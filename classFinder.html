@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Class finder</title>
+		
+		<link rel="stylesheet" href="stylesheet.css">
+		<script src="wayfindingJSFiles/utilities.js"></script>
+		<script src="wayfindingJSFiles/csv.js"></script>
+		<script src="wayfindingJSFiles/databases.js"></script>
+		<script src="wayfindingJSFiles/input.js"></script>
+		<script src="wayfindingJSFiles/urls.js"></script>
+		<script src="wayfindingJSFiles/importData.js"></script>
+		<script src="wayfindingJSFiles/main.js"></script>
+	</head>
+
+	<body>
+		<a href="index.html">Return to wayfinding</a>
+		<table style="background-color: aqua; width : 100%; height : 50%">
+			<tr>
+				<td>Class</td>
+				<td>Name</td>
+				<td>Instructor</td>
+				<td>Time</td>
+			</tr>
+			<tr>
+				<td>Enter information:</td>
+				<td><input type="text" id="name box"/></td>
+				<td><input type="text" id="instructor box"/></td>
+				<td><input type="text" id="time box"/></td>
+			</tr>
+			<tr>
+				<td>Closest Match:</td>
+				<td id="name hint">...</td>
+				<td id="instructor hint">...</td>
+				<td id="time hint">...</td>
+			</tr>
+			<tr>
+				<td><button id="find class">Find class number</button></td>
+				<td>Results:</td>
+				<td><select id="class result"></select></td>
+				<td><button id="clear">Clear input</button></td>
+			</tr>
+		</table>
+		
+		<script>
+			
+			var db = new ClassDB();
+			var master = new Main();
+			master.setClassDB(db);
+			
+			get(classesURL, function(responseText){
+				db.parseResponse(new CsvFile(responseText));
+				master.setClassFinder(
+					new TextBox("name box", "name hint"),
+					new TextBox("instructor box", "instructor hint"),
+					new TextBox("time box", "time hint"),
+					"find class",
+					"class result",
+					"clear"
+				);
+			});
+		</script>
+	</body>
+</html>

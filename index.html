@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title> Wayfinding </title>
+		<base target="_top">
+		
+		<link rel="stylesheet" href="stylesheet.css">
+		
+		<script src="wayfindingJSFiles/utilities.js"></script>
+		<script src="wayfindingJSFiles/importData.js"></script>
+		<script src="wayfindingJSFiles/urls.js"></script>
+        <script src="wayfindingJSFiles/csv.js"></script>
+		
+		<script src="wayfindingJSFiles/node.js"></script>
+		<script src="wayfindingJSFiles/path.js"></script>
+		<script src="wayfindingJSFiles/scaledCanvas.js"></script>
+		<script src="wayfindingJSFiles/databases.js"></script>
+		
+		<script src="wayfindingJSFiles/main.js"></script>
+		
+		<script src="wayfindingJSFiles/input.js"></script>
+		<script src="wayfindingJSFiles/qrCodes.js"></script>
+		
+		<script src="wayfindingJSFiles/svg.js"></script>
+		<script src="wayfindingJSFiles/svg.panzoom.js"></script>
+	</head>
+    <body>
+		<div id="imageTitle" onclick="nextImage()"> Next step </div>
+		<img id="image" alt="the next image in your path will appear here!"/>
+		<div id="wrapper"></div>
+		<div id="drawAll" onClick="master.getNodeDB().drawAll(master.getCanvas())">Draw All Nodes</div>
+		<div id="testAll" onClick="master.getPathFinder().testAll()">Test All Paths</div>
+		<div id="nodeDivs" onClick="master.getNodeDB().generateDivs(master)">Generate Node Connections</div>
+		
+		<table style="background-color: #D34C0F">
+			<tr>
+				<td>Set Path</td>
+				<td>Start</td>
+				<td>End</td>
+			</tr>
+			<tr>
+				<td>Input</td>
+				<td><input type="text" id="start box" style="width : 100%; height: 50%"/></td>
+				<td><input type="text" id="end box" style="width : 100%; height: 50%"/></td>
+			</tr>
+			<tr>
+				<td>Closest Match</td>
+				<td><div id="start hint" style="width : 100%; height: 50%"></div></td>
+				<td><div id="end hint" style="width : 100%; height: 50%"></div></td>
+			</tr>
+			<tr>
+				<td colspan="3">
+					<button id="button" style="width: 100%">Draw path</button>
+				</td>
+			</tr>
+		</table>
+        
+		<a href="classFinder.html" target="_blank">Find a class</a>
+		
+        <script>
+			"use strict";
+			var master = new Main();
+			
+			//http://svgjs.com/
+			var svgDrawer = SVG('wrapper').size(1000, 1000).panZoom();
+			var svgMap = svgDrawer.image(mapURL);
+			svgMap.loaded(
+				function(){
+					console.time("Time to load");
+					// need to wait to invoke since we need image width
+					var nodes = new NodeDB();
+					var masterCanvas = new Canvas();
+					var pathFinder = new PathFinder();
+					var ids;
+					var start = new TextBox("start box", "start hint");
+					var end = new TextBox("end box", "end hint");
+					
+					master.setNodeDB(nodes);
+					masterCanvas.link(svgDrawer, document.getElementById("wrapper")
+								.getElementsByTagName("svg")[0]
+								.getElementsByTagName("image")[0]
+							   );
+					masterCanvas.resize();
+					master.setCanvas(masterCanvas);
+					master.setPathFinder(pathFinder);
+					pathFinder.setDataSource(master);
+					
+					
+					
+					sequentialGets([
+						nodeDataURL,
+						connDataURL,
+						connectionImageURL,
+						buildingsURL,
+						roomsURL,
+						classToRoomURL
+					],
+					function(responses){
+						
+						
+						nodes.parseNodeData(formatResponse(responses[0]));
+						nodes.parseConnData(formatResponse(responses[1]));
+						
+						
+						masterCanvas.setCorners(nodes.getNode(-1).x, nodes.getNode(-1).y, nodes.getNode(-2).x, nodes.getNode(-2).y);
+						
+						nodes.parseImageResponse(new CsvFile(responses[2]));
+						
+						nodes.parseBuildingResponse(new CsvFile(responses[3]));
+						
+						nodes.parseRoomResponse(new CsvFile(responses[4]));
+						
+						nodes.parseClassResponse(new CsvFile(responses[5]));
+						master.setInput(start, end);
+						master.setPathButton("button");
+						
+						ids = getIDsFromURL();
+						master.setPath(new Path(ids[0], ids[1], master));
+						console.timeEnd("Time to load");
+					});
+				}
+			);
+			
+			
+			function nextImage(){
+				if(master.getPath() !== undefined){
+					document.getElementById("image").src = master.getPath().nextImage();
+				}
+			}
+			window.addEventListener("resize", function(){
+				master.getCanvas().resize();
+				if(master.getPath() != undefined){
+					master.getPath().draw(master.getCanvas());
+				}
+			});
+        </script>
+    </body>
+</html>
