@@ -167,6 +167,11 @@ function expand(array){
 	}
     
 	//lastly, return the data
+	
+	if(newData.length > 1){
+		console.log(array);
+	}
+	
     return newData;
 }
 

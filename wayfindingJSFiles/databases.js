@@ -77,18 +77,14 @@ function Database(headers){
 		this[h] = i; //makes enum
 	}
     
-    
-    
     this.sourceHeaders = [];
 }
 Database.prototype = {
 	insert : function(data){
 		/*
         @param data : an array with length equal to this.headers.length, the data to insert into the table
-        each element in data can be any type; the program automatically deals with arrays and objects
+        each element in data can be any type
         INSERT INTO this VALUES (data)
-        
-        expands the data so that none of its columns are arrays
         */
         "use strict";
 		try{
@@ -98,81 +94,8 @@ Database.prototype = {
 			if(data.length !== this.headers.length){
 				throw new RangeError("Invalid column count, must contain columns " + this.headerString);
 			}
-			//first, convert every column to an array
-            data = data.map(function(col){
-                return (Array.isArray(col) ? col : [col]);
-            });
 			
-            var newData = [];
-            var rows = 1;
-            data.forEach(function(col){
-                rows *= col.length;
-            });
-            
-            //populate newData so that we can access its indexes
-            for(var i = 0; i < rows; i++){
-				newData.push([]);
-				for(var j = 0; j < data.length; j++){
-					newData[i].push(0);
-				}
-			}
-            
-			//iterate through each column...
-			var period = 1; //how many times the current pattern will repeat
-            var spaceInPeriod; //how many elements are in the current period
-            var times; //how many times each element in the current column will appear in each period
-            
-            /*
-            OK, so this is a little bit complicated.
-            If we were given an array with arrays in it,
-            we would want to 'expand' it so that there are no arrays in it.
-            EXPANDING EXAMPLE:
-                this is a row
-                [
-                    [a, b],
-                    c,
-                    [d, e, f]
-                ]
-                
-                would get changed to:
-                this is 6 rows
-                [
-                    [a, c, d],
-                    [a, c, e],
-                    [a, c, f],
-                    [b, c, d],
-                    [b, c, e],
-                    [b, c, f]
-                ]
-            
-            now, whenever we get multiple elements in one 'column' from the data we are given,
-            that splits the resulting rows into pieces equal to the number of items in that column.
-            In the above example, column 0 contains 2 elements, so the result is split evenly into 2 pieces:
-            the first piece contains rows that all begin with 'a', whereas the second each begin with 'b'.
-            This split means that we have to make the pattern of future columns repeat; 
-            for example, column 2 contains 3 values: d, e, and f. Since the 0th column was split in 2,
-            it results in the pattern d, e, f, d, e, f instead of d, d, e, e, f, f
-            
-            */
-			
-			for(var col = 0; col < data.length; col++){
-				spaceInPeriod = rows / period;
-                times = spaceInPeriod / data[col].length;
-                
-                for(var row = 0; row < rows; row++){
-                    //                            how many times we have repeated
-                    //                                                     prevents it from going outside the array
-                    newData[row][col] = data[col][parseInt((row / times) % data[col].length)];
-                    //oh great, now I've forgotten why this works
-                }
-                period *= data[col].length;
-			}
-            
-            //lastly, copy the new data over to this' data
-            var db = this;
-			newData.forEach(function(row){
-                db.rows.push(row);
-            });
+            this.rows.push(data);
 		} catch(e){
 			console.log(e.stack);
 		}
@@ -255,23 +178,6 @@ Database.prototype = {
 		}
 		return ret;
 	},
-    
-    
-    
-    
-    addSourceHeader : function(headers){
-        this.sourceHeaders.push(headers);
-    },
-    getPreferredFormatting : function(){
-        //returns
-        "use strict";
-        return [this.sourceHeaders, this.headers];
-    },
-    
-    
-    
-    
-    
 	logAll : function(){
         /*
         prints the contents of the database
@@ -359,7 +265,9 @@ NodeDB.prototype = {
 		var imgCol = csvFile.indexOfCol(["image", "img", "photo", "url"]);
 		
 		for(var i = 0; i < data.length; i++){
-			if(data[i][imgCol] !== ""){
+			//make sure all 3 rows exist
+			//do better
+			if(data[imgCol] !== ""){
 				var nodes = this.select(this.NODE_OBJECT, this.NODE_ID, parseInt(data[i][fromCol]));
 				if(nodes.length === 1){
 					nodes[0].setConnectionImage(data[i][toCol], data[i][imgCol]);
@@ -374,7 +282,7 @@ NodeDB.prototype = {
 	parseBuildingResponse : function(csvFile){
 		/*
         @param csvFile : a CsvFil containing the result of a HTTP request to our building file
-        sets the associated buildings of each node
+        sets the associated building for each node
         */
         
         "use strict";
@@ -384,7 +292,7 @@ NodeDB.prototype = {
 		
 		for(var i = 0; i < data.length; i++){
 			var row = data[i];
-			this.getNode(parseInt(row[idCol])).addBuilding(row[nameCol]);
+			this.getNode(parseInt(row[idCol])).setBuilding(row[nameCol]);
 		}
 	},
 	
@@ -470,8 +378,12 @@ NodeDB.prototype = {
 	getAllBuildingNames : function(){
 		"use strict";
 		var ret = [];
+		var building;
 		for(var i = 0; i < this.rows.length; i++){
-			ret = ret.concat(this.rows[i][this.NODE_OBJECT].buildings);
+			building = this.rows[i][this.NODE_OBJECT].building;
+			if(building !== null){
+				ret.push(building);
+			}
 		}
 		return ret;
 	},
@@ -508,7 +420,7 @@ NodeDB.prototype = {
 		string = string.toUpperCase();
 		
 		ret = ret.concat(this.selectF(this.NODE_ID, this.NODE_OBJECT, function(node){
-			return node.isAdjToBuilding(string);
+			return node.getBuilding() !== null && node.getBuilding().toUpperCase() === string;
 		}));
 		
 		if(ret.length === 0){
@@ -524,24 +436,6 @@ NodeDB.prototype = {
 			}));
 		}
 		return ret;
-	},
-	
-	getBuildingsById : function(id){
-		/*
-		@param id : the node id to search for
-		@return an array of strings, the names of buildings connected to the given node
-		*/
-		"use strict";
-		return this.getNode(parseInt(id)).buildings;
-	},
-	
-	getRoomsById : function(id){
-		/*
-		@param id : the node id to search for
-		@return an array of strings, the names of rooms connected to the given node
-		*/
-		"use strict";
-		return this.getNode(parseInt(id)).rooms;
 	},
 	
 	logOneWayNodes : function(){
@@ -571,18 +465,12 @@ NodeDB.prototype = {
 		// counts how many different connections exist
 		"use strict";
 		var nodeConn = 0;
-		var buildingConn = 0;
-		var roomConn = 0;
 		var allNodes = this.getAll();
 		
 		for(var i = 0; i < allNodes.length; i++){
 			nodeConn += allNodes[i].adj.length;
-			buildingConn += this.getBuildingsById(allNodes[i].id).length;
-			roomConn += this.getRoomsById(allNodes[i].id).length;
 		}
 		console.log("Total connections between nodes: " + nodeConn);
-		console.log("Total connections between nodes and buildings: " + buildingConn);
-		console.log("Total connections between nodes and rooms: " + roomConn);
 	},
 	
 	generateDivs : function (main) {

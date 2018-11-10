@@ -36,10 +36,11 @@ function Node(id, x, y) {
 	}
 	
 	this.adjIds = [];
-	this.buildings = [];
 	this.rooms = [];
 	this.classes = [];
 	this.connectionImages = {};
+	
+	this.building = null;
 }
 
 // Methods
@@ -80,13 +81,13 @@ Node.prototype = {
 		this.adjIds.push(id);
 	},
 	
-	addBuilding : function(buildingName){
+	setBuilding : function(buildingName){
 		"use strict";
-		this.buildings.push(buildingName.toString().toUpperCase());
+		this.building = buildingName;
 	},
-	isAdjToBuilding : function(buildingName){
+	getBuilding : function(){
 		"use strict";
-		return (this.buildings.indexOf(buildingName.toString().toUpperCase()) !== -1);
+		return this.building;
 	},
 	
 	addRoom : function(roomName){
