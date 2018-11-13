@@ -264,16 +264,16 @@ NodeDB.prototype = {
 		var toCol = csvFile.indexOfCol(["to", "node2", "n2"]);
 		var imgCol = csvFile.indexOfCol(["image", "img", "photo", "url"]);
 		
-		for(var i = 0; i < data.length; i++){
+		//Skip header
+		for(var i = 1; i < data.length; i++){
 			//make sure all 3 rows exist
-			//do better
-			if(data[imgCol] !== ""){
+			if(data[i][fromCol] !== "" && data[i][toCol] !== "" && data[i][imgCol] !== ""){
 				var nodes = this.select(this.NODE_OBJECT, this.NODE_ID, parseInt(data[i][fromCol]));
 				if(nodes.length === 1){
 					nodes[0].setConnectionImage(data[i][toCol], data[i][imgCol]);
 				} else {
 					console.log("Error: invalid nodes returned by get, should return only 1: ");
-					console.log(nodes);
+					console.log(data[i]);
 				}
 			}
 		}
@@ -417,7 +417,8 @@ NodeDB.prototype = {
 		*/
 		"use strict";
 		var ret = [];
-		string = string.toUpperCase();
+		
+		string = string.toString().toUpperCase();
 		
 		ret = ret.concat(this.selectF(this.NODE_ID, this.NODE_OBJECT, function(node){
 			return node.getBuilding() !== null && node.getBuilding().toUpperCase() === string;

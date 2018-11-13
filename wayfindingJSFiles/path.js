@@ -226,7 +226,7 @@ Path.prototype = {
 A PathFinder is used to store data, which is used to generate a path.
 make sure it has a data source!
 
-will depreciate once we get 1 building per node and vice versa
+might still use
 */
 function PathFinder(){
 	"use strict";

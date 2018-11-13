@@ -15,7 +15,6 @@ function Main(){
 	this.currentPath = undefined;
 	this.nodeDatabase = undefined;
 	this.classDatabase = undefined;
-	this.pathFinder = undefined;
 }
 Main.prototype = {
 	setCanvas : function(canvas){
@@ -211,10 +210,62 @@ Main.prototype = {
 	
 	updatePath : function(data1, data2){
 		"use strict";
-		var newPath = this.pathFinder.find(data1, data2);
-		if(newPath.valid){
-			this.setPath(newPath);
+		try{
+			var start = this.getNodeDB().getIdsByString(data1);
+			var end = this.getNodeDB().getIdsByString(data2);
+			
+			if(start.length >= 1 && end.length >= 1){ //otherwise some class numbers cause problems
+				var newPath = new Path(start[0], end[0], this);
+				if(newPath.valid){
+					this.setPath(newPath);
+				} else {
+					throw new Error("Invalid path: " + newPath.idPath);
+				}
+			} else {
+				throw new Error("Invalid number of nodes: " + start.length + " " + end.length);
+			}
+		} catch(e){
+			console.log(e.stack);
 		}
+	},
+	
+	testAllPaths : function(){
+		//developer tool. Detects any paths between any two nodes that cannot exist
+		"use strict";
+		
+		var source = this;
+		var nodeDB = source.getNodeDB();
+		
+		var points = [];
+		points = points.concat(nodeDB.getAllBuildingNames());
+		points = points.concat(nodeDB.getAllRooms());
+		points = points.concat(nodeDB.getAllClasses());
+		
+		function checkPath(startStr, endStr){
+			try{
+				var id1 = nodeDB.getIdsByString(startStr);
+				var id2 = nodeDB.getIdsByString(endStr);
+				
+				if(id1.length !== 1 || id2.length !== 1){
+					throw new Error("Invalid node count: " + startStr + ": " + id1.length + " " + endStr + ": " + id2.length);
+				} else {
+					var path = new Path(id1[0], id2[0], source);
+					if(!path.valid){
+						throw new Error("Invalid Path: " + path.idPath);
+					}
+				}
+			} catch(e){
+				console.log(e.stack);
+			}
+		}
+		
+		alert("Please wait while I process " + (points.length * points.length) + " paths...");
+		for(var i = 0; i < points.length; i++){
+			for(var j = 0; j < points.length; j++){
+				checkPath(points[i], points[j]);
+			}
+		}
+		alert("Done.");
 	},
 	
 	setNodeDB : function(database){
@@ -233,14 +284,5 @@ Main.prototype = {
 	getClassDB : function(){
 		"use strict";
 		return this.classDatabase;
-	},
-	
-	setPathFinder : function(pathFinder){
-		"use strict";
-		this.pathFinder = pathFinder;
-	},
-	getPathFinder : function(){
-		"use strict";
-		return this.pathFinder;
 	}
 };

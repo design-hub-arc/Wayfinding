@@ -30,7 +30,7 @@
 		<img id="image" alt="the next image in your path will appear here!"/>
 		<div id="wrapper"></div>
 		<div id="drawAll" onClick="master.getNodeDB().drawAll(master.getCanvas())">Draw All Nodes</div>
-		<div id="testAll" onClick="master.getPathFinder().testAll()">Test All Paths</div>
+		<div id="testAll" onClick="master.testAllPaths()">Test All Paths</div>
 		<div id="nodeDivs" onClick="master.getNodeDB().generateDivs(master)">Generate Node Connections</div>
 		
 		<table style="background-color: #D34C0F">
@@ -71,7 +71,6 @@
 					// need to wait to invoke since we need image width
 					var nodes = new NodeDB();
 					var masterCanvas = new Canvas();
-					var pathFinder = new PathFinder();
 					var ids;
 					var start = new TextBox("start box", "start hint");
 					var end = new TextBox("end box", "end hint");
@@ -83,8 +82,6 @@
 							   );
 					masterCanvas.resize();
 					master.setCanvas(masterCanvas);
-					master.setPathFinder(pathFinder);
-					pathFinder.setDataSource(master);
 					
 					
 					
