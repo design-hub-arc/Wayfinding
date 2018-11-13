@@ -4,8 +4,6 @@ Provides the CsvFile class
 The CsvFile class is used to format imported data from spreadsheets to a format usable by the program.
 */
 
-var newline = /\r?\n|\r/;
-
 function formatResponse(responseText){
 	"use strict";
 	var ret = [];

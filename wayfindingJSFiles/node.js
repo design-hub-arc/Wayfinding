@@ -36,11 +36,7 @@ function Node(id, x, y) {
 	}
 	
 	this.adjIds = [];
-	this.rooms = [];
-	this.classes = [];
 	this.connectionImages = {};
-	
-	this.building = null;
 }
 
 // Methods
@@ -79,33 +75,6 @@ Node.prototype = {
 	addAdjId : function(id){
 		"use strict";
 		this.adjIds.push(id);
-	},
-	
-	setBuilding : function(buildingName){
-		"use strict";
-		this.building = buildingName;
-	},
-	getBuilding : function(){
-		"use strict";
-		return this.building;
-	},
-	
-	addRoom : function(roomName){
-		"use strict";
-		this.rooms.push(roomName.toString().toUpperCase());
-	},
-	isAdjToRoom : function(roomName){
-		"use strict";
-		return (this.rooms.indexOf(roomName.toString().toUpperCase()) !== -1);
-	},
-	
-	addClass : function(classNum){
-		"use strict";
-		this.classes.push(parseInt(classNum));
-	},
-	isAdjToClass : function(classNum){
-		"use strict";
-		return (this.classes.indexOf(parseInt(classNum)) !== -1);
 	},
 	
 	setConnectionImage: function (id, url) {

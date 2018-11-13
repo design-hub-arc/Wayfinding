@@ -52,6 +52,8 @@ SQL to Database class:
 */
 //@import extend from utilities.js
 
+
+//todo: add table subclass
 function Database(headers){
 	/*
     @param headers : an array of strings, the column names
@@ -207,6 +209,10 @@ the HTML file.
 function NodeDB(){
 	"use strict";
 	Database.call(this, ["NODE ID", "NODE OBJECT"]);
+	
+	this.buildingDB = new Database(["BUILDING NAME", "NODE ID"]);
+	this.roomDB = new Database(["ROOM NAME", "NODE ID"]);
+	this.classDB = new Database(["CLASS", "NODE ID"]);
 }
 NodeDB.prototype = {
 	
@@ -289,10 +295,11 @@ NodeDB.prototype = {
 		var data = csvFile.getNonHeaders();
 		var nameCol = csvFile.indexOfCol(["Name", "building", "building name", "buildingname"]);
 		var idCol = csvFile.indexOfCol(["id", "node", "node id", "nodeid"]);
+		var row;
 		
 		for(var i = 0; i < data.length; i++){
-			var row = data[i];
-			this.getNode(parseInt(row[idCol])).setBuilding(row[nameCol]);
+			row = data[i];
+			this.buildingDB.insert([row[nameCol], parseInt(row[idCol])]);
 		}
 	},
 	
@@ -312,10 +319,7 @@ NodeDB.prototype = {
 		var row;
 		for(var i = 1; i < data.length; i++){
 			row = data[i];
-			node = this.getNode(row[nodeCol]);
-			if(node){
-				node.addRoom(row[roomCol]);
-			}
+			this.roomDB.insert([row[roomCol], parseInt(row[nodeCol])]);
 		}
 	},
 	
@@ -325,7 +329,7 @@ NodeDB.prototype = {
 		to a sheet containing class numbers and rooms
 		*/
 		"use strict";
-		var data = csvFile.getNonHeaders();
+		var data =        csvFile.getNonHeaders();
 		var classCol =    csvFile.indexOfCol(["CLASS NUMBER", "CLASS"]);
         var buildingCol = csvFile.indexOfCol(["BUILDING"]);
 		var roomCol =     csvFile.indexOfCol(["ROOM"]);
@@ -334,13 +338,13 @@ NodeDB.prototype = {
 		var nodeIds;
 		for(var i = 1; i < data.length; i++){
 			row = data[i];
-			nodeIds = this.selectF(this.NODE_ID, this.NODE_OBJECT, function(node){
-				return node.isAdjToRoom(row[buildingCol] + " " + row[roomCol]);
-			});
+			nodeIds = this.roomDB.select(this.roomDB.NODE_ID, this.roomDB.ROOM_NAME, (row[buildingCol] + " " + row[roomCol]).toUpperCase());
 			if(nodeIds.length === 0){
 				console.log("Could not find a node connected to room " + row[buildingCol] + " " + row[roomCol]);
 			} else{
-				this.getNode(nodeIds[0]).addClass(row[classCol]);
+				if(!isNaN(parseInt(nodeIds[0]))){
+					this.classDB.insert([row[classCol], parseInt(nodeIds[0])]);
+				}
 			}
 		}
 	},
@@ -377,33 +381,17 @@ NodeDB.prototype = {
 	
 	getAllBuildingNames : function(){
 		"use strict";
-		var ret = [];
-		var building;
-		for(var i = 0; i < this.rows.length; i++){
-			building = this.rows[i][this.NODE_OBJECT].building;
-			if(building !== null){
-				ret.push(building);
-			}
-		}
-		return ret;
+		return this.buildingDB.getColumn(this.buildingDB.BUILDING_NAME);
 	},
 	
 	getAllRooms : function(){
 		"use strict";
-		var ret = [];
-		for(var i = 0; i < this.rows.length; i++){
-			ret = ret.concat(this.rows[i][this.NODE_OBJECT].rooms);
-		}
-		return ret;
+		return this.roomDB.getColumn(this.roomDB.ROOM_NAME);
 	},
 	
 	getAllClasses : function(){
 		"use strict";
-		var ret = [];
-		for(var i = 0; i < this.rows.length; i++){
-			ret = ret.concat(this.rows[i][this.NODE_OBJECT].classes);
-		}
-		return ret;
+		return this.classDB.getColumn(this.classDB.CLASS);
 	},
 	
 	getAll : function(){
@@ -420,21 +408,15 @@ NodeDB.prototype = {
 		
 		string = string.toString().toUpperCase();
 		
-		ret = ret.concat(this.selectF(this.NODE_ID, this.NODE_OBJECT, function(node){
-			return node.getBuilding() !== null && node.getBuilding().toUpperCase() === string;
-		}));
+		ret = ret.concat(this.buildingDB.select(this.buildingDB.NODE_ID, this.buildingDB.BUILDING_NAME, string));
 		
 		if(ret.length === 0){
 			//not found
-			ret = ret.concat(this.selectF(this.NODE_ID, this.NODE_OBJECT, function(node){
-				return node.isAdjToRoom(string);
-			}));
+			ret = ret.concat(this.roomDB.select(this.roomDB.NODE_ID, this.roomDB.ROOM_NAME, string));
 		}
 		if(ret.length === 0){
 			//still not found
-			ret = ret.concat(this.selectF(this.NODE_ID, this.NODE_OBJECT, function(node){
-				return node.isAdjToClass(string);
-			}));
+			ret = ret.concat(this.classDB.select(this.classDB.NODE_ID, this.classDB.CLASS, string));
 		}
 		return ret;
 	},
@@ -444,8 +426,6 @@ NodeDB.prototype = {
 		Detects nodes with a one-way relationship with other nodes
 		ex. node 1 connects to node 2, but node 2 doesn't connect to node 1
 		fixes the errors
-		
-		TODO: make autoupdate spreadsheet?
 		*/
 		"use strict";
 		var allNodes = this.getAll();

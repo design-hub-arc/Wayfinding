@@ -15,6 +15,8 @@ function Main(){
 	this.currentPath = undefined;
 	this.nodeDatabase = undefined;
 	this.classDatabase = undefined;
+	
+	this.pathFinder = undefined; //need until we get rid of duplicate class ids
 }
 Main.prototype = {
 	setCanvas : function(canvas){
@@ -190,6 +192,11 @@ Main.prototype = {
 			}
 		};
 	},
+	setPathFinder : function(pathFinder){
+		"use strict";
+		this.pathFinder = pathFinder;
+		pathFinder.setDataSource(this);
+	},
 	
 	setPath : function(path){
 		"use strict";
@@ -215,7 +222,8 @@ Main.prototype = {
 			var end = this.getNodeDB().getIdsByString(data2);
 			
 			if(start.length >= 1 && end.length >= 1){ //otherwise some class numbers cause problems
-				var newPath = new Path(start[0], end[0], this);
+				//var newPath = new Path(start[0], end[0], this);
+				var newPath = this.pathFinder.find(data1, data2);
 				if(newPath.valid){
 					this.setPath(newPath);
 				} else {

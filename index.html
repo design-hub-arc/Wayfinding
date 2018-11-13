@@ -82,6 +82,20 @@
 							   );
 					masterCanvas.resize();
 					master.setCanvas(masterCanvas);
+					master.setPathFinder(new PathFinder());
+					
+					
+					
+					
+					
+					get(masterSheetURL, function(responseText){
+						console.log(formatResponse(responseText));
+						get(formatResponse(responseText)[1][1], function(responseText){
+							console.log(formatResponse(responseText));
+						});
+					});
+					
+					
 					
 					
 					
@@ -114,6 +128,7 @@
 						
 						ids = getIDsFromURL();
 						master.setPath(new Path(ids[0], ids[1], master));
+						master.getPath().draw(master.getCanvas());
 						console.timeEnd("Time to load");
 					});
 				}

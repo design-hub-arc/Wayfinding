@@ -64,12 +64,12 @@ roomsURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSKTAczTWWMafvEaNFxn
 
 
 
-
-
-
-//WIP
 var classesURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREUvLP1uMDKADze2uCHx6jN4voxvO41g-gZ5pEDK_vJ0M9LA7UmfRgqJeX_NRDZsMMC_lOs2A0OKtm/pub?gid=57491238&single=true&output=csv";
 //classesURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREUvLP1uMDKADze2uCHx6jN4voxvO41g-gZ5pEDK_vJ0M9LA7UmfRgqJeX_NRDZsMMC_lOs2A0OKtm/pub?gid=1085973202&single=true&output=csv";
 
 var classToRoomURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREUvLP1uMDKADze2uCHx6jN4voxvO41g-gZ5pEDK_vJ0M9LA7UmfRgqJeX_NRDZsMMC_lOs2A0OKtm/pub?gid=1039815810&single=true&output=csv";
 //classToRoomURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREUvLP1uMDKADze2uCHx6jN4voxvO41g-gZ5pEDK_vJ0M9LA7UmfRgqJeX_NRDZsMMC_lOs2A0OKtm/pub?gid=1315144100&single=true&output=csv";
+
+
+//WIP
+var masterSheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR-FO3lDmriTqDlwZkp9A3bxVMhJUiQ2l6OiCJboyuPyhOafAxyh0DYDjF0sz28xfotVj8xbJ2zSzrc/pub?gid=0&single=true&output=csv";
