@@ -57,19 +57,12 @@ HOW TO CHANGE THE mapURL FILE:
 	9. extract the map data, and apply the new node data using the steps detailed above.
 */
 
-var roomsURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSKTAczTWWMafvEaNFxnFMmDMFLT35PvweKAaBHMnVcMJOWlADL3593zRR7PXGiitYMLETFKonBxsgK/pub?gid=0&single=true&output=csv";
-// links to a file containing room - to building - to node data
-roomsURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSKTAczTWWMafvEaNFxnFMmDMFLT35PvweKAaBHMnVcMJOWlADL3593zRR7PXGiitYMLETFKonBxsgK/pub?gid=231242223&single=true&output=csv";
-
-
+var roomsURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSKTAczTWWMafvEaNFxnFMmDMFLT35PvweKAaBHMnVcMJOWlADL3593zRR7PXGiitYMLETFKonBxsgK/pub?gid=231242223&single=true&output=csv";
 
 
 var classesURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREUvLP1uMDKADze2uCHx6jN4voxvO41g-gZ5pEDK_vJ0M9LA7UmfRgqJeX_NRDZsMMC_lOs2A0OKtm/pub?gid=57491238&single=true&output=csv";
-//classesURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREUvLP1uMDKADze2uCHx6jN4voxvO41g-gZ5pEDK_vJ0M9LA7UmfRgqJeX_NRDZsMMC_lOs2A0OKtm/pub?gid=1085973202&single=true&output=csv";
 
 var classToRoomURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREUvLP1uMDKADze2uCHx6jN4voxvO41g-gZ5pEDK_vJ0M9LA7UmfRgqJeX_NRDZsMMC_lOs2A0OKtm/pub?gid=1039815810&single=true&output=csv";
-//classToRoomURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREUvLP1uMDKADze2uCHx6jN4voxvO41g-gZ5pEDK_vJ0M9LA7UmfRgqJeX_NRDZsMMC_lOs2A0OKtm/pub?gid=1315144100&single=true&output=csv";
-
 
 //WIP
 var masterSheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR-FO3lDmriTqDlwZkp9A3bxVMhJUiQ2l6OiCJboyuPyhOafAxyh0DYDjF0sz28xfotVj8xbJ2zSzrc/pub?gid=0&single=true&output=csv";

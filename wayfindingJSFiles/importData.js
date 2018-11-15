@@ -33,32 +33,93 @@ function get(url, callback){
 			callback(req.responseText);
 		}
 	};
-	req.open("GET", url, true); // true means asynchronous
-	req.setRequestHeader("Cache-Control", "max-age=0"); // prevent outdated data
-	req.send(null);
+        req.onerror = function(e){
+            console.log(e);
+            callback("");
+        };
+        
+        req.open("GET", url, true); // true means asynchronous
+        req.setRequestHeader("Cache-Control", "max-age=0"); // prevent outdated data
+        req.send(null);
 }
 
+
 //works
-function sequentialGets(urls, callback){
-	//@param urls : an array of strings, the urls to get
-	//@param callback : a function which takes an array of strings as a parameter
-	//performs a get request for each url, then passes all responses to callback
-	"use strict";
-	var responses = [];
-	var received = 0;
-	
-	function f(i){
-		return function(responseText){
-			responses[i] = responseText;
-			received++;
-			if(received === urls.length){
-				callback(responses);
-			}
-		};
-	}
-	
-	for(var i = 0; i < urls.length; i++){
-		responses.push("No response from URL " + urls[i]);
-		get(urls[i], f(i));
-	}
+function sequentialGets(urls, callbacks){
+    /*
+    @param urls : an array of strings, the urls to get
+    @param callbacks : either...
+    (a): an array of functions, each taking a string as a paramter
+    (b): a single element array or function, taking an array of strings as a parameter
+
+    performs a get request on each url, then...
+    (a): if multiple callbacks are provided, passes in responses[i] to callback[i]
+    (b): if only one callback is passed (one element array, or just a function), passes in all responses as an array to that function
+    */
+    "use strict";
+    var responses = [];
+    var received = 0;
+    var singleFunction = !Array.isArray(callbacks) || callbacks.length === 1;
+    
+    if(!Array.isArray(callbacks)){
+        callbacks = [callbacks]; //make sure it's an array. Can't use singleFunction b/c single element array would cause problems
+    }
+    
+    function finish(){
+        if(singleFunction){
+            callbacks[0](responses);
+        } else {
+            for(var i = 0; i < responses.length && i < callbacks.length; i++){
+                callbacks[i](responses[i]);
+            }
+        }
+    }
+    
+    function f(i){
+        return function(responseText){
+            responses[i] = responseText;
+            received++;
+            if(received === urls.length){
+                finish();
+            }
+        };
+    }
+
+    for(var i = 0; i < urls.length; i++){
+        responses.push("No response from URL " + urls[i]);
+        get(urls[i], f(i));
+    }
+}
+
+
+
+// improve this
+function importMasterSheet(url, callbacks, ignore = []){
+    /*
+     * @param url : a string, the 
+     * url of the master url file
+     * on our google drive
+     * 
+     * @param callback : a function
+     * 
+     * This performs a get request on the master url spreadsheet,
+     * then performs a get request on each url on the spreadsheet,
+     * then passes each URL into the callback function
+     * 
+     * (improve later)
+     */
+    
+    get(url, function(responseText){
+        var data = formatResponse(responseText);
+        
+        var urls = [];
+        
+        for(var i = 1; i < data.length; i++){ 
+            if(data[i][1] !== "" && ignore.indexOf(data[i][0]) === -1){
+                urls.push(data[i][1]);
+            }
+        }
+        console.log(urls);
+        sequentialGets(urls, callbacks);
+    });
 }

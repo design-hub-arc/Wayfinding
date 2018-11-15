@@ -83,54 +83,27 @@
 					masterCanvas.resize();
 					master.setCanvas(masterCanvas);
 					master.setPathFinder(new PathFinder());
-					
-					
-					
-					
-					
-					get(masterSheetURL, function(responseText){
-						console.log(formatResponse(responseText));
-						get(formatResponse(responseText)[1][1], function(responseText){
-							console.log(formatResponse(responseText));
-						});
-					});
-					
-					
-					
-					
-					
-					sequentialGets([
-						nodeDataURL,
-						connDataURL,
-						connectionImageURL,
-						buildingsURL,
-						roomsURL,
-						classToRoomURL
-					],
-					function(responses){
+                    
+					importMasterSheet(masterSheetURL, function(responses){
+                        nodes.parseNodeData(formatResponse(responses[0]));
+                        nodes.parseConnData(formatResponse(responses[1]));
+                        masterCanvas.setCorners(nodes.getNode(-1).x, nodes.getNode(-1).y, nodes.getNode(-2).x, nodes.getNode(-2).y);
 						
-						
-						nodes.parseNodeData(formatResponse(responses[0]));
-						nodes.parseConnData(formatResponse(responses[1]));
-						
-						
-						masterCanvas.setCorners(nodes.getNode(-1).x, nodes.getNode(-1).y, nodes.getNode(-2).x, nodes.getNode(-2).y);
-						
-						nodes.parseImageResponse(new CsvFile(responses[2]));
-						
-						nodes.parseBuildingResponse(new CsvFile(responses[3]));
-						
-						nodes.parseRoomResponse(new CsvFile(responses[4]));
-						
-						nodes.parseClassResponse(new CsvFile(responses[5]));
-						master.setInput(start, end);
-						master.setPathButton("button");
-						
-						ids = getIDsFromURL();
-						master.setPath(new Path(ids[0], ids[1], master));
-						master.getPath().draw(master.getCanvas());
-						console.timeEnd("Time to load");
-					});
+                        nodes.parseBuildingResponse(new CsvFile(responses[2]));
+                        nodes.parseRoomResponse(new CsvFile(responses[3]));
+                        nodes.parseImageResponse(new CsvFile(responses[4]));
+                        nodes.parseClassResponse(new CsvFile(responses[5]));
+                        
+                        master.setInput(start, end);
+                        master.setPathButton("button");
+
+                        ids = getIDsFromURL();
+                        master.setPath(new Path(ids[0], ids[1], master));
+                        master.getPath().draw(master.getCanvas());
+                        console.timeEnd("Time to load");
+                    },
+                        ["map image", "classes"]
+                    );
 				}
 			);
 			
@@ -142,7 +115,7 @@
 			}
 			window.addEventListener("resize", function(){
 				master.getCanvas().resize();
-				if(master.getPath() != undefined){
+				if(master.getPath() !== undefined){
 					master.getPath().draw(master.getCanvas());
 				}
 			});
