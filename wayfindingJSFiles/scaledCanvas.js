@@ -2,21 +2,23 @@
 The x and y coordinates given by the coordinate spreadsheet are those nodes' position on the autocad file where the data is extracted from.
 This means that we can't draw point directly onto the SVG canvas, as the scaling is way off (x coordinates upwards of 2300 do not draw on a 1000 pixel canvas), and the autocad y-axis points upward (oh cartesian coordinates, why don't you point the logical way?) so all y - coordinates are negative, as the autocad map assigns coordinates from the upper-left corner (go figure)
 
-This file is used to convert x y coordinates on the autocad map image
+This file is used to convert x y coordinates on the map image
 to x y coordinates on the SVG canvas.
 Also provides canvas functions
 */
 
 function Canvas(){
 	"use strict";
-	this.draw = undefined;
-	this.scalingElement = undefined;
-	this.minX = 0;
+	this.draw = undefined;           // the svg image this corresponds to
+	this.scalingElement = undefined; // the svg element this gets its size from
+	this.width = 0;                  // dimensions of the svg element
+	this.height = 0;
+    
+    this.minX = 0;                   // coordinates of the upper-leftmost and lower-rightmost nodes
 	this.minY = 0;
 	this.maxX = 0;
 	this.maxY = 0;
-	this.width = 0;
-	this.height = 0;
+	
 	this.color = undefined;
 }
 Canvas.prototype = {

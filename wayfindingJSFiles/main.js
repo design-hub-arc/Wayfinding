@@ -6,7 +6,7 @@ It also takes a lot of code out of the main HTML file.
 function Main(){
 	"use strict";
 	this.canvas = undefined;
-	
+
 	//html elements
 	this.start = undefined;
 	this.end = undefined;

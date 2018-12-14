@@ -1,0 +1,65 @@
+The program begins in index.html
+
+Creates a Main object, which is used to store otherwise global variables
+
+Creates an SVG element on the webpage, setting its image to the map of the ARC campus
+
+Once this SVG element is loaded, it does a lot of stuff ( all in index.html ):
+	It creates a NodeDB object (not a real database), 
+	a Canvas (not HTML canvas) interface to draw on the SVG element,
+	and two TextBoxes interfaces to make working with the input boxes easier.
+	
+	the Canvas is then linked to the SVG element, so any calls to the Canvas' drawing methods will draw on the SVG.
+	the Main object is then given a PathFinder, which is a relic of older versions of the program, so it will likely be removed.
+	
+	Next, the program performs a GET request to the master sheet containing links to the various data used by the program. Once it recieves the data from all these sheets, it continues:
+		The NodeDB reads the response from the node position and connection files, creating many Node objects, representing points on campus,
+		The Nodes' coordinate system is not the same as the SVG image's, so we have to scale them.
+		Nodes -1 and -2 mark the upper leftmost and lower rightmost points on the campus, so all other nodes lie between them.
+		After creating those Nodes, sets the Canvas' corners to nodes -1 and -2. This means whatever coordinates node -1 has translate to the upper-left corner of the SVG element, and node -2 corresponds to the lower right.
+		With that in mind, each Node's coordinates are a set percentage of the way between Nodes -1 and -2's coordinates, and thus are the same percentage of the way between them on the SVG image.
+		(probably explained badly)
+		
+		Next, the NodeDB constructs a string to node ID table of buildings, rooms, and college classes.
+		the Main object populates the two input boxes with all the strings from this table, meaning that when the user starts typing, the string that most closely matches what they are typing will appear below the input box.
+		the program then reads the parameters passed to the URL, and if any of the parameters are "startID=" or "endID=", it will set the default path's start and end points based on the node IDs passed in.
+		draw the current path.
+
+Upon receiving input, the input boxes will search through their "options" for what closest matches what is being typed, then displays the match.
+Upon clicking the "Draw Path" button, takes the closest match from the two input boxes, and grabs the corresponding node ids from the NodeDB
+these node IDs are then used to construct a path using Djdkstra's algorithm, then, if the result is valid, sets the Main object's path to the newly constructed one.
+
+What each file does:
+	arcNode.js (you said to change the name. I'm so proud of my creativity) contains the Node class.
+	
+	csv.js provides functions for "reverting" the csv files downloaded by the program from just a string of comma seperated values back into a two-dimensional array.
+	In future versions, this will be removed, as next semester I will be working on an app that will force the data into the format we want.
+	
+	databases.js is awful. I would not advise looking at while you have food in your stomach. It emulates basic SQL functionality, storing the downloaded data in a two-dimensional arrays. Once we finally have an official SQL database, all this nasty code can be burned.
+	
+	importData.js provides the GET request functionality.
+	
+	input.js provides the TextBox interface that works with those two boxes that the user types into. 
+	Oh, just noticed that this one uses a function from another file. Might be able to move the closestMatch function here.
+	
+	main.js provides the Main class, which is used to store otherwise global variables. One is created by index.html, then stuff gets passed into it. We can then pass the Main object to whatever function we want so it can access the "global" variables.
+	Two things about this that I hope you can help me with:
+		1: What should I call this thing? I have no idea why I called it "Main", what would you recommend? "Global"? "Scope"?
+		2: I know having variables defined globally is bad, but is stuffing everything into one object like this the best solution?
+	
+	path.js provides the Path and PathFinder classes, which are used to construct paths from nodes. PathFinder is a relic from when building-to-node was a many-to-many relationship, so I'll be phasing it out soonish.
+	
+	qrCodes.js allows us to extract parameters from the URL, so we can make QR codes which allows us to set a default path (see index.html, that's where it invokes getIDsFromURL)
+	
+	scaledCanvas is used as an interface to draw nodes on the SVG element.
+	the first version of wayfinding used latitude and longitude for node coordinates,
+	then later versions used real-world measurement (feet, miles, whatever),
+	and now they use some arbitrary coordinates.
+	Given that we can't guarantee that the nodes will occupy the exact size needed by the program, we need to scale them.
+	scaledCanvas converts these arbitrary coordinates to points on the SVG,
+	given the assumption that the point (0, 0) on the SVG is node -1, and the lower right corner is node -2.
+	
+	urls.js is another relic. It was originally used to allow the less tech-savvy interns to update the URLs used by the program to retrieve data,
+	but it has since been replaced by the master URL spreadsheet in the google drive.
+	
+	utilities.js is miscilaneous functions.

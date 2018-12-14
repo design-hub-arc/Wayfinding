@@ -2,7 +2,11 @@
 Provides the CsvFile class
 
 The CsvFile class is used to format imported data from spreadsheets to a format usable by the program.
-*/
+
+ Since Matt will be developing an app to manage the data used by the program, 
+ we may get rid of this later,
+ as then it will always be in exactly the format we want.
+ */
 
 function formatResponse(responseText){
 	"use strict";
