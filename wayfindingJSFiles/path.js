@@ -22,45 +22,44 @@ NO A-STAR: it is overkill in this case, and would make little difference.
 */
 
 //use this in conjunction with Node
-function Path(startId, endId, dataSource) {
-	/*
-	start and endId are node IDs
-	dataSource is a main object
-	
-	idPath is an array of numbers, the ids of the nodes the path goes through
-	nodePath is the corresponding nodes
-	pathLength is the total length of the distance between all the nodes used in the path
-		it doesn't matter what scale it's in, as it is just used to compare in bestPath
-	images is an array of strings, the URLs of the path's images
-	imageInd is the index of the image currently displayed in main (in development)
-	*/
-	"use strict";
-	this.startId = parseInt(startId);
-	this.endId = parseInt(endId);
-	this.dataSource = dataSource;
-	
-	this.valid = true;
-	
-	this.idPath = [];
-	this.nodePath = [];
-	this.pathLength = 0;
-	this.loadPath();
-	
-	this.decodeIds();
-	this.images = this.getImages();
-	this.imgInd = -1; // increments before getting image
-}
-Path.prototype = {
-	decodeIds: function () {
+class Path{
+    constructor(startId, endId, dataSource) {
+        /*
+        start and endId are node IDs
+        dataSource is a main object
+        
+        idPath is an array of numbers, the ids of the nodes the path goes through
+        nodePath is the corresponding nodes
+        pathLength is the total length of the distance between all the nodes used in the path
+            it doesn't matter what scale it's in, as it is just used to compare in bestPath
+        images is an array of strings, the URLs of the path's images
+        imageInd is the index of the image currently displayed in main (in development)
+        */
+        "use strict";
+        this.startId = parseInt(startId);
+        this.endId = parseInt(endId);
+        this.dataSource = dataSource;
+
+        this.valid = true;
+
+        this.idPath = [];
+        this.nodePath = [];
+        this.pathLength = 0;
+        this.loadPath();
+
+        this.decodeIds();
+        this.images = this.getImages();
+        this.imgInd = -1; // increments before getting image
+    }
+	decodeIds() {
 		// generates nodePath
 		"use strict";
 		this.nodePath = [];
 		for (var i = 0; i < this.idPath.length; i++) {
 			this.nodePath[i] = this.dataSource.getNodeDB().getNode(this.idPath[i]);
 		}
-	},
-    
-	loadPath: function () {
+	}
+	loadPath() {
 		/*
 		this is the big one.
 
@@ -151,9 +150,8 @@ Path.prototype = {
 		if((this.startId < 0) || (this.endId < 0)){
 			this.invalidate();
 		}
-	},
-	
-	invalidate : function(){
+	}
+	invalidate(){
 		"use strict";
 		if(this.valid){
 			//prevent doubling up on this message
@@ -166,16 +164,15 @@ Path.prototype = {
 				console.log(e.stack);
 			}
 		}
-	},
-	
-	getURL: function () {
+	}
+	getURL() {
 		"use strict";
 		var origURL = window.location.href;
 		var split = origURL.split("?");
 		return split[0] + "?startID=" + this.idPath[0] + "&endID=" + this.idPath[this.idPath.length - 1];
-	},
+	}
 
-	draw: function (canvas) {
+	draw(canvas) {
 		"use strict";
 		canvas.clear();
 		canvas.setColor("red");
@@ -187,8 +184,8 @@ Path.prototype = {
 			canvas.line(p[i-1].x, p[i-1].y, p[i].x, p[i].y);
 			p[i].draw(canvas);
 		}
-	},
-	getImages: function () {
+	}
+	getImages() {
 		// returns an array of strings, each element is the url of a path image
 		"use strict";
 		var ret = [];
@@ -205,8 +202,8 @@ Path.prototype = {
 			}
 		}
 		return ret;
-	},
-	nextImage: function () {
+	}
+	nextImage() {
 		// grabs the next image from this.images
 		"use strict";
 		// make sure not to go out of range
@@ -228,18 +225,17 @@ make sure it has a data source!
 
 might still use
 */
-function PathFinder(){
-	"use strict";
-	//dataSource is a Main object containing data used when constructing a path
-	this.dataSource = undefined;
-}
-
-PathFinder.prototype = {
-	setDataSource : function(main){
+class PathFinder{
+	constructor(){
+        "use strict";
+        //dataSource is a Main object containing data used when constructing a path
+        this.dataSource = undefined;
+    }
+	setDataSource(main){
 		"use strict";
 		this.dataSource = main;
-	},
-	find : function(data1, data2){
+	}
+	find(data1, data2){
 		/*
 		Finds which combination building entrances 
 		create the most effective path between two
@@ -280,8 +276,8 @@ PathFinder.prototype = {
 		}
 		
 		return ret;
-	},
-	testAll : function(){
+	}
+	testAll(){
 		//developer tool. Detects any paths between any two nodes that cannot exist
 		"use strict";
 		

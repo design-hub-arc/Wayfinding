@@ -53,36 +53,35 @@ SQL to Database class:
 //@import extend from utilities.js
 
 
-//todo: add table subclass
-function Database(headers){
-	/*
-    @param headers : an array of strings, the column names
-    */
-    "use strict";
-	
-	if(!Array.isArray(headers)){
-		headers = [headers];
-	}
-	
-	this.headers = [];
-	this.rows = [];
-	this.headerString = "";
-	
-	var h;
-	for(var i = 0; i < headers.length; i++){
-		h = headers[i].toString().toUpperCase();
-		while(h.indexOf(" ") !== -1){
-			h = h.replace(" ", "_");
-		}
-		this.headers.push(h);
-		this.headerString += (h + " ");
-		this[h] = i; //makes enum
-	}
-    
-    this.sourceHeaders = [];
-}
-Database.prototype = {
-	insert : function(data){
+class Database{
+    constructor(headers){
+        /*
+        @param headers : an array of strings, the column names
+        */
+        "use strict";
+
+        if(!Array.isArray(headers)){
+            headers = [headers];
+        }
+
+        this.headers = [];
+        this.rows = [];
+        this.headerString = "";
+
+        var h;
+        for(var i = 0; i < headers.length; i++){
+            h = headers[i].toString().toUpperCase();
+            while(h.indexOf(" ") !== -1){
+                h = h.replace(" ", "_");
+            }
+            this.headers.push(h);
+            this.headerString += (h + " ");
+            this[h] = i; //makes enum
+        }
+
+        this.sourceHeaders = [];
+    }
+	insert(data){
 		/*
         @param data : an array with length equal to this.headers.length, the data to insert into the table
         each element in data can be any type
@@ -101,8 +100,8 @@ Database.prototype = {
 		} catch(e){
 			console.log(e.stack);
 		}
-	},
-	selectF : function(retCol, checkCol, callback){
+	}
+	selectF(retCol, checkCol, callback){
 		/*
         @param retCol : an int, the index of the column to return. Should be an enum value of this db
         @param checkCol : an int, the index of the column to compare to checkVal
@@ -134,8 +133,8 @@ Database.prototype = {
 			console.log(e.stack);
 		}
 		return ret;
-	},
-	select : function(retCol, checkCol, checkVal){
+	}
+	select(retCol, checkCol, checkVal){
 		/*
         @param retCol : an int, the index of the column to return. Should be an enum value of this db
         @param checkCol : an int, the index of the column to compare to checkVal
@@ -152,8 +151,8 @@ Database.prototype = {
 		return this.selectF(retCol, checkCol, function(data){
 			return (data.toString().toUpperCase() === checkVal);
 		});
-	},
-	getColumn : function(col){
+	}
+	getColumn(col){
 		/*
         @param col : an int, an enum value for this, the column number to return
         @return an array containing each unique value from the given column
@@ -179,8 +178,8 @@ Database.prototype = {
 			console.log(e.stack);
 		}
 		return ret;
-	},
-	logAll : function(){
+	}
+	logAll(){
         /*
         prints the contents of the database
         SELECT * FROM this
@@ -206,17 +205,17 @@ NodeDB is used by the Main class to store the data used by the program.
 It is initialized, filled with data, and applied to an instance of Main in
 the HTML file.
 */
-function NodeDB(){
-	"use strict";
-	Database.call(this, ["NODE ID", "NODE OBJECT"]);
-	
-	this.buildingDB = new Database(["BUILDING NAME", "NODE ID"]);
-	this.roomDB = new Database(["ROOM NAME", "NODE ID"]);
-	this.classDB = new Database(["CLASS", "NODE ID"]);
-}
-NodeDB.prototype = {
-	
-	parseNodeData : function(data){
+class NodeDB extends Database{
+	constructor(){
+        "use strict";
+        super(["NODE ID", "NODE OBJECT"]);
+        
+        this.buildingDB = new Database(["BUILDING NAME", "NODE ID"]);
+        this.roomDB = new Database(["ROOM NAME", "NODE ID"]);
+        this.classDB = new Database(["CLASS", "NODE ID"]);
+    }
+    
+	parseNodeData(data){
 		/*
 		@param data : the result of an HTTP request to the node data spreadsheet, converted to a 2D array for convenience
 		*/
@@ -236,8 +235,8 @@ NodeDB.prototype = {
 				));
 			}
 		}
-	},
-	parseConnData : function(data){
+	}
+	parseConnData(data){
 		/*
 		@param data : the result of an HTTP request to the node data spreadsheet, converted to a 2D array for convenience
 		*/
@@ -257,9 +256,9 @@ NodeDB.prototype = {
 			node.loadAdj(db);
 		});
 		this.logOneWayNodes();
-	},
+	}
 	
-	parseImageResponse : function(csvFile){
+	parseImageResponse(csvFile){
 		/*
         @param csvFile : a CsvFile object containing the result of a HTTP request to our image spreadsheet
         sets the connection images of nodes
@@ -283,9 +282,9 @@ NodeDB.prototype = {
 				}
 			}
 		}
-	},
+	}
 	
-	parseBuildingResponse : function(csvFile){
+	parseBuildingResponse(csvFile){
 		/*
         @param csvFile : a CsvFil containing the result of a HTTP request to our building file
         sets the associated building for each node
@@ -301,9 +300,9 @@ NodeDB.prototype = {
 			row = data[i];
 			this.buildingDB.insert([row[nameCol], parseInt(row[idCol])]);
 		}
-	},
+	}
 	
-	parseRoomResponse : function(csvFile){
+	parseRoomResponse(csvFile){
 		/*
         @param csvFile : a CsvFile containing the result of a HTTP request to our room file
         sets the associated room of each node
@@ -321,9 +320,9 @@ NodeDB.prototype = {
 			row = data[i];
 			this.roomDB.insert([row[roomCol], parseInt(row[nodeCol])]);
 		}
-	},
+	}
 	
-	parseClassResponse : function(csvFile){
+	parseClassResponse(csvFile){
 		/*
 		@param responseText : the response from an XMLHTTP request 
 		to a sheet containing class numbers and rooms
@@ -347,18 +346,17 @@ NodeDB.prototype = {
 				}
 			}
 		}
-	},
+	}
 	
-	
-	addRecord : function(node){
+	addRecord(node){
 		/*
 		@param node : a Node instance, the node to add to the database
 		*/
 		"use strict";
 		this.insert([parseInt(node.id), node]);
-	},
+	}
 	
-	getNode : function(id){
+	getNode(id){
 		/*
 		@param id : a number, the ID of the node to return
 		@return a Node from the database with an ID matching the once passed in
@@ -372,34 +370,34 @@ NodeDB.prototype = {
 			console.log(e.stack);
 		}
 		return ret;
-	},
+	}
 	
-	getAllIds : function(){
+	getAllIds(){
 		"use strict";
 		return this.getColumn(this.NODE_ID);
-	},
+	}
 	
-	getAllBuildingNames : function(){
+	getAllBuildingNames(){
 		"use strict";
 		return this.buildingDB.getColumn(this.buildingDB.BUILDING_NAME);
-	},
+	}
 	
-	getAllRooms : function(){
+	getAllRooms(){
 		"use strict";
 		return this.roomDB.getColumn(this.roomDB.ROOM_NAME);
-	},
+	}
 	
-	getAllClasses : function(){
+	getAllClasses(){
 		"use strict";
 		return this.classDB.getColumn(this.classDB.CLASS);
-	},
+    }
 	
-	getAll : function(){
+	getAll(){
 		"use strict";
 		return this.getColumn(this.NODE_OBJECT);
-	},
+	}
 	
-	getIdsByString : function(string){
+	getIdsByString(string){
 		/*
 		@param string : a string, what to search for in buildings, rooms, and class numbers
 		*/
@@ -419,9 +417,9 @@ NodeDB.prototype = {
 			ret = ret.concat(this.classDB.select(this.classDB.NODE_ID, this.classDB.CLASS, string));
 		}
 		return ret;
-	},
+	}
 	
-	logOneWayNodes : function(){
+	logOneWayNodes(){
 		/*
 		Detects nodes with a one-way relationship with other nodes
 		ex. node 1 connects to node 2, but node 2 doesn't connect to node 1
@@ -440,9 +438,9 @@ NodeDB.prototype = {
 				}
 			}
 		}
-	},
+	}
 	
-	countConnections : function(){
+	countConnections(){
 		// counts how many different connections exist
 		"use strict";
 		var nodeConn = 0;
@@ -452,17 +450,17 @@ NodeDB.prototype = {
 			nodeConn += allNodes[i].adj.length;
 		}
 		console.log("Total connections between nodes: " + nodeConn);
-	},
+	}
 	
-	generateDivs : function (main) {
+	generateDivs(main) {
 		//used to detect connection errors
 		"use strict";
 		this.getAll().forEach(function(node){
 			node.generateDiv(main);
 		});
-	},
+	}
 	
-	drawAll : function(canvas){
+	drawAll(canvas){
 		//canvas is an instance of the program's Canvas object, not HTML canvas
 		"use strict";
 		this.getAll().forEach(function(node){
@@ -471,21 +469,18 @@ NodeDB.prototype = {
 		});
 	}
 };
-extend(NodeDB, Database);
-
-
 
 /*
 ClassDB is used by the Main class to store the data used by the class locator.
 Once again, the HTML file does the populating
 */
-function ClassDB(){
-	"use strict";
-	//number is the five digit class number
-	Database.call(this, ["NUMBER", "NAME", "INSTRUCTOR", "ROOM", "MEETING TIME"]);
-}
-ClassDB.prototype = {
-	parseResponse : function(csvFile){
+class ClassDB extends Database{
+    constructor(){
+        "use strict";
+        //number is the five digit class number
+        super(["NUMBER", "NAME", "INSTRUCTOR", "ROOM", "MEETING TIME"]);
+    }
+	parseResponse(csvFile){
 		"use strict";
 		var data = csvFile.getNonHeaders();
 		var classNumCol =   csvFile.indexOfCol(["CLASS #", "CLASS NUMBER"]);
@@ -516,38 +511,37 @@ ClassDB.prototype = {
 				console.log(e.stack);
 			}
 		}
-	},
-	addRecord : function(number, name, instructor, room, times){
+	}
+	addRecord(number, name, instructor, room, times){
 		"use strict";
 		this.insert([number, name, instructor, room, times]);
-	},
-	getNumbersByName : function(className){
+	}
+	getNumbersByName(className){
 		"use strict";
 		return this.select(this.NUMBER, this.NAME, className.toUpperCase());
-	},
-	getNumbersByInstructor : function(instructorName){
+	}
+	getNumbersByInstructor(instructorName){
 		"use strict";
 		return this.select(this.NUMBER, this.INSTRUCTOR, instructorName.toUpperCase());
-	},
-	getNumbersByTime : function(time){
+	}
+	getNumbersByTime(time){
 		"use strict";
 		return this.select(this.NUMBER, this.MEETING_TIME, time.toUpperCase());
-	},
-	getAllClassNumbers : function(){
+	}
+	getAllClassNumbers(){
 		"use strict";
 		return this.getColumn(this.NUMBER);
-	},
-	getAllClassNames : function(){
+	}
+	getAllClassNames(){
 		"use strict";
 		return this.getColumn(this.NAME);
-	},
-	getAllInstructors : function(){
+	}
+	getAllInstructors(){
 		"use strict";
 		return this.getColumn(this.INSTRUCTOR);
-	},
-	getAllMeetingTimes : function(){
+	}
+	getAllMeetingTimes(){
 		"use strict";
 		return this.getColumn(this.MEETING_TIME);
 	}
 };
-extend(ClassDB, Database);

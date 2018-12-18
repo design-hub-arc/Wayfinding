@@ -3,33 +3,33 @@ The Main class is used to store data, preventing the need for global variables.
 It also takes a lot of code out of the main HTML file.
 */
 
-function Main(){
-	"use strict";
-	this.canvas = undefined;
+class Main{
+    constructor(){
+        "use strict";
+        this.canvas = undefined;
 
-	//html elements
-	this.start = undefined;
-	this.end = undefined;
-	this.pathButton = undefined;
-	
-	this.currentPath = undefined;
-	this.nodeDatabase = undefined;
-	this.classDatabase = undefined;
-	
-	this.pathFinder = undefined; //need until we get rid of duplicate class ids
-}
-Main.prototype = {
-	setCanvas : function(canvas){
+        //html elements
+        this.start = undefined;
+        this.end = undefined;
+        this.pathButton = undefined;
+
+        this.currentPath = undefined;
+        this.nodeDatabase = undefined;
+        this.classDatabase = undefined;
+
+        this.pathFinder = undefined; //need until we get rid of duplicate class ids
+    }
+	setCanvas(canvas){
 		"use strict";
 		// canvas is my custom Canvas class, NOT HTML canvas
 		this.canvas = canvas;
-	},
-	getCanvas : function(){
+	}
+	getCanvas(){
 		"use strict";
 		return this.canvas;
-	},
+	}
 	
-	setInput : function(start, end){
+	setInput(start, end){
 		/*
 		start and end are TextBoxes.
 		Populates said TextBoxes with the contents of this' fake database
@@ -46,9 +46,9 @@ Main.prototype = {
 		end.addOptions(db.getAllBuildingNames());
 		end.addOptions(db.getAllRooms());
 		end.addOptions(db.getAllClasses());
-	},
+	}
 	
-	setClassFinder : function(nameTextBox, instructorTextBox, timesTextBox, buttonId, resultsId, clearId){
+	setClassFinder(nameTextBox, instructorTextBox, timesTextBox, buttonId, resultsId, clearId){
 		/*
 		loads the contents of this' Class database into the options of the three passed in text boxes,
 		then makes button change the contents of result based on the results of each of the three boxes when clicked
@@ -165,9 +165,9 @@ Main.prototype = {
 			instructorTextBox.setInput(db.select(db.INSTRUCTOR, db.NUMBER, result.value)[0]);
 			timesTextBox.setInput(     db.select(db.MEETING_TIME, db.NUMBER, result.value)[0]);
 		};
-	},
+	}
 	
-	setPathButton : function(id){
+	setPathButton(id){
 		/*
 		id is the id of any HTML element
 		if it doesn't exist, will create it for you
@@ -191,14 +191,14 @@ Main.prototype = {
 				);
 			}
 		};
-	},
-	setPathFinder : function(pathFinder){
+	}
+	setPathFinder(pathFinder){
 		"use strict";
 		this.pathFinder = pathFinder;
 		pathFinder.setDataSource(this);
-	},
+	}
 	
-	setPath : function(path){
+	setPath(path){
 		"use strict";
 		if(path.valid){
 			this.currentPath = path;
@@ -209,13 +209,13 @@ Main.prototype = {
 				console.log(e.stack);
 			}
 		}
-	},
-	getPath : function(){
+	}
+	getPath(){
 		"use strict";
 		return this.currentPath;
-	},
+	}
 	
-	updatePath : function(data1, data2){
+	updatePath(data1, data2){
 		"use strict";
 		try{
 			var start = this.getNodeDB().getIdsByString(data1);
@@ -235,9 +235,9 @@ Main.prototype = {
 		} catch(e){
 			console.log(e.stack);
 		}
-	},
+	}
 	
-	testAllPaths : function(){
+	testAllPaths(){
 		//developer tool. Detects any paths between any two nodes that cannot exist
 		"use strict";
 		
@@ -274,22 +274,22 @@ Main.prototype = {
 			}
 		}
 		alert("Done.");
-	},
+	}
 	
-	setNodeDB : function(database){
+	setNodeDB(database){
 		"use strict";
 		this.nodeDatabase = database;
-	},
-	getNodeDB : function(){
+	}
+	getNodeDB(){
 		"use strict";
 		return this.nodeDatabase;
-	},
+	}
 	
-	setClassDB : function(database){
+	setClassDB(database){
 		"use strict";
 		this.classDatabase = database;
-	},
-	getClassDB : function(){
+	}
+	getClassDB(){
 		"use strict";
 		return this.classDatabase;
 	}

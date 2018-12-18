@@ -1,47 +1,43 @@
-function Node(id, x, y) {
-	/*
-	nodes are created by the importData.js file
+class Node{
+    constructor(id, x, y) {
+        /*
+        x and y are coordinates on the map image
 
-	x and y are coordinates on the map image
-	    
-	id is a unique identifier
-	like a primary key
-            
-	adjIds is an array of ints,
-	each int represents the id
-	of an adjacent node.
-	i.e. you can travel from this point to that one
-	*/
-	"use strict";
-	var error = false;
-	try {
-		this.id = parseInt(id);
-		if (isNaN(this.id)) {
-			error = true;
-			throw new TypeError("Node id must be an integer");
-		}
-	} catch (idError) {
-		console.log(idError.stack);
-	}
+        id is a unique identifier
+        like a primary key
 
-	try {
-		this.x = parseFloat(x);
-		this.y = parseFloat(y);
-		if (isNaN(this.x) || isNaN(this.y)) {
-			error = true;
-			throw new TypeError("X and Y must be numbers");
-		}
-	} catch (latLngError) {
-		console.log(latLngError);
-	}
-	
-	this.adjIds = [];
-	this.connectionImages = {};
-}
+        adjIds is an array of ints,
+        each int represents the id
+        of an adjacent node.
+        i.e. you can travel from this point to that one
+        */
+        "use strict";
+        var error = false;
+        try {
+            this.id = parseInt(id);
+            if (isNaN(this.id)) {
+                error = true;
+                throw new TypeError("Node id must be an integer");
+            }
+        } catch (idError) {
+            console.log(idError.stack);
+        }
 
-// Methods
-Node.prototype = {
-	loadAdj: function (nodeDB) {
+        try {
+            this.x = parseFloat(x);
+            this.y = parseFloat(y);
+            if (isNaN(this.x) || isNaN(this.y)) {
+                error = true;
+                throw new TypeError("X and Y must be numbers");
+            }
+        } catch (latLngError) {
+            console.log(latLngError);
+        }
+
+        this.adjIds = [];
+        this.connectionImages = {};
+    }
+	loadAdj(nodeDB) {
 		/*
 		Creates an array of Nodes,
 		the array contains all the
@@ -63,49 +59,49 @@ Node.prototype = {
 				this.adj.push(check);
 			}
 		}
-	},
+	}
 	
-	distanceFrom: function (n2) {
+	distanceFrom(n2) {
 		"use strict";
 		return Math.sqrt(
 			Math.pow(this.x - n2.x, 2) + Math.pow(this.y - n2.y, 2)
 		);
-	},
+	}
 	
-	addAdjId : function(id){
+	addAdjId(id){
 		"use strict";
 		this.adjIds.push(id);
-	},
+	}
 	
-	setConnectionImage: function (id, url) {
+	setConnectionImage(id, url) {
 		// invoked by importImages in import data file
 		// sets the image going from this node to node with id equal to the id passed
 		"use strict";
 		this.connectionImages[id] = url;
-	},
-	getHasImage: function (id) {
+	}
+	getHasImage(id) {
 		// returns whether or not an image has been given showing the area 
 		//between this node and node with id equal to the id passed
 		"use strict";
 		return this.connectionImages.hasOwnProperty(id);
-	},
-	getImageTo: function (id) {
+	}
+	getImageTo(id) {
 		// returns the image of going from this node to node with id equal to the id passed
 		"use strict";
 		return this.connectionImages[id];
-	},
+	}
 
-	draw : function (canvas) {
+	draw(canvas) {
 		"use strict";
 		canvas.setColor("red");
 		canvas.rect(this.x, this.y, 5, 5);
-	},
-	drawId : function(canvas){
+	}
+	drawId(canvas){
 		"use strict";
 		canvas.setColor("red");
 		canvas.text(this.id, this.x, this.y);
-	},
-	drawLinks: function (canvas) {
+	}
+	drawLinks(canvas) {
 		// draws lines connecting this node to its adjacent nodes
 		"use strict";
 		canvas.setColor("red");
@@ -114,8 +110,8 @@ Node.prototype = {
 			this.adj[j].draw(canvas);
 			canvas.line(this.x, this.y, this.adj[j].x, this.adj[j].y);
 		}
-	},
-	generateDiv: function (main) {
+	}
+	generateDiv(main) {
 		// used for testing
 		"use strict";
 		var node = this;

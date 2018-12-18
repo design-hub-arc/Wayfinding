@@ -7,22 +7,21 @@ to x y coordinates on the SVG canvas.
 Also provides canvas functions
 */
 
-function Canvas(){
-	"use strict";
-	this.draw = undefined;           // the svg image this corresponds to
-	this.scalingElement = undefined; // the svg element this gets its size from
-	this.width = 0;                  // dimensions of the svg element
-	this.height = 0;
-    
-    this.minX = 0;                   // coordinates of the upper-leftmost and lower-rightmost nodes
-	this.minY = 0;
-	this.maxX = 0;
-	this.maxY = 0;
-	
-	this.color = undefined;
-}
-Canvas.prototype = {
-	link : function(svgDrawer, scaler){
+class Canvas{
+	constructor(){
+        this.draw = undefined;           // the svg image this corresponds to
+        this.scalingElement = undefined; // the svg element this gets its size from
+        this.width = 0;                  // dimensions of the svg element
+        this.height = 0;
+        
+        this.minX = 0;                   // coordinates of the upper-leftmost and lower-rightmost nodes
+        this.minY = 0;
+        this.maxX = 0;
+        this.maxY = 0;
+        
+        this.color = undefined;
+    }
+	link(svgDrawer, scaler){
 		"use strict";
 		//better way?
 		//maybe built-in creating the svg?
@@ -34,18 +33,18 @@ Canvas.prototype = {
 		} catch(e){
 			console.log(e.stack);
 		}
-	},
-	setColor : function(color){
+	}
+	setColor(color){
 		"use strict";
 		this.color = color;
-	},
-	rect : function(x, y, w, h){
+	}
+	rect(x, y, w, h){
 		"use strict";
 		return this.draw.rect(w, h)
 			.attr({fill: this.color})
 			.move(this.x(x), this.y(y));
-	},
-	clear : function(){
+	}
+	clear(){
 		"use strict";
 		var a = this.draw.children();
 		for(var i = a.length - 1; i >= 0; i--){
@@ -53,8 +52,8 @@ Canvas.prototype = {
 				a[i].remove();
 			}
 		}
-	},
-	resize : function(){
+	}
+	resize(){
 		"use strict";
 		this.width = this.scalingElement
 			.width
@@ -64,15 +63,15 @@ Canvas.prototype = {
 			.height
 			.baseVal
 			.value;
-	},
-	text : function(text, x, y){
+	}
+	text(text, x, y){
 		"use strict";
 		this.draw.text(text.toString())
 			.move(this.x(x) - 10, 
 				  this.y(y) - 20
 				 ).attr({fill: this.color});
-	},
-	line : function(x1, y1, x2, y2){
+	}
+	line(x1, y1, x2, y2){
 		"use strict";
 		this.draw.line(
 			this.x(x1), 
@@ -80,8 +79,8 @@ Canvas.prototype = {
 			this.x(x2), 
 			this.y(y2)
 		).stroke({color: this.color, width: 3});
-	},
-	setCorners : function(x1, y1, x2, y2){
+	}
+	setCorners(x1, y1, x2, y2){
 		// parameters are the corners of the map image used
 		// it's fine if the y axis is reversed
 		"use strict";
@@ -90,20 +89,20 @@ Canvas.prototype = {
 		this.maxX = x2;
 		this.maxY = y2;
 		this.calcSize();
-	},
-	calcSize : function(){
+	}
+	calcSize(){
 		"use strict";
 		this.mapWidth = this.maxX - this.minX;
 		this.mapHeight = this.maxY - this.minY;
-	},
-	x : function(coord){
+	}
+	x(coord){
 		// convert a coordinate on the map image
 		// to a point on the SVG canvas
 		"use strict";
 		var percRight = (coord - this.minX) / this.mapWidth;
 		return percRight * this.width;
-	},
-	y : function(coord){
+	}
+	y(coord){
 		"use strict";
 		var percDown = (coord - this.minY) / this.mapHeight;
 		return percDown * this.height;

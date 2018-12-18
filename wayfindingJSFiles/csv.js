@@ -20,27 +20,27 @@ function formatResponse(responseText){
 	return ret;
 }
 
-function CsvFile(text){
-    /*
-    @param text : a String, the response text from an HTTP request
-    */
-	"use strict";
-    this.headers = [];
-    this.data = formatResponse(text);
-    
-    this.headers = this.data[0].map(function(header){
-		return header.toUpperCase();
-	});
-}
-CsvFile.prototype = {
-	getNonHeaders : function(){
+class CsvFile{
+    constructor(text){
+        /*
+        @param text : a String, the response text from an HTTP request
+        */
+        "use strict";
+        this.headers = [];
+        this.data = formatResponse(text);
+
+        this.headers = this.data[0].map(function(header){
+            return header.toUpperCase();
+        });
+    }
+	getNonHeaders(){
 		/*
 		@return an array of arrays of strings, each row of this' data, sans the first, which is headers
 		*/
 		"use strict";
 		return this.data.slice(1, this.data.length);
-	},
-	indexOfCol : function(possibleHeaders){
+	}
+	indexOfCol(possibleHeaders){
 		/*
 		@param possibleHeaders : an array of strings, possible names of the header we're searching for
 		@return an int : the index of one of this' headers contained in possibleHeaders

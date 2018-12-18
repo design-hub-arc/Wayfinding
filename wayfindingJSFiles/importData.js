@@ -3,10 +3,10 @@ Provides functions which are used to perform XMLHTTPRequests.
 These are invoked in main.html.
 */
 
-var newline = /\r?\n|\r/;
+const newline = /\r?\n|\r/;
 
 //used for debugging
-var logger = {
+const logger = {
 	contents : [],
 	add : function(msg){
 		"use strict";
