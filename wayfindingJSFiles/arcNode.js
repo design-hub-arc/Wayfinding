@@ -12,11 +12,9 @@ class Node{
         i.e. you can travel from this point to that one
         */
         "use strict";
-        var error = false;
         try {
             this.id = parseInt(id);
             if (isNaN(this.id)) {
-                error = true;
                 throw new TypeError("Node id must be an integer");
             }
         } catch (idError) {
@@ -27,7 +25,6 @@ class Node{
             this.x = parseFloat(x);
             this.y = parseFloat(y);
             if (isNaN(this.x) || isNaN(this.y)) {
-                error = true;
                 throw new TypeError("X and Y must be numbers");
             }
         } catch (latLngError) {
@@ -53,8 +50,9 @@ class Node{
 		"use strict";
 		this.adj = [];
 		
-		for (var i = 0; i < this.adjIds.length; i++) {
-			var check = nodeDB.getNode(this.adjIds[i]);
+        let check;
+		for (let i = 0; i < this.adjIds.length; i++) {
+			check = nodeDB.getNode(this.adjIds[i]);
 			if (check) {
 				this.adj.push(check);
 			}
@@ -106,7 +104,7 @@ class Node{
 		"use strict";
 		canvas.setColor("red");
 		this.drawId(canvas);
-		for (var j = 0; j < this.adj.length; j++) {
+		for (let j = 0; j < this.adj.length; j++) {
 			this.adj[j].draw(canvas);
 			canvas.line(this.x, this.y, this.adj[j].x, this.adj[j].y);
 		}
@@ -114,26 +112,34 @@ class Node{
 	generateDiv(main) {
 		// used for testing
 		"use strict";
-		var node = this;
-		var canvas = main.getCanvas();
+		let node = this;
+		let canvas = main.getCanvas();
 		
-		var f = function () {
+        //draws this node's links
+		let f = function () {
 			node.draw(canvas);
 			node.drawLinks(canvas);
 		};
-		var f2 = function (){
+        
+        //redraws the current path
+		let f2 = function (){
 			canvas.clear();
-			var path = main.getPath();
+			let path = main.getPath();
 			if (path !== undefined) {
 				path.draw(canvas);
 			}
 			main.getNodeDB().generateDivs(main);
 		};
-		var f3 = function(){
+        
+        //logs the node's data
+		let f3 = function(){
 			console.log(node);
 		};
 		
 		node.drawId(canvas);
 		canvas.rect(this.x, this.y, 10, 10).mouseover(f).mouseout(f2).click(f3);
+        //                                            ^ display links when hovered over,
+        //                                                        ^ redraw the path when mouse exits
+        //                                                                  ^ display data when clicked
 	}
 };

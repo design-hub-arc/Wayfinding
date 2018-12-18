@@ -15,7 +15,7 @@ SQL to Database class:
 
 	translates to...
 
-	var x = new Database(["col1", "col2", "col3"]);
+	let x = new Database(["col1", "col2", "col3"]);
 
 
 
@@ -68,8 +68,8 @@ class Database{
         this.rows = [];
         this.headerString = "";
 
-        var h;
-        for(var i = 0; i < headers.length; i++){
+        let h;
+        for(let i = 0; i < headers.length; i++){
             h = headers[i].toString().toUpperCase();
             while(h.indexOf(" ") !== -1){
                 h = h.replace(" ", "_");
@@ -113,7 +113,7 @@ class Database{
         */
         
         "use strict";
-		var ret = [];
+		let ret = [];
 		try{
 			//checking
 			if(retCol >= this.headers.length){
@@ -123,8 +123,8 @@ class Database{
 				throw new RangeError("Invalid index for checkCol");
 			}
 			
-			this.rows.forEach(function(row){
-				var check = row[checkCol];
+			this.rows.forEach(row => {
+				let check = row[checkCol];
 				if(callback(check)){
 					ret.push(row[retCol]);
 				}
@@ -148,9 +148,7 @@ class Database{
         
         "use strict";
 		checkVal = checkVal.toString().toUpperCase();
-		return this.selectF(retCol, checkCol, function(data){
-			return (data.toString().toUpperCase() === checkVal);
-		});
+		return this.selectF(retCol, checkCol, data => (data.toString().toUpperCase() === checkVal));
 	}
 	getColumn(col){
 		/*
@@ -160,15 +158,15 @@ class Database{
         */
         
         "use strict";
-		var ret = [];
+		let ret = [];
 		
 		if(col >= this.headers.length){
 			throw new RangeError("Invalid column");
 		}
 		
-		var item;
+		let item;
 		try{
-			for(var i = 0; i < this.rows.length; i++){
+			for(let i = 0; i < this.rows.length; i++){
 				item = this.rows[i][col];
 				if(ret.indexOf(item) === -1){
 					ret.push(item);
@@ -187,9 +185,9 @@ class Database{
         
 		"use strict";
 		console.log(this.headerString);
-		for(var i = 0; i < this.rows.length; i++){
-			var row = "";
-			for(var j = 0; j < this.rows[i].length; j++){
+		for(let i = 0; i < this.rows.length; i++){
+			let row = "";
+			for(let j = 0; j < this.rows[i].length; j++){
 				row += this.rows[i][j];
 				if(j !== this.rows[i].length - 1){
 					row += ", ";
@@ -221,10 +219,10 @@ class NodeDB extends Database{
 		*/
 		"use strict";
 		
-		var row;
-		var id;
+		let row;
+		let id;
 		//skip headers
-		for(var i = 1; i < data.length; i++){
+		for(let i = 1; i < data.length; i++){
 			row = data[i];
 			id = parseInt(row[0]);
 			if(!this.getNode(id)){
@@ -242,8 +240,8 @@ class NodeDB extends Database{
 		*/
 		"use strict";
 		
-		var row;
-		for(var i = 1; i < data.length; i++){
+		let row;
+		for(let i = 1; i < data.length; i++){
 			row = data[i];
 			try {
 				this.getNode(parseInt(row[0])).addAdjId(parseInt(row[1]));
@@ -251,10 +249,8 @@ class NodeDB extends Database{
 				console.log("Node not found: " + parseInt(row[1]));
 			}
 		}
-		var db = this;
-		this.getAll().forEach(function(node){
-			node.loadAdj(db);
-		});
+		let db = this;
+		this.getAll().forEach(node => node.loadAdj(db));
 		this.logOneWayNodes();
 	}
 	
@@ -264,16 +260,16 @@ class NodeDB extends Database{
         sets the connection images of nodes
         */
         "use strict";
-		var data = csvFile.getNonHeaders();
-		var fromCol = csvFile.indexOfCol(["From", "node1", "n1"]);
-		var toCol = csvFile.indexOfCol(["to", "node2", "n2"]);
-		var imgCol = csvFile.indexOfCol(["image", "img", "photo", "url"]);
+		let data = csvFile.getNonHeaders();
+		let fromCol = csvFile.indexOfCol(["From", "node1", "n1"]);
+		let toCol = csvFile.indexOfCol(["to", "node2", "n2"]);
+		let imgCol = csvFile.indexOfCol(["image", "img", "photo", "url"]);
 		
 		//Skip header
-		for(var i = 1; i < data.length; i++){
+		for(let i = 1; i < data.length; i++){
 			//make sure all 3 rows exist
 			if(data[i][fromCol] !== "" && data[i][toCol] !== "" && data[i][imgCol] !== ""){
-				var nodes = this.select(this.NODE_OBJECT, this.NODE_ID, parseInt(data[i][fromCol]));
+				let nodes = this.select(this.NODE_OBJECT, this.NODE_ID, parseInt(data[i][fromCol]));
 				if(nodes.length === 1){
 					nodes[0].setConnectionImage(data[i][toCol], data[i][imgCol]);
 				} else {
@@ -291,12 +287,12 @@ class NodeDB extends Database{
         */
         
         "use strict";
-		var data = csvFile.getNonHeaders();
-		var nameCol = csvFile.indexOfCol(["Name", "building", "building name", "buildingname"]);
-		var idCol = csvFile.indexOfCol(["id", "node", "node id", "nodeid"]);
-		var row;
+		let data = csvFile.getNonHeaders();
+		let nameCol = csvFile.indexOfCol(["Name", "building", "building name", "buildingname"]);
+		let idCol = csvFile.indexOfCol(["id", "node", "node id", "nodeid"]);
+		let row;
 		
-		for(var i = 0; i < data.length; i++){
+		for(let i = 0; i < data.length; i++){
 			row = data[i];
 			this.buildingDB.insert([row[nameCol], parseInt(row[idCol])]);
 		}
@@ -309,14 +305,14 @@ class NodeDB extends Database{
         */
         
         "use strict";
-		var data = csvFile.getNonHeaders();
+		let data = csvFile.getNonHeaders();
 		
-		var roomCol = csvFile.indexOfCol(["room", "room number"]);
-		var nodeCol = csvFile.indexOfCol(["node", "associated node"]);
+		let roomCol = csvFile.indexOfCol(["room", "room number"]);
+		let nodeCol = csvFile.indexOfCol(["node", "associated node"]);
 		
-		var node;
-		var row;
-		for(var i = 1; i < data.length; i++){
+		let node;
+		let row;
+		for(let i = 1; i < data.length; i++){
 			row = data[i];
 			this.roomDB.insert([row[roomCol], parseInt(row[nodeCol])]);
 		}
@@ -328,14 +324,14 @@ class NodeDB extends Database{
 		to a sheet containing class numbers and rooms
 		*/
 		"use strict";
-		var data =        csvFile.getNonHeaders();
-		var classCol =    csvFile.indexOfCol(["CLASS NUMBER", "CLASS"]);
-        var buildingCol = csvFile.indexOfCol(["BUILDING"]);
-		var roomCol =     csvFile.indexOfCol(["ROOM"]);
+		let data =        csvFile.getNonHeaders();
+		let classCol =    csvFile.indexOfCol(["CLASS NUMBER", "CLASS"]);
+        let buildingCol = csvFile.indexOfCol(["BUILDING"]);
+		let roomCol =     csvFile.indexOfCol(["ROOM"]);
 		
-		var row;
-		var nodeIds;
-		for(var i = 1; i < data.length; i++){
+		let row;
+		let nodeIds;
+		for(let i = 1; i < data.length; i++){
 			row = data[i];
 			nodeIds = this.roomDB.select(this.roomDB.NODE_ID, this.roomDB.ROOM_NAME, (row[buildingCol] + " " + row[roomCol]).toUpperCase());
 			if(nodeIds.length === 0){
@@ -363,7 +359,7 @@ class NodeDB extends Database{
 		TODO: decide what to do about invalid IDs
 		*/
 		"use strict";
-		var ret = null;
+		let ret = null;
 		try{
 			ret = this.select(this.NODE_OBJECT, this.NODE_ID, id)[0];
 		} catch(e){
@@ -402,7 +398,7 @@ class NodeDB extends Database{
 		@param string : a string, what to search for in buildings, rooms, and class numbers
 		*/
 		"use strict";
-		var ret = [];
+		let ret = [];
 		
 		string = string.toString().toUpperCase();
 		
@@ -426,11 +422,11 @@ class NodeDB extends Database{
 		fixes the errors
 		*/
 		"use strict";
-		var allNodes = this.getAll();
+		let allNodes = this.getAll();
 		
-		for(var i = 0; i < allNodes.length; i++){
-			var current = allNodes[i];
-			for(var j = 0; j < current.adj.length && current.id >= 0; j++){
+		for(let i = 0; i < allNodes.length; i++){
+			let current = allNodes[i];
+			for(let j = 0; j < current.adj.length && current.id >= 0; j++){
 				if(!current.adj[j].adjIds.includes(current.id)){
 					//console.log("Node with ID " + current.adj[j].id + " needs to connect with node " + current.id);
 					current.adj[j].adjIds.push(current.id);
@@ -443,10 +439,10 @@ class NodeDB extends Database{
 	countConnections(){
 		// counts how many different connections exist
 		"use strict";
-		var nodeConn = 0;
-		var allNodes = this.getAll();
+		let nodeConn = 0;
+		let allNodes = this.getAll();
 		
-		for(var i = 0; i < allNodes.length; i++){
+		for(let i = 0; i < allNodes.length; i++){
 			nodeConn += allNodes[i].adj.length;
 		}
 		console.log("Total connections between nodes: " + nodeConn);
@@ -455,15 +451,13 @@ class NodeDB extends Database{
 	generateDivs(main) {
 		//used to detect connection errors
 		"use strict";
-		this.getAll().forEach(function(node){
-			node.generateDiv(main);
-		});
+		this.getAll().forEach(node => node.generateDiv(main));
 	}
 	
 	drawAll(canvas){
 		//canvas is an instance of the program's Canvas object, not HTML canvas
 		"use strict";
-		this.getAll().forEach(function(node){
+		this.getAll().forEach(node => {
 			node.draw(canvas);
 			node.drawLinks(canvas);
 		});
@@ -482,21 +476,21 @@ class ClassDB extends Database{
     }
 	parseResponse(csvFile){
 		"use strict";
-		var data = csvFile.getNonHeaders();
-		var classNumCol =   csvFile.indexOfCol(["CLASS #", "CLASS NUMBER"]);
-		var subjCol =       csvFile.indexOfCol(["SUBJ CD", "SUBJECT"]);
-		var numCol =        csvFile.indexOfCol(["CAT NBR", "NUMBER"]);
-		var startTimeCol =  csvFile.indexOfCol(["BEG TIME", "START TIME"]);
-		var endTimeCol =    csvFile.indexOfCol(["END TIME"]);
-		var daysCol =       csvFile.indexOfCol(["DAYS"]);
-        var buildingCol =   csvFile.indexOfCol(["BUILDING"]);
-		var roomCol =       csvFile.indexOfCol(["ROOM"]);
-		var instructorCol = csvFile.indexOfCol(["INSTRCTR", "INSTRUCTOR"]);
+		let data = csvFile.getNonHeaders();
+		let classNumCol =   csvFile.indexOfCol(["CLASS #", "CLASS NUMBER"]);
+		let subjCol =       csvFile.indexOfCol(["SUBJ CD", "SUBJECT"]);
+		let numCol =        csvFile.indexOfCol(["CAT NBR", "NUMBER"]);
+		let startTimeCol =  csvFile.indexOfCol(["BEG TIME", "START TIME"]);
+		let endTimeCol =    csvFile.indexOfCol(["END TIME"]);
+		let daysCol =       csvFile.indexOfCol(["DAYS"]);
+        let buildingCol =   csvFile.indexOfCol(["BUILDING"]);
+		let roomCol =       csvFile.indexOfCol(["ROOM"]);
+		let instructorCol = csvFile.indexOfCol(["INSTRCTR", "INSTRUCTOR"]);
 		
-		var row;
-		var name;
+		let row;
+		let name;
 		//skip headers
-		for(var i = 1; i < data.length; i++){
+		for(let i = 1; i < data.length; i++){
 			row = data[i];
 			try{
 				//name = row[instructorCol.]

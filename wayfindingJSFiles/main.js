@@ -1,5 +1,5 @@
 /*
-The Main class is used to store data, preventing the need for global variables.
+The Main class is used to store data, preventing the need for global letiables.
 It also takes a lot of code out of the main HTML file.
 */
 
@@ -37,7 +37,7 @@ class Main{
 		"use strict";
 		this.start = start;
 		this.end = end;
-		var db = this.getNodeDB();
+		let db = this.getNodeDB();
 		
 		start.addOptions(db.getAllBuildingNames());
 		start.addOptions(db.getAllRooms());
@@ -62,11 +62,11 @@ class Main{
 		if either the buttonId, resultsId, or clearId elements do not exist, creates them for you
 		*/
 		"use strict";
-		var db = this.getClassDB();
-		var main = this;
-		var button = document.getElementById(buttonId);
-		var result = document.getElementById(resultsId);
-		var clear = document.getElementById(clearId);
+		let db = this.getClassDB();
+		let main = this;
+		let button = document.getElementById(buttonId);
+		let result = document.getElementById(resultsId);
+		let clear = document.getElementById(clearId);
 		
 		if(button === null){
 			button = document.createElement("button");
@@ -102,17 +102,17 @@ class Main{
 				*/
 				return parseInt(num);
 			}
-			var results = [
+			let results = [
 				main.getClassDB().getNumbersByName      (nameTextBox.getResult())      .map(toInt),
 				main.getClassDB().getNumbersByInstructor(instructorTextBox.getResult()).map(toInt),
 				main.getClassDB().getNumbersByTime      (timesTextBox.getResult())     .map(toInt)
 			]; //this is an array of arrays
-			var validResults = []; //which results can be compared
-			var setTo = ["class not found"]; //what the dropbox will be set to
+			let validResults = []; //which results can be compared
+			let setTo = ["class not found"]; //what the dropbox will be set to
 			
 			//then, check if the result set contains any data.
 			//this way, we won't be comparing valid data to an empty set
-			results.forEach(function(array){
+			results.forEach(array =>{
 				if(array.length > 0){
 					validResults.push(array);
 				}
@@ -125,12 +125,12 @@ class Main{
 			} else {
 				//find a class present in each data set
 				//iterate through each element in the first set of valid results
-				validResults[0].forEach(function(item){
+				validResults[0].forEach(item => {
 					setTo = [];
-					var match = true;
+					let match = true;
 					
 					//check if each other valid result set contains said value
-					for(var i = 1; i < validResults.length && match; i++){
+					for(let i = 1; i < validResults.length && match; i++){
 						match = (validResults[i].indexOf(item) !== -1);
 					}
 					if(match){
@@ -145,8 +145,8 @@ class Main{
 			}
 			
 			//then repopulate it
-			var newElem;
-			setTo.forEach(function(opt){
+			let newElem;
+			setTo.forEach(opt =>{
 				newElem = document.createElement("option");
 				newElem.text = opt;
 				result.add(newElem);
@@ -181,7 +181,7 @@ class Main{
 			document.body.appendChild(this.pathButton);
 		}
 		
-		var main = this;
+		let main = this;
 		this.pathButton.onclick = function(){
 			if(main.start.isValid() && main.end.isValid()){
 				//updatepath does the finding
@@ -218,12 +218,12 @@ class Main{
 	updatePath(data1, data2){
 		"use strict";
 		try{
-			var start = this.getNodeDB().getIdsByString(data1);
-			var end = this.getNodeDB().getIdsByString(data2);
+			let start = this.getNodeDB().getIdsByString(data1);
+			let end = this.getNodeDB().getIdsByString(data2);
 			
 			if(start.length >= 1 && end.length >= 1){ //otherwise some class numbers cause problems
-				//var newPath = new Path(start[0], end[0], this);
-				var newPath = this.pathFinder.find(data1, data2);
+				//let newPath = new Path(start[0], end[0], this);
+				let newPath = this.pathFinder.find(data1, data2);
 				if(newPath.valid){
 					this.setPath(newPath);
 				} else {
@@ -241,23 +241,23 @@ class Main{
 		//developer tool. Detects any paths between any two nodes that cannot exist
 		"use strict";
 		
-		var source = this;
-		var nodeDB = source.getNodeDB();
+		let source = this;
+		let nodeDB = source.getNodeDB();
 		
-		var points = [];
+		let points = [];
 		points = points.concat(nodeDB.getAllBuildingNames());
 		points = points.concat(nodeDB.getAllRooms());
 		points = points.concat(nodeDB.getAllClasses());
 		
 		function checkPath(startStr, endStr){
 			try{
-				var id1 = nodeDB.getIdsByString(startStr);
-				var id2 = nodeDB.getIdsByString(endStr);
+				let id1 = nodeDB.getIdsByString(startStr);
+				let id2 = nodeDB.getIdsByString(endStr);
 				
 				if(id1.length !== 1 || id2.length !== 1){
 					throw new Error("Invalid node count: " + startStr + ": " + id1.length + " " + endStr + ": " + id2.length);
 				} else {
-					var path = new Path(id1[0], id2[0], source);
+					let path = new Path(id1[0], id2[0], source);
 					if(!path.valid){
 						throw new Error("Invalid Path: " + path.idPath);
 					}
@@ -268,8 +268,8 @@ class Main{
 		}
 		
 		alert("Please wait while I process " + (points.length * points.length) + " paths...");
-		for(var i = 0; i < points.length; i++){
-			for(var j = 0; j < points.length; j++){
+		for(let i = 0; i < points.length; i++){
+			for(let j = 0; j < points.length; j++){
 				checkPath(points[i], points[j]);
 			}
 		}

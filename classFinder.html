@@ -48,7 +48,7 @@
 			var master = new Main();
 			master.setClassDB(db);
 			
-			get(classesURL, function(responseText){
+			get(classesURL, responseText =>{
 				db.parseResponse(new CsvFile(responseText));
 				master.setClassFinder(
 					new TextBox("name box", "name hint"),

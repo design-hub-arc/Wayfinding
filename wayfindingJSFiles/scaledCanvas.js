@@ -46,8 +46,8 @@ class Canvas{
 	}
 	clear(){
 		"use strict";
-		var a = this.draw.children();
-		for(var i = a.length - 1; i >= 0; i--){
+		let a = this.draw.children();
+		for(let i = a.length - 1; i >= 0; i--){
 			if(a[i].type === "rect" || a[i].type === "line" || a[i].type === "text"){
 				a[i].remove();
 			}
@@ -99,12 +99,12 @@ class Canvas{
 		// convert a coordinate on the map image
 		// to a point on the SVG canvas
 		"use strict";
-		var percRight = (coord - this.minX) / this.mapWidth;
+		let percRight = (coord - this.minX) / this.mapWidth;
 		return percRight * this.width;
 	}
 	y(coord){
 		"use strict";
-		var percDown = (coord - this.minY) / this.mapHeight;
+		let percDown = (coord - this.minY) / this.mapHeight;
 		return percDown * this.height;
 	}
 };

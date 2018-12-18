@@ -10,12 +10,10 @@ The CsvFile class is used to format imported data from spreadsheets to a format 
 
 function formatResponse(responseText){
 	"use strict";
-	var ret = [];
-	var splitOnLine = responseText.split(/\r?\n|\r/); //split on newline
+	let ret = [];
+	let splitOnLine = responseText.split(/\r?\n|\r/); //split on newline
 	
-	splitOnLine.forEach(function(line){
-		ret.push(line.split(","));
-	});
+	splitOnLine.forEach(line => ret.push(line.split(",")));
 	
 	return ret;
 }
@@ -29,9 +27,7 @@ class CsvFile{
         this.headers = [];
         this.data = formatResponse(text);
 
-        this.headers = this.data[0].map(function(header){
-            return header.toUpperCase();
-        });
+        this.headers = this.data[0].map(header => header.toUpperCase());
     }
 	getNonHeaders(){
 		/*
@@ -47,16 +43,14 @@ class CsvFile{
 		if none of the headers in possibleHeaders exists in this' headers, returns -1
 		*/
 		"use strict";
-		var ret = -1;
+		let ret = -1;
 		
 		if(!Array.isArray(possibleHeaders)){
 			possibleHeaders = [possibleHeaders];
 		}
-		possibleHeaders = possibleHeaders.map(function(header){
-			return header.toUpperCase();
-		});
+		possibleHeaders = possibleHeaders.map(header => header.toUpperCase());
 		
-		for(var i = 0; i < this.headers.length && ret === -1; i++){
+		for(let i = 0; i < this.headers.length && ret === -1; i++){
 			if(possibleHeaders.indexOf(this.headers[i]) !== -1){
 				ret = i;
 			}

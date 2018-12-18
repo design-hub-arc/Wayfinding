@@ -8,13 +8,13 @@ const newline = /\r?\n|\r/;
 //used for debugging
 const logger = {
 	contents : [],
-	add : function(msg){
+	add(msg){
 		"use strict";
 		this.contents.push(msg);
 	},
-	displayAll : function(){
+	displayAll(){
 		"use strict";
-		for(var i = 0; i < this.contents.length; i++){
+		for(let i = 0; i < this.contents.length; i++){
 			console.log(this.contents[i]);
 		}
 	}
@@ -25,7 +25,7 @@ function get(url, callback){
 	// callback is a function with a single parameter,
     // passes in the url's response text as that parameter
 	"use strict";
-	var req = new XMLHttpRequest();
+	let req = new XMLHttpRequest();
 	req.onreadystatechange = function(){
 		if(req.readyState === 4 && req.status === 200){
 			logger.add("Response from " + url + ":");
@@ -57,9 +57,9 @@ function sequentialGets(urls, callbacks){
     (b): if only one callback is passed (one element array, or just a function), passes in all responses as an array to that function
     */
     "use strict";
-    var responses = [];
-    var received = 0;
-    var singleFunction = !Array.isArray(callbacks) || callbacks.length === 1;
+    let responses = [];
+    let received = 0;
+    let singleFunction = !Array.isArray(callbacks) || callbacks.length === 1;
     
     if(!Array.isArray(callbacks)){
         callbacks = [callbacks]; //make sure it's an array. Can't use singleFunction b/c single element array would cause problems
@@ -69,7 +69,7 @@ function sequentialGets(urls, callbacks){
         if(singleFunction){
             callbacks[0](responses);
         } else {
-            for(var i = 0; i < responses.length && i < callbacks.length; i++){
+            for(let i = 0; i < responses.length && i < callbacks.length; i++){
                 callbacks[i](responses[i]);
             }
         }
@@ -85,7 +85,7 @@ function sequentialGets(urls, callbacks){
         };
     }
 
-    for(var i = 0; i < urls.length; i++){
+    for(let i = 0; i < urls.length; i++){
         responses.push("No response from URL " + urls[i]);
         get(urls[i], f(i));
     }
@@ -109,12 +109,12 @@ function importMasterSheet(url, callbacks, ignore = []){
      * (improve later)
      */
     
-    get(url, function(responseText){
-        var data = formatResponse(responseText);
+    get(url, responseText => {
+        let data = formatResponse(responseText);
         
-        var urls = [];
+        let urls = [];
         
-        for(var i = 1; i < data.length; i++){ 
+        for(let i = 1; i < data.length; i++){ 
             if(data[i][1] !== "" && ignore.indexOf(data[i][0]) === -1){
                 urls.push(data[i][1]);
             }

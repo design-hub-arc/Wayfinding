@@ -55,7 +55,7 @@ class Path{
 		// generates nodePath
 		"use strict";
 		this.nodePath = [];
-		for (var i = 0; i < this.idPath.length; i++) {
+		for (let i = 0; i < this.idPath.length; i++) {
 			this.nodePath[i] = this.dataSource.getNodeDB().getNode(this.idPath[i]);
 		}
 	}
@@ -79,16 +79,16 @@ class Path{
 		
 		
 		
-		var nodeDB = this.dataSource.getNodeDB();
-		var allNodes = nodeDB.getAll();
+		let nodeDB = this.dataSource.getNodeDB();
+		let allNodes = nodeDB.getAll();
 		
-		// start by declaring variables
-		var unvisited = []; // unchecked nodes. Store as Node.
-		var dists = {}; // distances from start. Store as id : number
-		var prev = {}; // previous node in best path. Store as id : id
+		// start by declaring letiables
+		let unvisited = []; // unchecked nodes. Store as Node.
+		let dists = {}; // distances from start. Store as id : number
+		let prev = {}; // previous node in best path. Store as id : id
 
 		// initialize values
-		for (var i = 0; i < allNodes.length; i++) {
+		for (let i = 0; i < allNodes.length; i++) {
 			unvisited[i] = allNodes[i];
 			dists[allNodes[i].id] = Infinity;
 			prev[allNodes[i].id] = undefined;
@@ -100,8 +100,8 @@ class Path{
 			Returns the index of the node with the shortest distance from start
 			that has yet to be visited
 			*/
-			var index = 0;
-			for (var i = 0; i < unvisited.length; i++) {
+			let index = 0;
+			for (let i = 0; i < unvisited.length; i++) {
 				if (dists[unvisited[i].id] < dists[unvisited[index].id]) {
 					index = i;
 				}
@@ -111,15 +111,15 @@ class Path{
 
 		// run while there are still nodes to visit
 		while (unvisited.length > 0) {
-			var index = smallestIndex();
+			let index = smallestIndex();
 
-			var nearest = unvisited[index];
+			let nearest = unvisited[index];
 			unvisited.splice(index, 1); // remove nearest from unvisited, as we are visiting it
 
 			// find which of its adjacent nodes are closest to start
-			for (var j = 0; j < nearest.adj.length; j++) {
+			for (let j = 0; j < nearest.adj.length; j++) {
 				if (unvisited.includes(nearest.adj[j])) {
-					var check = dists[nearest.id] + nearest.distanceFrom(nearest.adj[j]); // distance from start to i
+					let check = dists[nearest.id] + nearest.distanceFrom(nearest.adj[j]); // distance from start to i
 					//                                                V     is this right?
 					if (dists[nearest.adj[j].id] === Infinity || check < nearest.adj[j].distanceFrom(nodeDB.getNode(this.startId))) {
 						dists[nearest.adj[j].id] = check;
@@ -130,8 +130,8 @@ class Path{
 		}
 
 		// generate the path
-		var path = [];
-		var id = this.endId;
+		let path = [];
+		let id = this.endId;
 		while (prev[id] !== undefined) {
 			path.push(id);
 			id = prev[id];
@@ -167,8 +167,8 @@ class Path{
 	}
 	getURL() {
 		"use strict";
-		var origURL = window.location.href;
-		var split = origURL.split("?");
+		let origURL = window.location.href;
+		let split = origURL.split("?");
 		return split[0] + "?startID=" + this.idPath[0] + "&endID=" + this.idPath[this.idPath.length - 1];
 	}
 
@@ -177,10 +177,10 @@ class Path{
 		canvas.clear();
 		canvas.setColor("red");
 		
-		var p = this.nodePath;
+		let p = this.nodePath;
 		p[0].draw(canvas);
 
-		for (var i = 1; i < p.length; i++) {
+		for (let i = 1; i < p.length; i++) {
 			canvas.line(p[i-1].x, p[i-1].y, p[i].x, p[i].y);
 			p[i].draw(canvas);
 		}
@@ -188,14 +188,14 @@ class Path{
 	getImages() {
 		// returns an array of strings, each element is the url of a path image
 		"use strict";
-		var ret = [];
-		var ind = 0;
+		let ret = [];
+		let ind = 0;
 		while (ind + 1 < this.idPath.length) {
 			ind++; // skips 0 so we can compare two nodes
-			var n1 = this.nodePath[ind - 1];
-			var n2 = this.nodePath[ind];
+			let n1 = this.nodePath[ind - 1];
+			let n2 = this.nodePath[ind];
 			if (n1.getHasImage(n2.id)) {
-				var url = n1.getImageTo(n2.id);
+				let url = n1.getImageTo(n2.id);
 				if (ret.indexOf(url) === -1) {
 					ret.push(url);
 				}
@@ -245,9 +245,9 @@ class PathFinder{
 		@param data2 : the ending point
 		*/
 		"use strict";
-		var startIds = [14];
-		var endIds = [96]; //default to admin to hub
-		var valid = true;
+		let startIds = [14];
+		let endIds = [96]; //default to admin to hub
+		let valid = true;
 		
 		startIds = this.dataSource.getNodeDB().getIdsByString(data1);
 		endIds = this.dataSource.getNodeDB().getIdsByString(data2);
@@ -261,10 +261,10 @@ class PathFinder{
 			valid = false;
 		}
 		
-		var ret = new Path(startIds[0], endIds[0], this.dataSource);
-		for (var i = 0; i < startIds.length; i++) {
-			for (var j = 0; j < endIds.length; j++) {
-				var p = new Path(startIds[i], endIds[j], this.dataSource);
+		let ret = new Path(startIds[0], endIds[0], this.dataSource);
+		for (let i = 0; i < startIds.length; i++) {
+			for (let j = 0; j < endIds.length; j++) {
+				let p = new Path(startIds[i], endIds[j], this.dataSource);
 				if (p.pathLength < ret.pathLength) {
 					ret = p;
 				}
@@ -281,30 +281,30 @@ class PathFinder{
 		//developer tool. Detects any paths between any two nodes that cannot exist
 		"use strict";
 		
-		var source = this.dataSource;
+		let source = this.dataSource;
 		
-		var nodeDB = source.getNodeDB();
-		var allNodes = nodeDB.getAll();
-		var nodeCount = allNodes.length;
+		let nodeDB = source.getNodeDB();
+		let allNodes = nodeDB.getAll();
+		let nodeCount = allNodes.length;
 		
 		function checkPath(start, end){
-			var path = new Path(start.id, end.id, source);
+			let path = new Path(start.id, end.id, source);
 			if(path.idPath[path.idPath.length - 1] !== end.id){
 				console.log("An error occurred with path from " + start.id + " to " + end.id);
 				console.log("The path returned was:");
 				console.log(path.idPath);
 				console.log("IDs of the nodes adjacent to the ones used in this path are...");
-				for(var k = 0; k < path.idPath.length; k++){
+				for(let k = 0; k < path.idPath.length; k++){
 					console.log("*" + path.idPath[k] + ": " + path.nodePath[k].adjIds);
 				}
 			}
 		}
 		
 		alert("Please wait while I process some information...");
-		for(var i = 0; i < nodeCount; i++){
-			for(var j = 0; j < nodeCount; j++){
-				var start = allNodes[i];
-				var end = allNodes[j];
+		for(let i = 0; i < nodeCount; i++){
+			for(let j = 0; j < nodeCount; j++){
+				let start = allNodes[i];
+				let end = allNodes[j];
 				if(start.id >= 0 && end.id >= 0){
 					//don't check corner nodes
 					checkPath(start, end);

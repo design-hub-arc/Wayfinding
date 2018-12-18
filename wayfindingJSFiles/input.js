@@ -50,8 +50,8 @@ class TextBox{
 		@param options : an array of strings
 		*/
 		"use strict";
-		var b = this;
-		options.forEach(function(option){
+		let b = this;
+		options.forEach(option =>{
 			if(option){
 				b.options.push((option.toString().toUpperCase()));
 			}
@@ -92,23 +92,23 @@ function matchCount(find, inString){
 	*/
 	find = find.toUpperCase();
 	inString = inString.toUpperCase();
-	var best = 0;
-	var spaces = 0;
+	let best = 0;
+	let spaces = 0;
 	
-	var matchIdx; //the index in inString of the most recent letter match
-	var current;
-	var currentSpaces;
+	let matchIdx; //the index in inString of the most recent letter match
+	let current;
+	let currentSpaces;
 	
 	// matchCount("string", "stri") whould get a best of 4 on the first run,
 	// the next check would be for "tring" in "stri". (offset = 1)
 	// would not check with offset = 2, as it could not have more than 4 matches,
 	// so cannot be better than the current best of 4
-	for(var offset = 0; offset < find.length - best; offset++){
+	for(let offset = 0; offset < find.length - best; offset++){
 		current = 0; //number of matches in current substring
 		currentSpaces = 0;
 		matchIdx = 0;
 		
-		for(var ind = 0; ind < inString.length && offset + current < find.length; ind++){
+		for(let ind = 0; ind < inString.length && offset + current < find.length; ind++){
 			//find[offset + current] will check the second character of the find substring after finding one match
 			//guarantees that the letters are in order
 			if(find[offset + current] === inString[ind]){
@@ -133,14 +133,14 @@ function matchCount(find, inString){
 
 function closestMatchIndex(string, options){
 	"use strict";
-	var s = string.trim().toUpperCase();
-	var check = [];
-	var best = 0;
-	var leastSpaces = string.length;
-	var idxOfBest = 0;
+	let s = string.trim().toUpperCase();
+	let check = [];
+	let best = 0;
+	let leastSpaces = string.length;
+	let idxOfBest = 0;
 	
-	var count;
-	for(var i = 0; i < options.length; i++){
+	let count;
+	for(let i = 0; i < options.length; i++){
 		check.push(options[i].trim().toUpperCase());
 		count = matchCount(s, check[i]);
 		if(count.matches > best){
