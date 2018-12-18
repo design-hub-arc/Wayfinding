@@ -1,4 +1,9 @@
 /*
+ * Need to export NodeDB and ClassDB, then import them in index.html and classFinder.html
+ */
+
+
+/*
 This file is used to create the fake databases used by the program.
 THESE ARE NOT REAL DATABASES
 hopefully one day we'll have our own SQL server to store stuff on.
@@ -50,7 +55,7 @@ SQL to Database class:
 	x.logAll();
 	but it just outputs the data, it doesn't return the data
 */
-//@import extend from utilities.js
+//import Node from './arcNode';
 
 
 class Database{

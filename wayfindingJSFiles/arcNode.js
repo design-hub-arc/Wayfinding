@@ -1,3 +1,6 @@
+/*
+ * This needs to be exported, then imported by databases.js
+ */
 class Node{
     constructor(id, x, y) {
         /*
