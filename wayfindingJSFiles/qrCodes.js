@@ -1,4 +1,4 @@
-function getIDsFromURL() {
+export function getIDsFromURL() {
 	/*
 	extracts variables from url.
 	defined as ?startID=...&endID=...

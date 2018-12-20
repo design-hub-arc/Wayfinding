@@ -13,9 +13,7 @@ the result element will search through options for the closest match to what the
 then sets its text to that match.
 */
 
-//@import closestMatch from utilities.js
-
-class TextBox{
+export class TextBox{
     constructor(textBoxId, resultElementId){
         /*
         @param textBoxId : a string, the id of an <input> HTML element with type="text"

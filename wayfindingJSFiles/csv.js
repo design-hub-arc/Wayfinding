@@ -8,7 +8,7 @@ The CsvFile class is used to format imported data from spreadsheets to a format 
  as then it will always be in exactly the format we want.
  */
 
-function formatResponse(responseText){
+export function formatResponse(responseText){
 	"use strict";
 	let ret = [];
 	let splitOnLine = responseText.split(/\r?\n|\r/); //split on newline
@@ -18,7 +18,7 @@ function formatResponse(responseText){
 	return ret;
 }
 
-class CsvFile{
+export class CsvFile{
     constructor(text){
         /*
         @param text : a String, the response text from an HTTP request

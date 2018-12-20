@@ -5,12 +5,6 @@
 		<title>Class finder</title>
 		
 		<link rel="stylesheet" href="stylesheet.css">
-		<script src="wayfindingJSFiles/csv.js"></script>
-		<script src="wayfindingJSFiles/databases.js"></script>
-		<script src="wayfindingJSFiles/input.js"></script>
-		<script src="wayfindingJSFiles/urls.js"></script>
-		<script src="wayfindingJSFiles/importData.js"></script>
-		<script src="wayfindingJSFiles/main.js"></script>
 	</head>
 
 	<body>
@@ -42,8 +36,14 @@
 			</tr>
 		</table>
 		
-		<script>
-			
+		<script type="module">
+			import {Main} from "./wayfindingJSFiles/main.js";
+            import {TextBox} from "./wayfindingJSFiles/input.js";
+            import {get} from "./wayfindingJSFiles/importData.js";
+            import {formatResponse, CsvFile} from "./wayfindingJSFiles/csv.js";
+            import {ClassDB} from "./wayfindingJSFiles/databases.js";
+            import {classesURL} from "./wayfindingJSFiles/urls.js";
+            
 			var db = new ClassDB();
 			var master = new Main();
 			master.setClassDB(db);

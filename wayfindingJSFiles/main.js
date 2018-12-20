@@ -3,7 +3,7 @@ The Main class is used to store data, preventing the need for global letiables.
 It also takes a lot of code out of the main HTML file.
 */
 
-class Main{
+export class Main{
     constructor(){
         "use strict";
         this.canvas = undefined;

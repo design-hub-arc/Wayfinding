@@ -55,10 +55,10 @@ SQL to Database class:
 	x.logAll();
 	but it just outputs the data, it doesn't return the data
 */
-//import Node from './arcNode';
+import {Node} from './arcNode';
 
 
-class Database{
+export class Database{
     constructor(headers){
         /*
         @param headers : an array of strings, the column names
@@ -208,7 +208,7 @@ NodeDB is used by the Main class to store the data used by the program.
 It is initialized, filled with data, and applied to an instance of Main in
 the HTML file.
 */
-class NodeDB extends Database{
+export class NodeDB extends Database{
 	constructor(){
         "use strict";
         super(["NODE ID", "NODE OBJECT"]);
@@ -473,7 +473,7 @@ class NodeDB extends Database{
 ClassDB is used by the Main class to store the data used by the class locator.
 Once again, the HTML file does the populating
 */
-class ClassDB extends Database{
+export class ClassDB extends Database{
     constructor(){
         "use strict";
         //number is the five digit class number

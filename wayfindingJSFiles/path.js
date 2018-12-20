@@ -22,7 +22,7 @@ NO A-STAR: it is overkill in this case, and would make little difference.
 */
 
 //use this in conjunction with Node
-class Path{
+export class Path{
     constructor(startId, endId, dataSource) {
         /*
         start and endId are node IDs
@@ -225,7 +225,7 @@ make sure it has a data source!
 
 might still use
 */
-class PathFinder{
+export class PathFinder{
 	constructor(){
         "use strict";
         //dataSource is a Main object containing data used when constructing a path

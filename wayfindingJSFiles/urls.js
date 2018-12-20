@@ -8,7 +8,7 @@ IMPORTANT!!! : do NOT change ANYTHING to the left of the equal signs on each lin
 Before changing this file, it might be a good idea to save a copy in case something goes wrong...
 */
 
-const mapURL = "https://drive.google.com/uc?id=1Lt58PPBmimpY8hIlCJgg4qvF8CLt_mis";
+export const mapURL = "https://drive.google.com/uc?id=1Lt58PPBmimpY8hIlCJgg4qvF8CLt_mis";
 // this links to an image that is used as the campus map
 
 /*
@@ -23,8 +23,8 @@ HOW TO CHANGE THE mapURL FILE:
 */
 
 
-const classesURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREUvLP1uMDKADze2uCHx6jN4voxvO41g-gZ5pEDK_vJ0M9LA7UmfRgqJeX_NRDZsMMC_lOs2A0OKtm/pub?gid=57491238&single=true&output=csv";
+export const classesURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREUvLP1uMDKADze2uCHx6jN4voxvO41g-gZ5pEDK_vJ0M9LA7UmfRgqJeX_NRDZsMMC_lOs2A0OKtm/pub?gid=57491238&single=true&output=csv";
 //the huge class data extract
 
-const masterSheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR-FO3lDmriTqDlwZkp9A3bxVMhJUiQ2l6OiCJboyuPyhOafAxyh0DYDjF0sz28xfotVj8xbJ2zSzrc/pub?gid=0&single=true&output=csv";
+export const masterSheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR-FO3lDmriTqDlwZkp9A3bxVMhJUiQ2l6OiCJboyuPyhOafAxyh0DYDjF0sz28xfotVj8xbJ2zSzrc/pub?gid=0&single=true&output=csv";
 //the master spreadsheet containing links to all the data used by the program

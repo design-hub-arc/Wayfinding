@@ -6,21 +6,7 @@
 		<base target="_top">
 		
 		<link rel="stylesheet" href="stylesheet.css">
-		
-		<script src="wayfindingJSFiles/importData.js"></script>
-		<script src="wayfindingJSFiles/urls.js"></script>
-        <script src="wayfindingJSFiles/csv.js"></script>
-		
-		<script src="wayfindingJSFiles/arcNode.js"></script>
-		<script src="wayfindingJSFiles/path.js"></script>
-		<script src="wayfindingJSFiles/scaledCanvas.js"></script>
-		<script src="wayfindingJSFiles/databases.js"></script>
-		
-		<script src="wayfindingJSFiles/main.js"></script>
-		
-		<script src="wayfindingJSFiles/input.js"></script>
-		<script src="wayfindingJSFiles/qrCodes.js"></script>
-		
+        
 		<script src="wayfindingJSFiles/svg.js"></script>
 		<script src="wayfindingJSFiles/svg.panzoom.js"></script>
 	</head>
@@ -28,10 +14,13 @@
 		<div id="imageTitle" onclick="nextImage()"> Next step </div>
 		<img id="image" alt="the next image in your path will appear here!"/>
 		<div id="wrapper"></div>
+        
+        <!--
 		<div id="drawAll" onClick="master.getNodeDB().drawAll(master.getCanvas())">Draw All Nodes</div>
 		<div id="testAll" onClick="master.testAllPaths()">Test All Paths</div>
 		<div id="nodeDivs" onClick="master.getNodeDB().generateDivs(master)">Generate Node Connections</div>
-		
+		-->
+        
 		<table style="background-color: #D34C0F">
 			<tr>
 				<td>Set Path</td>
@@ -57,10 +46,17 @@
         
 		<a href="classFinder.html" target="_blank">Find a class</a>
 		
-        <script>
+        <script type="module">
 			"use strict";
-            
-            //import {get, sequentialGets, importMasterSheet} from "wayfindingJSFiles/importData.js";
+            import {getIDsFromURL} from "./wayfindingJSFiles/qrCodes.js";
+            import {Canvas} from "./wayfindingJSFiles/scaledCanvas.js";
+            import {Path, PathFinder} from "./wayfindingJSFiles/path.js";
+            import {Main} from "./wayfindingJSFiles/main.js";
+            import {TextBox} from "./wayfindingJSFiles/input.js";
+            import {get, sequentialGets, importMasterSheet} from "./wayfindingJSFiles/importData.js";
+            import {formatResponse, CsvFile} from "./wayfindingJSFiles/csv.js";
+            import {mapURL, masterSheetURL} from "./wayfindingJSFiles/urls.js";
+            import {NodeDB} from "./wayfindingJSFiles/databases.js";
             
 			var master = new Main();
 			

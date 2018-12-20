@@ -7,7 +7,7 @@ to x y coordinates on the SVG canvas.
 Also provides canvas functions
 */
 
-class Canvas{
+export class Canvas{
 	constructor(){
         this.draw = undefined;           // the svg image this corresponds to
         this.scalingElement = undefined; // the svg element this gets its size from

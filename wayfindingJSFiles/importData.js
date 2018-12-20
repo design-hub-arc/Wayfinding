@@ -3,10 +3,12 @@ Provides functions which are used to perform XMLHTTPRequests.
 These are invoked in main.html.
 */
 
-const newline = /\r?\n|\r/;
+import {formatResponse} from "./csv.js";
+
+export const newline = /\r?\n|\r/;
 
 //used for debugging
-const logger = {
+export const logger = {
 	contents : [],
 	add(msg){
 		"use strict";
@@ -21,7 +23,7 @@ const logger = {
 };
 
 // basic http request functions
-function get(url, callback){
+export function get(url, callback){
 	// callback is a function with a single parameter,
     // passes in the url's response text as that parameter
 	"use strict";
@@ -43,9 +45,7 @@ function get(url, callback){
         req.send(null);
 }
 
-
-//works
-function sequentialGets(urls, callbacks){
+export function sequentialGets(urls, callbacks){
     /*
     @param urls : an array of strings, the urls to get
     @param callbacks : either...
@@ -94,7 +94,7 @@ function sequentialGets(urls, callbacks){
 
 
 // improve this
-function importMasterSheet(url, callbacks, ignore = []){
+export function importMasterSheet(url, callbacks, ignore = []){
     /*
      * @param url : a string, the 
      * url of the master url file

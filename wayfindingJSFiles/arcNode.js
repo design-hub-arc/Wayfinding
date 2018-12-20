@@ -1,7 +1,4 @@
-/*
- * This needs to be exported, then imported by databases.js
- */
-class Node{
+export class Node{
     constructor(id, x, y) {
         /*
         x and y are coordinates on the map image
