@@ -35,14 +35,14 @@ export function get(url, callback){
 			callback(req.responseText);
 		}
 	};
-        req.onerror = function(e){
-            console.log(e);
-            callback("");
-        };
-        
-        req.open("GET", url, true); // true means asynchronous
-        req.setRequestHeader("Cache-Control", "max-age=0"); // prevent outdated data
-        req.send(null);
+    req.onerror = function(e){
+        console.log(e);
+        callback("");
+    };
+
+    req.open("GET", url, true); // true means asynchronous
+    req.setRequestHeader("Cache-Control", "max-age=0"); // prevent outdated data
+    req.send(null);
 }
 
 export function sequentialGets(urls, callbacks){
