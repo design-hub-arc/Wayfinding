@@ -1,9 +1,9 @@
 /*
 Provides functions which are used to perform XMLHTTPRequests.
-These are invoked in main.html.
+These are invoked in the html files.
 */
 
-import {formatResponse} from "./csv.js";
+import {formatResponse} from "../dataFormatting/csv.js";
 
 export const newline = /\r?\n|\r/;
 

@@ -1,12 +1,12 @@
-import {getIDsFromURL} from "./qrCodes.js";
-import {Canvas} from "./scaledCanvas.js";
-import {Path, PathFinder} from "./path.js";
-import {Main} from "./main.js";
-import {TextBox} from "./input.js";
-import {get, sequentialGets, importMasterSheet} from "./importData.js";
-import {formatResponse, CsvFile} from "./csv.js";
-import {mapURL, masterSheetURL} from "./urls.js";
-import {NodeDB} from "./databases.js";
+import {getIDsFromURL} from                          "../htmlInterface/qrCodes.js";
+import {Canvas} from                                 "../htmlInterface/scaledCanvas.js";
+import {Path, PathFinder} from                       "../nodes/path.js";
+import {Main} from                                   "../main.js";
+import {TextBox} from                                "../htmlInterface/input.js";
+import {get, sequentialGets, importMasterSheet} from "../getRequests/importData.js";
+import {formatResponse, CsvFile} from                "../dataFormatting/csv.js";
+import {mapURL, masterSheetURL} from                 "../getRequests/urls.js";
+import {NodeDB} from                                 "../dataFormatting/databases.js";
 
 var master = new Main();
 
