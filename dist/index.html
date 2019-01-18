@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title> Wayfinding </title>
+		<base target="_top">
+		
+		<link rel="stylesheet" href="stylesheet.css">
+        
+		<script src="./js/svg.js"></script>
+		<script src="./js/svg.panzoom.js"></script>
+	</head>
+    <body>
+		<div id="imageTitle" onclick="nextImage()"> Next step </div>
+		<img id="image" alt="the next image in your path will appear here!"/>
+		<div id="wrapper"></div>
+        
+        <!--
+		<div id="drawAll" onClick="master.getNodeDB().drawAll(master.getCanvas())">Draw All Nodes</div>
+		<div id="testAll" onClick="master.testAllPaths()">Test All Paths</div>
+		<div id="nodeDivs" onClick="master.getNodeDB().generateDivs(master)">Generate Node Connections</div>
+		-->
+        
+        
+        
+        
+        
+		<table style="background-color: #D34C0F">
+			<tr>
+				<td>Set Path</td>
+				<td>Start</td>
+				<td>End</td>
+			</tr>
+			<tr>
+				<td>Input</td>
+				<td><input type="text" id="start box" style="width : 100%; height: 50%"/></td>
+				<td><input type="text" id="end box" style="width : 100%; height: 50%"/></td>
+			</tr>
+			<tr>
+				<td>Closest Match</td>
+				<td><div id="start hint" style="width : 100%; height: 50%"></div></td>
+				<td><div id="end hint" style="width : 100%; height: 50%"></div></td>
+			</tr>
+			<tr>
+				<td colspan="3">
+					<button id="button" style="width: 100%">Draw path</button>
+				</td>
+			</tr>
+		</table>
+        
+		<a href="classFinder.html" target="_blank">Find a class</a>
+		
+        <script src="./js/bundle.js" type="module"></script>
+    </body>
+</html>
