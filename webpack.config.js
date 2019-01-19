@@ -1,10 +1,13 @@
 const path = require("path");
 
 module.exports = {
-  entry: "./wayfindingJSFiles/webpages/index.js",
+  entry: {
+    index: "./wayfindingJSFiles/webpages/index.js",
+    classFinder: "./wayfindingJSFiles/webpages/classFinder.js"
+  },
   output: {
     path: path.resolve(__dirname, "dist/js"),
-    filename: "bundle.js"
+    filename: "[name].js"
   },
   module: {
     rules: [{
