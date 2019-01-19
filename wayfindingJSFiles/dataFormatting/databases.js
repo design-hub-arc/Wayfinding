@@ -50,7 +50,7 @@ SQL to Database class:
 	x.logAll();
 	but it just outputs the data, it doesn't return the data
 */
-import {Node} from '../nodes/arcNode';
+import {Node} from '../nodes/arcNode.js';
 
 
 export class Database{
