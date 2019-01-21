@@ -1,33 +1,21 @@
 {
-  
   "name": "wayfinding",
-
   "version": "1.0.0",
-
   "description": "",
-
   "main": "index.js",
-
-  "dependencies": {},
-  
-  "devDependencies": {
-    
-    "babel-core": "^6.26.3",
-
-    "babel-loader": "^8.0.5",
-
-    "babel-preset-env": "^1.7.0",
-
-    "webpack": "^4.28.4",
-
-    "webpack-dev-server": "^3.1.14"
-  
+  "dependencies": {
+    "@babel/core": "^7.2.2"
   },
-  
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-loader": "^8.0.5",
+    "babel-preset-env": "^1.7.0",
+    "webpack": "^4.28.4",
+    "webpack-cli": "^3.2.1",
+    "webpack-dev-server": "^3.1.14"
+  },
   "scripts": {
-
-    "test": "echo \"Error: no test specified\" && exit 1"
-,
+    "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack",
     "start": "webpack-dev-server --output-public-path=/build/"
   },
