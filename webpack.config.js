@@ -2,8 +2,8 @@ const path = require("path");
 
 module.exports = {
   entry: {
-    index: "./wayfindingJSFiles/webpages/index.js",
-    classFinder: "./wayfindingJSFiles/webpages/classFinder.js"
+    index: "./src/webpages/index.js",
+    classFinder: "./src/webpages/classFinder.js"
   },
   output: {
     path: path.resolve(__dirname, "dist/js"),

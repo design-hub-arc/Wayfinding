@@ -32,23 +32,13 @@ svgMap.loaded(
         master.setCanvas(masterCanvas);
         master.setPathFinder(new PathFinder());
         
-        function asyncTest(){
-            return new Promise(resolve => {
-                get(masterSheetURL, console.log);
-            });
-        }
-        
-        async function w(){
-            await asyncTest();
-        }
-        
-        importMasterSheet(masterSheetURL, function(responses){
-            w();
+        importMasterSheet(masterSheetURL, (responses) => {
             nodes.parseNodeData(formatResponse(responses[0]));
             nodes.parseConnData(formatResponse(responses[1]));
             masterCanvas.setCorners(nodes.getNode(-1).x, nodes.getNode(-1).y, nodes.getNode(-2).x, nodes.getNode(-2).y);
 
-            nodes.parseBuildingResponse(new CsvFile(responses[2]));
+			nodes.parseNameToId(responses[2]);
+			
             nodes.parseRoomResponse(new CsvFile(responses[3]));
             nodes.parseImageResponse(new CsvFile(responses[4]));
             nodes.parseClassResponse(new CsvFile(responses[5]));
@@ -60,6 +50,8 @@ svgMap.loaded(
             master.setPath(new Path(ids[0], ids[1], master));
             master.getPath().draw(master.getCanvas());
             console.timeEnd("Time to load");
+			
+			//nodes.prettyPrintStuffToId();
         },
             ["map image", "classes"]
         );

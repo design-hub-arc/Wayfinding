@@ -207,10 +207,19 @@ export class NodeDB extends Database{
 	constructor(){
         "use strict";
         super(["NODE ID", "NODE OBJECT"]);
-        
-        this.buildingDB = new Database(["BUILDING NAME", "NODE ID"]);
-        this.roomDB = new Database(["ROOM NAME", "NODE ID"]);
-        this.classDB = new Database(["CLASS", "NODE ID"]);
+		/*
+		Since we go by the pattern of "something" has a node ID associated with it,
+		and we don't need to differentiate between rooms/buildings/etc,
+		I can store them all in one place.
+		
+		Not sure which is most efficient:
+		-Map
+		-Object
+		-Array
+		*/
+        this.stuffToNodeId = new Map();
+		// keys are a string, the name of the point (building/room/class name)
+		// value is associated node ID
     }
     
 	parseNodeData(data){
@@ -234,6 +243,55 @@ export class NodeDB extends Database{
 			}
 		}
 	}
+	
+	parseNameToId(data){
+		/*
+		data is the result of an HTTP request to a csv file, formatted as:
+		    header1, header2
+			name, node id
+			name, node id
+			...
+		
+		This can be given as either a two-dimensional array,
+		or a string, which it will convert into a two-d array.
+		
+		Inserts the name and id rows into this' stuffToNodeId Map
+		*/
+		let db = this;
+		let name;
+		let id;
+		
+		//is it an array?
+		if(!Array.isArray(data)){
+			data = data.split(/\r?\n|\r/);
+		}
+		
+		//what about 2D?
+		if(data.some(element => !Array.isArray(element))){
+			data = data.map(row => row.split(","));
+		}
+		
+		//allright, now it's in the right format
+		
+		data.forEach(row => {
+			try{
+				name = row[0].toString().toUpperCase();
+				id = parseInt(row[1]);
+				
+				if(isNaN(id)){
+					// the first row will fail, because of the header, so don't throw an error
+					console.log("Oops! Node ID of " + row[1]);
+				} else {
+					db.stuffToNodeId.set(name, id);
+				}
+				
+			} catch(err){
+				console.log("Invalid row: " + row);
+				console.log(err.message);
+			}
+		});
+	}
+	
 	parseConnData(data){
 		/*
 		@param data : the result of an HTTP request to the node data spreadsheet, converted to a 2D array for convenience
@@ -286,6 +344,7 @@ export class NodeDB extends Database{
         sets the associated building for each node
         */
         
+		
         "use strict";
 		let data = csvFile.getNonHeaders();
 		let nameCol = csvFile.indexOfCol(["Name", "building", "building name", "buildingname"]);
@@ -294,7 +353,7 @@ export class NodeDB extends Database{
 		
 		for(let i = 0; i < data.length; i++){
 			row = data[i];
-			this.buildingDB.insert([row[nameCol], parseInt(row[idCol])]);
+			this.stuffToNodeId.set(row[nameCol].toUpperCase(), parseInt(row[idCol]));
 		}
 	}
 	
@@ -314,7 +373,7 @@ export class NodeDB extends Database{
 		let row;
 		for(let i = 1; i < data.length; i++){
 			row = data[i];
-			this.roomDB.insert([row[roomCol], parseInt(row[nodeCol])]);
+			this.stuffToNodeId.set(row[roomCol].toUpperCase(), parseInt(row[nodeCol]));
 		}
 	}
 	
@@ -333,16 +392,18 @@ export class NodeDB extends Database{
 		let nodeIds;
 		for(let i = 1; i < data.length; i++){
 			row = data[i];
-			nodeIds = this.roomDB.select(this.roomDB.NODE_ID, this.roomDB.ROOM_NAME, (row[buildingCol] + " " + row[roomCol]).toUpperCase());
+			nodeIds = this.getIdsByString((row[buildingCol] + " " + row[roomCol]).toUpperCase());
+			
 			if(nodeIds.length === 0){
 				console.log("Could not find a node connected to room " + row[buildingCol] + " " + row[roomCol]);
 			} else{
 				if(!isNaN(parseInt(nodeIds[0]))){
-					this.classDB.insert([row[classCol], parseInt(nodeIds[0])]);
+					this.stuffToNodeId.set(row[classCol].toString().toUpperCase(), parseInt(nodeIds[0]));
 				}
 			}
 		}
 	}
+	
 	
 	addRecord(node){
 		/*
@@ -373,20 +434,14 @@ export class NodeDB extends Database{
 		return this.getColumn(this.NODE_ID);
 	}
 	
-	getAllBuildingNames(){
-		"use strict";
-		return this.buildingDB.getColumn(this.buildingDB.BUILDING_NAME);
+	getAllNames(){
+		/*
+		Returns an array of strings,
+		the names of all named nodes
+		(buildings, rooms, etc)
+		*/
+		return Array.from(this.stuffToNodeId.keys())
 	}
-	
-	getAllRooms(){
-		"use strict";
-		return this.roomDB.getColumn(this.roomDB.ROOM_NAME);
-	}
-	
-	getAllClasses(){
-		"use strict";
-		return this.classDB.getColumn(this.classDB.CLASS);
-    }
 	
 	getAll(){
 		"use strict";
@@ -398,21 +453,39 @@ export class NodeDB extends Database{
 		@param string : a string, what to search for in buildings, rooms, and class numbers
 		*/
 		"use strict";
-		let ret = [];
-		
 		string = string.toString().toUpperCase();
 		
-		ret = ret.concat(this.buildingDB.select(this.buildingDB.NODE_ID, this.buildingDB.BUILDING_NAME, string));
+		let ret = [];
 		
-		if(ret.length === 0){
-			//not found
-			ret = ret.concat(this.roomDB.select(this.roomDB.NODE_ID, this.roomDB.ROOM_NAME, string));
-		}
-		if(ret.length === 0){
-			//still not found
-			ret = ret.concat(this.classDB.select(this.classDB.NODE_ID, this.classDB.CLASS, string));
-		}
+		this.stuffToNodeId.forEach((id, name) => {
+			//apparently, Map.forEach passes in value, key; not key, value
+			if(name.toUpperCase() == string){
+				ret.push(id);
+			}
+		});
+		
 		return ret;
+	}
+	
+	prettyPrintStuffToId(){
+		let longestName = 0
+		this.getAllNames().forEach(name => {
+			if(name.length > longestName){
+				longestName = name.length;
+			}
+		});
+		let spaceCount = 0;
+		let padding = " ";
+		let i;
+		
+		this.stuffToNodeId.forEach((id, name) => {
+			spaceCount = longestName - name.length;
+			padding = " ";
+			for(i = 0; i < spaceCount; i++){
+				padding += " ";
+			}
+			console.log(name + padding + id);
+		});
 	}
 	
 	logOneWayNodes(){

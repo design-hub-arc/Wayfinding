@@ -37,15 +37,9 @@ export class Main{
 		"use strict";
 		this.start = start;
 		this.end = end;
-		let db = this.getNodeDB();
 		
-		start.addOptions(db.getAllBuildingNames());
-		start.addOptions(db.getAllRooms());
-		start.addOptions(db.getAllClasses());
-		
-		end.addOptions(db.getAllBuildingNames());
-		end.addOptions(db.getAllRooms());
-		end.addOptions(db.getAllClasses());
+		start.addOptions(this.getNodeDB().getAllNames());
+		end.addOptions(this.getNodeDB().getAllNames());
 	}
 	
 	setClassFinder(nameTextBox, instructorTextBox, timesTextBox, buttonId, resultsId, clearId){
@@ -245,8 +239,7 @@ export class Main{
 		let nodeDB = source.getNodeDB();
 		
 		let points = [];
-		points = points.concat(nodeDB.getAllBuildingNames());
-		points = points.concat(nodeDB.getAllRooms());
+		points = points.concat(nodeDB.getAllNames());
 		points = points.concat(nodeDB.getAllClasses());
 		
 		function checkPath(startStr, endStr){
