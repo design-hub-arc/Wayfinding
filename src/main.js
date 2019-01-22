@@ -212,10 +212,11 @@ export class Main{
 	updatePath(data1, data2){
 		"use strict";
 		try{
-			let start = this.getNodeDB().getIdsByString(data1);
-			let end = this.getNodeDB().getIdsByString(data2);
+			let start = this.getNodeDB().getIdByString(data1);
+			let end = this.getNodeDB().getIdByString(data2);
 			
-			if(start.length >= 1 && end.length >= 1){ //otherwise some class numbers cause problems
+			//single equal will catch both null and undefined
+			if(start != null && end != null){ //otherwise some class numbers cause problems
 				//let newPath = new Path(start[0], end[0], this);
 				let newPath = this.pathFinder.find(data1, data2);
 				if(newPath.valid){
@@ -224,7 +225,7 @@ export class Main{
 					throw new Error("Invalid path: " + newPath.idPath);
 				}
 			} else {
-				throw new Error("Invalid number of nodes: " + start.length + " " + end.length);
+				throw new Error("Invalid start and end points: " + data1 + " " + data2);
 			}
 		} catch(e){
 			console.log(e.stack);
@@ -240,17 +241,15 @@ export class Main{
 		
 		let points = [];
 		points = points.concat(nodeDB.getAllNames());
-		points = points.concat(nodeDB.getAllClasses());
 		
 		function checkPath(startStr, endStr){
 			try{
-				let id1 = nodeDB.getIdsByString(startStr);
-				let id2 = nodeDB.getIdsByString(endStr);
+				let id1 = nodeDB.getIdByString(startStr);
+				let id2 = nodeDB.getIdByString(endStr);
 				
-				if(id1.length !== 1 || id2.length !== 1){
-					throw new Error("Invalid node count: " + startStr + ": " + id1.length + " " + endStr + ": " + id2.length);
-				} else {
-					let path = new Path(id1[0], id2[0], source);
+				//getIdByString will log any errors
+				if(id1 != null && id2 != null){
+					let path = new Path(id1, id2, source);
 					if(!path.valid){
 						throw new Error("Invalid Path: " + path.idPath);
 					}

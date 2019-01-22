@@ -245,31 +245,23 @@ export class PathFinder{
 		@param data2 : the ending point
 		*/
 		"use strict";
-		let startIds = [14];
-		let endIds = [96]; //default to admin to hub
+		let startId = 14;
+		let endId = 96; //default to admin to hub
 		let valid = true;
 		
-		startIds = this.dataSource.getNodeDB().getIdsByString(data1);
-		endIds = this.dataSource.getNodeDB().getIdsByString(data2);
+		startId = this.dataSource.getNodeDB().getIdByString(data1);
+		endId = this.dataSource.getNodeDB().getIdByString(data2);
 		
-		if(startIds.length === 0){
-			startIds = [-1];
+		if(startId === null){
+			startId = -1;
 			valid = false;
 		}
-		if(endIds.length === 0){
-			endIds = [-2];
+		if(endId === null){
+			endId = -2;
 			valid = false;
 		}
 		
-		let ret = new Path(startIds[0], endIds[0], this.dataSource);
-		for (let i = 0; i < startIds.length; i++) {
-			for (let j = 0; j < endIds.length; j++) {
-				let p = new Path(startIds[i], endIds[j], this.dataSource);
-				if (p.pathLength < ret.pathLength) {
-					ret = p;
-				}
-			}
-		}
+		let ret = new Path(startId, endId, this.dataSource);
 		
 		if(!valid){
 			ret.invalidate();

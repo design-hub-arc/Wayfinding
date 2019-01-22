@@ -1,6 +1,7 @@
 const path = require("path");
 
 module.exports = {
+  mode: "development",
   entry: {
     index: "./src/webpages/index.js",
     classFinder: "./src/webpages/classFinder.js"

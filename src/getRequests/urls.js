@@ -26,5 +26,7 @@ HOW TO CHANGE THE mapURL FILE:
 export const classesURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREUvLP1uMDKADze2uCHx6jN4voxvO41g-gZ5pEDK_vJ0M9LA7UmfRgqJeX_NRDZsMMC_lOs2A0OKtm/pub?gid=57491238&single=true&output=csv";
 //the huge class data extract
 
-export const masterSheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR-FO3lDmriTqDlwZkp9A3bxVMhJUiQ2l6OiCJboyuPyhOafAxyh0DYDjF0sz28xfotVj8xbJ2zSzrc/pub?gid=0&single=true&output=csv";
+//export const masterSheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR-FO3lDmriTqDlwZkp9A3bxVMhJUiQ2l6OiCJboyuPyhOafAxyh0DYDjF0sz28xfotVj8xbJ2zSzrc/pub?gid=0&single=true&output=csv";
+
+export const masterSheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSuRqzSZ2LyamtAz7Gs88JkOiBmyIx8ND6kqRhxbunGVPBw4Wqrc1yYgfjFeC6m_Dx0sbXTE4Q5k3uQ/pub?gid=0&single=true&output=csv";
 //the master spreadsheet containing links to all the data used by the program

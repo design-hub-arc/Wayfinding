@@ -6,7 +6,7 @@ import {TextBox} from                                "../htmlInterface/input.js"
 import {get, sequentialGets, importMasterSheet} from "../getRequests/importData.js";
 import {formatResponse, CsvFile} from                "../dataFormatting/csv.js";
 import {mapURL, masterSheetURL} from                 "../getRequests/urls.js";
-import {NodeDB} from                                 "../dataFormatting/databases.js";
+import {NodeDB} from                                 "../dataFormatting/nodeDB.js";
 
 var master = new Main();
 
@@ -38,8 +38,9 @@ svgMap.loaded(
             masterCanvas.setCorners(nodes.getNode(-1).x, nodes.getNode(-1).y, nodes.getNode(-2).x, nodes.getNode(-2).y);
 
 			nodes.parseNameToId(responses[2]);
+			nodes.parseNameToId(responses[3]);
 			
-            nodes.parseRoomResponse(new CsvFile(responses[3]));
+			
             nodes.parseImageResponse(new CsvFile(responses[4]));
             nodes.parseClassResponse(new CsvFile(responses[5]));
 
