@@ -30,7 +30,6 @@ svgMap.loaded(
                    );
         masterCanvas.resize();
         master.setCanvas(masterCanvas);
-        master.setPathFinder(new PathFinder());
         
         importMasterSheet(masterSheetURL, (responses) => {
             nodes.parseNodeData(formatResponse(responses[0]));

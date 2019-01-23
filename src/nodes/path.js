@@ -1,15 +1,6 @@
 /*
-This file contains two class: Path and PathFinder.
 Path is used to store a collection of Nodes that connect together
-to form a path between two Nodes, while PathFinder stores data and constructs Paths based on that data. 
-
-HOW IT WORKS:
-1. a PathFinder is created, then given a data source: a Main object containing the node, building, and room databases used to find paths.
-2. after invoking 'pathFinder.find(buildingName, roomName), the pathFinder begins filtering data by...
-3. ...creating a list of each ID in its data source that links to a building with a name equal to the first parameter
-4. ...creating a list of each ID in its data source that links to a room with a nome equal to the second parameter
-5. afterwards, it constructs Paths using every possible combination of Nodes given by the building and room node IDs from steps 3 and 4 as start and end points respectively.
-6. once all possible paths are found, it returns the shortest one.
+to form a path between two Nodes. 
 
 HOW A PATH IS FOUND:
 1. Every Node has a list of Nodes that connect to it, called adjacent nodes.
@@ -17,8 +8,6 @@ HOW A PATH IS FOUND:
 3. Similarly, if node B also connects to node C, then there exists a path A-B-C
 4. Now, repeat this process until there exists a path between the start and end points given.
 read this for a better explaination: https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
-
-NO A-STAR: it is overkill in this case, and would make little difference.
 */
 
 //use this in conjunction with Node
@@ -26,7 +15,7 @@ export class Path{
     constructor(startId, endId, dataSource) {
         /*
         start and endId are node IDs
-        dataSource is a main object
+        dataSource is a Main object
         
         idPath is an array of numbers, the ids of the nodes the path goes through
         nodePath is the corresponding nodes
@@ -35,7 +24,6 @@ export class Path{
         images is an array of strings, the URLs of the path's images
         imageInd is the index of the image currently displayed in main (in development)
         */
-        "use strict";
         this.startId = parseInt(startId);
         this.endId = parseInt(endId);
         this.dataSource = dataSource;
@@ -53,7 +41,6 @@ export class Path{
     }
 	decodeIds() {
 		// generates nodePath
-		"use strict";
 		this.nodePath = [];
 		for (let i = 0; i < this.idPath.length; i++) {
 			this.nodePath[i] = this.dataSource.getNodeDB().getNode(this.idPath[i]);
@@ -68,8 +55,6 @@ export class Path{
 		Thanks Kevin
 		sets this.idPath to shortest path when complete
 		*/
-		"use strict";
-		
 		
 		if(this.startId === this.endId){
 			this.idPath = [this.startId];
@@ -152,7 +137,6 @@ export class Path{
 		}
 	}
 	invalidate(){
-		"use strict";
 		if(this.valid){
 			//prevent doubling up on this message
 			this.valid = false;
@@ -166,14 +150,12 @@ export class Path{
 		}
 	}
 	getURL() {
-		"use strict";
 		let origURL = window.location.href;
 		let split = origURL.split("?");
 		return split[0] + "?startID=" + this.idPath[0] + "&endID=" + this.idPath[this.idPath.length - 1];
 	}
 
 	draw(canvas) {
-		"use strict";
 		canvas.clear();
 		canvas.setColor("red");
 		
@@ -187,7 +169,6 @@ export class Path{
 	}
 	getImages() {
 		// returns an array of strings, each element is the url of a path image
-		"use strict";
 		let ret = [];
 		let ind = 0;
 		while (ind + 1 < this.idPath.length) {
@@ -205,7 +186,6 @@ export class Path{
 	}
 	nextImage() {
 		// grabs the next image from this.images
-		"use strict";
 		// make sure not to go out of range
 		if (this.imgInd + 1 < this.images.length) {
 			this.imgInd++;
@@ -214,95 +194,5 @@ export class Path{
 		}
 
 		return (this.images.length !== 0) ? this.images[this.imgInd] : " "; // if this path has no images, return a blank string
-	}
-};
-
-
-
-/*
-A PathFinder is used to store data, which is used to generate a path.
-make sure it has a data source!
-
-might still use
-*/
-export class PathFinder{
-	constructor(){
-        "use strict";
-        //dataSource is a Main object containing data used when constructing a path
-        this.dataSource = undefined;
-    }
-	setDataSource(main){
-		"use strict";
-		this.dataSource = main;
-	}
-	find(data1, data2){
-		/*
-		Finds which combination building entrances 
-		create the most effective path between two
-		points.
-		
-		@param data1 : the starting point
-		@param data2 : the ending point
-		*/
-		"use strict";
-		let startId = 14;
-		let endId = 96; //default to admin to hub
-		let valid = true;
-		
-		startId = this.dataSource.getNodeDB().getIdByString(data1);
-		endId = this.dataSource.getNodeDB().getIdByString(data2);
-		
-		if(startId === null){
-			startId = -1;
-			valid = false;
-		}
-		if(endId === null){
-			endId = -2;
-			valid = false;
-		}
-		
-		let ret = new Path(startId, endId, this.dataSource);
-		
-		if(!valid){
-			ret.invalidate();
-		}
-		
-		return ret;
-	}
-	testAll(){
-		//developer tool. Detects any paths between any two nodes that cannot exist
-		"use strict";
-		
-		let source = this.dataSource;
-		
-		let nodeDB = source.getNodeDB();
-		let allNodes = nodeDB.getAll();
-		let nodeCount = allNodes.length;
-		
-		function checkPath(start, end){
-			let path = new Path(start.id, end.id, source);
-			if(path.idPath[path.idPath.length - 1] !== end.id){
-				console.log("An error occurred with path from " + start.id + " to " + end.id);
-				console.log("The path returned was:");
-				console.log(path.idPath);
-				console.log("IDs of the nodes adjacent to the ones used in this path are...");
-				for(let k = 0; k < path.idPath.length; k++){
-					console.log("*" + path.idPath[k] + ": " + path.nodePath[k].adjIds);
-				}
-			}
-		}
-		
-		alert("Please wait while I process some information...");
-		for(let i = 0; i < nodeCount; i++){
-			for(let j = 0; j < nodeCount; j++){
-				let start = allNodes[i];
-				let end = allNodes[j];
-				if(start.id >= 0 && end.id >= 0){
-					//don't check corner nodes
-					checkPath(start, end);
-				}
-			}
-		}
-		alert("Done.");
 	}
 };

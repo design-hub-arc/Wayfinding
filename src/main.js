@@ -3,6 +3,8 @@ The Main class is used to store data, preventing the need for global letiables.
 It also takes a lot of code out of the main HTML file.
 */
 
+import { Path } from "./nodes/path.js";
+
 export class Main{
     constructor(){
         "use strict";
@@ -16,8 +18,6 @@ export class Main{
         this.currentPath = undefined;
         this.nodeDatabase = undefined;
         this.classDatabase = undefined;
-
-        this.pathFinder = undefined; //need until we get rid of duplicate class ids
     }
 	setCanvas(canvas){
 		"use strict";
@@ -186,11 +186,6 @@ export class Main{
 			}
 		};
 	}
-	setPathFinder(pathFinder){
-		"use strict";
-		this.pathFinder = pathFinder;
-		pathFinder.setDataSource(this);
-	}
 	
 	setPath(path){
 		"use strict";
@@ -217,8 +212,7 @@ export class Main{
 			
 			//single equal will catch both null and undefined
 			if(start != null && end != null){ //otherwise some class numbers cause problems
-				//let newPath = new Path(start[0], end[0], this);
-				let newPath = this.pathFinder.find(data1, data2);
+				let newPath = new Path(start, end, this);
 				if(newPath.valid){
 					this.setPath(newPath);
 				} else {
