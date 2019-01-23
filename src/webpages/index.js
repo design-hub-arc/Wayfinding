@@ -34,16 +34,16 @@ svgMap.loaded(
 		get(masterSheetURL, console.log);
 		
         importMasterSheet(masterSheetURL, (responses) => {
-            nodes.parseNodeData(formatResponse(responses[0]));
-            nodes.parseConnData(formatResponse(responses[1]));
+            nodes.parseNodeData(formatResponse(responses.get("Node coordinates")));
+            nodes.parseConnData(formatResponse(responses.get("Node connections")));
             masterCanvas.setCorners(nodes.getNode(-1).x, nodes.getNode(-1).y, nodes.getNode(-2).x, nodes.getNode(-2).y);
 
-			nodes.parseNameToId(responses[2]);
-			nodes.parseNameToId(responses[3]);
+			nodes.parseNameToId(responses.get("buildings"));
+			nodes.parseNameToId(responses.get("rooms"));
 			
 			
-            nodes.parseImageResponse(new CsvFile(responses[4]));
-            nodes.parseClassResponse(new CsvFile(responses[5]));
+            nodes.parseImageResponse(new CsvFile(responses.get("images")));
+            nodes.parseClassResponse(new CsvFile(responses.get("class to room")));
 
             master.setInput(start, end);
             master.setPathButton("button");

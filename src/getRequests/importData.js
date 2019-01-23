@@ -66,7 +66,7 @@ export function sequentialGets(urls, callbacks){
     (b): if only one callback is passed (one element array, or just a function), passes in all responses as an array to that function
     */
     "use strict";
-    let responses = [];
+    let responses = new Map();
     let received = 0;
     let singleFunction = !Array.isArray(callbacks) || callbacks.length === 1;
     
@@ -78,15 +78,16 @@ export function sequentialGets(urls, callbacks){
         if(singleFunction){
             callbacks[0](responses);
         } else {
-            for(let i = 0; i < responses.length && i < callbacks.length; i++){
-                callbacks[i](responses[i]);
+			let respArray = Array.from(responses.values()); // Maps retain insertion order, so this works
+            for(let i = 0; i < respArray.length && i < callbacks.length; i++){
+                callbacks[i](respArray[i]);
             }
         }
     }
     
-    function f(i){
+    function f(url){
         return function(responseText){
-            responses[i] = responseText;
+            responses.set(url, responseText);
             received++;
             if(received === urls.length){
                 finish();
@@ -95,8 +96,8 @@ export function sequentialGets(urls, callbacks){
     }
 
     for(let i = 0; i < urls.length; i++){
-        responses.push("No response from URL " + urls[i]);
-        get(urls[i], f(i));
+        responses.set(urls[i], "No response from URL " + urls[i]);
+        get(urls[i], f(urls[i]));
     }
 }
 
@@ -105,32 +106,46 @@ export function sequentialGets(urls, callbacks){
 // improve this
 export function importMasterSheet(url, callback, options={}){
     /*
-     * @param url : a string, the 
-     * url of the master url file
-     * on our google drive
-     * 
-     * @param callback : a function
-     * 
-     * This performs a get request on the master url spreadsheet,
-     * then performs a get request on each url on the spreadsheet,
-     * then passes each URL into the callback function
-     * 
-     * (improve later)
+	 @param url : a string, the 
+	 url of the master url file
+	 on our google drive
+
+	 @param callback : a function
+
+	 This performs a get request on the master url spreadsheet,
+	 then performs a get request on each url on the spreadsheet,
+	 then passes each URL into the callback function
+
+	 passes a Map, 
+	 with the keys being the identifier in the first column of the spreadsheet,
+	 and the value is the response text from performing a get request on the url after that identifier;
+	 into the callback
      */
     
     get(url, responseText => {
         let data = formatResponse(responseText);
         
 		let ignore = (options.hasOwnProperty("ignore")) ? options["ignore"] : [];
+		let keys = [];
         let urls = [];
 		
         for(let i = 1; i < data.length; i++){ 
             if(data[i][1] !== "" && ignore.indexOf(data[i][0]) === -1){
+				keys.push(data[i][0]);
                 urls.push(data[i][1]);
             }
         }
 		
-        console.log(urls);
-        sequentialGets(urls, callback);
+		function f(responses){
+			let ret = new Map();
+			
+			for(let i = 0; i < keys.length; i++){
+				ret.set(keys[i], responses.get(urls[i]));
+			}
+			
+			callback(ret);
+		}
+		
+        sequentialGets(urls, f);
     });
 }

@@ -11,9 +11,15 @@ The CsvFile class is used to format imported data from spreadsheets to a format 
 export function formatResponse(responseText){
 	"use strict";
 	let ret = [];
-	let splitOnLine = responseText.split(/\r?\n|\r/); //split on newline
+	try{
+		let splitOnLine = responseText.split(/\r?\n|\r/); //split on newline
 	
-	splitOnLine.forEach(line => ret.push(line.split(",")));
+		splitOnLine.forEach(line => ret.push(line.split(",")));
+	} catch(e){
+		console.log(e.stack);
+		console.log("response text is: ");
+		console.log(responseText);
+	}
 	
 	return ret;
 }
