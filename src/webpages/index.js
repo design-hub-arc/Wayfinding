@@ -31,6 +31,8 @@ svgMap.loaded(
         masterCanvas.resize();
         master.setCanvas(masterCanvas);
         
+		get(masterSheetURL, console.log);
+		
         importMasterSheet(masterSheetURL, (responses) => {
             nodes.parseNodeData(formatResponse(responses[0]));
             nodes.parseConnData(formatResponse(responses[1]));
@@ -53,8 +55,9 @@ svgMap.loaded(
 			
 			//nodes.prettyPrintStuffToId();
         },
-            ["map image", "classes"]
-        );
+		{
+			ignore: ["map image", "classes"]
+		});
     }
 );
 
