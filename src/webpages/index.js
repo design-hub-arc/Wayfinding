@@ -8,20 +8,19 @@ import {formatResponse, CsvFile} from                "../dataFormatting/csv.js";
 import {mapURL, masterSheetURL} from                 "../getRequests/urls.js";
 import {NodeDB} from                                 "../dataFormatting/nodeDB.js";
 
-var master = new Main();
+let master = new Main();
 
 //http://svgjs.com/
-var svgDrawer = SVG('wrapper').size(1000, 1000).panZoom();
-var svgMap = svgDrawer.image(mapURL);
-svgMap.loaded(
-    function(){
+let svgDrawer = SVG('wrapper').size(1000, 1000).panZoom();
+let svgMap = svgDrawer.image(mapURL);
+svgMap.loaded(() => {
         console.time("Time to load");
         // need to wait to invoke since we need image width
-        var nodes = new NodeDB();
-        var masterCanvas = new Canvas();
-        var ids;
-        var start = new TextBox("start box", "start hint");
-        var end = new TextBox("end box", "end hint");
+        let nodes = new NodeDB();
+        let masterCanvas = new Canvas();
+        let ids;
+        let start = new TextBox("start box", "start hint");
+        let end = new TextBox("end box", "end hint");
 
         master.setNodeDB(nodes);
         masterCanvas.link(svgDrawer, document.getElementById("wrapper")
