@@ -2,6 +2,8 @@
 ClassDB is used by the Main class to store the data used by the class locator.
 Once again, the HTML file does the populating
 
+I would not advise reading this...
+
 PLEASE. DATABASE FOR THIS!!!
 */
 export class ClassDB{

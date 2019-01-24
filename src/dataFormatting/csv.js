@@ -9,12 +9,18 @@ The CsvFile class is used to format imported data from spreadsheets to a format 
  */
 
 export function formatResponse(responseText){
-	"use strict";
+	/*
+	Converts the response from a csv file into a 
+	two dimentional array.
+	If it already in the correct format, leaves it in that format.
+	*/
 	let ret = [];
-	try{
-		let splitOnLine = responseText.split(/\r?\n|\r/); //split on newline
 	
-		splitOnLine.forEach(line => ret.push(line.split(",")));
+	try{
+		let lines = (Array.isArray(responseText)) ? responseText : responseText.split(/\r?\n|\r/); //split on newline
+		lines.forEach(line => {
+			ret.push((Array.isArray(line)) ? line : line.split(","));
+		});
 	} catch(e){
 		console.log(e.stack);
 		console.log("response text is: ");
@@ -29,7 +35,6 @@ export class CsvFile{
         /*
         @param text : a String, the response text from an HTTP request
         */
-        "use strict";
         this.headers = [];
         this.data = formatResponse(text);
 
@@ -39,16 +44,14 @@ export class CsvFile{
 		/*
 		@return an array of arrays of strings, each row of this' data, sans the first, which is headers
 		*/
-		"use strict";
 		return this.data.slice(1, this.data.length);
 	}
 	indexOfCol(possibleHeaders){
 		/*
-		@param possibleHeaders : an array of strings, possible names of the header we're searching for
+		@param possibleHeaders : an array of strings, possible names for the header we're searching for
 		@return an int : the index of one of this' headers contained in possibleHeaders
 		if none of the headers in possibleHeaders exists in this' headers, returns -1
 		*/
-		"use strict";
 		let ret = -1;
 		
 		if(!Array.isArray(possibleHeaders)){

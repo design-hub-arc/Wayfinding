@@ -1,4 +1,5 @@
 import {Node} from '../nodes/arcNode.js';
+import {formatResponse} from '../dataFormatting/csv.js';
 
 /*
 NodeDB is used by the Main class to store the data used by the program.
@@ -20,6 +21,9 @@ export class NodeDB{
 		
 		this.stuffToNodeId = new Map();
 		/*
+		keys are a string, the name of the point (building/room/class name).
+		value is associated node ID.
+		
 		Since we go by the pattern of "something" has a node ID associated with it,
 		and we don't need to differentiate between rooms/buildings/etc,
 		I can store them all in one place.
@@ -29,20 +33,24 @@ export class NodeDB{
 		-Object
 		-Array
 		*/
-		// keys are a string, the name of the point (building/room/class name)
-		// value is associated node ID
     }
     
-	parseNodeData(data){
+	parseNodeData(responseText){
 		/*
-		@param data : the result of an HTTP request to the node data spreadsheet, converted to a 2D array for convenience
-		*/
-		"use strict";
+		Reads the response from the node spreadsheet,
+		and creates and stores node objects based on that data.
 		
+		@param data : the result of an HTTP request to the node data spreadsheet, 
+		can be either a string, or a two-dimentional array.
+		*/
+		
+		let data = formatResponse(responseText);
 		let row;
 		let id;
 		let x;
 		let y;
+		
+		let errors = [];
 		
 		//skip headers
 		for(let i = 1; i < data.length; i++){
@@ -57,13 +65,19 @@ export class NodeDB{
 					x,
 					y
 				));
+			} else {
+				errors.push("An error occured for the line " + row.join());
 			}
+		}
+		if(errors.length > 0){
+			console.log("Something went wrong with parsing the node data:");
+			errors.forEach(msg => console.log("--" + msg));
 		}
 	}
 	
-	parseNameToId(data){
+	parseNameToId(responseText){
 		/*
-		data is the result of an HTTP request to a csv file, formatted as:
+		responseText is the result of an HTTP request to a csv file, formatted as:
 		    header1, header2
 			name, node id
 			name, node id
@@ -77,18 +91,7 @@ export class NodeDB{
 		let db = this;
 		let name;
 		let id;
-		
-		//is it an array?
-		if(!Array.isArray(data)){
-			data = data.split(/\r?\n|\r/);
-		}
-		
-		//what about 2D?
-		if(data.some(element => !Array.isArray(element))){
-			data = data.map(row => row.split(","));
-		}
-		
-		//allright, now it's in the right format
+		let data = formatResponse(responseText);
 		
 		data.forEach(row => {
 			try{
@@ -109,11 +112,11 @@ export class NodeDB{
 		});
 	}
 	
-	parseConnData(data){
+	parseConnData(responseText){
 		/*
-		@param data : the result of an HTTP request to the node data spreadsheet, converted to a 2D array for convenience
+		@param responseText : the result of an HTTP request to the node data spreadsheet
 		*/
-		"use strict";
+		let data = formatResponse(responseText);
 		
 		let row;
 		for(let i = 1; i < data.length; i++){
@@ -133,9 +136,10 @@ export class NodeDB{
 	parseImageResponse(csvFile){
 		/*
         @param csvFile : a CsvFile object containing the result of a HTTP request to our image spreadsheet
-        sets the connection images of nodes
+        sets the connection images of nodes.
+		
+		Might redo this once we start working on images
         */
-        "use strict";
 		let data = csvFile.getNonHeaders();
 		let fromCol = csvFile.indexOfCol(["From", "node1", "n1"]);
 		let toCol = csvFile.indexOfCol(["to", "node2", "n2"]);
@@ -240,6 +244,9 @@ export class NodeDB{
 	}
 	
 	getAll(){
+		/*
+		Gets all the nodes stored here
+		*/
 		return Array.from(this.nodes.values());
 	}
 	

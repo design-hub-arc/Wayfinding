@@ -34,8 +34,8 @@ svgMap.loaded(
 		get(masterSheetURL, console.log);
 		
         importMasterSheet(masterSheetURL, (responses) => {
-            nodes.parseNodeData(formatResponse(responses.get("Node coordinates")));
-            nodes.parseConnData(formatResponse(responses.get("Node connections")));
+            nodes.parseNodeData(responses.get("Node coordinates"));
+            nodes.parseConnData(responses.get("Node connections"));
             masterCanvas.setCorners(nodes.getNode(-1).x, nodes.getNode(-1).y, nodes.getNode(-2).x, nodes.getNode(-2).y);
 
 			nodes.parseNameToId(responses.get("buildings"));
@@ -43,7 +43,7 @@ svgMap.loaded(
 			
 			
             nodes.parseImageResponse(new CsvFile(responses.get("images")));
-            nodes.parseClassResponse(new CsvFile(responses.get("class to room")));
+            //nodes.parseClassResponse(new CsvFile(responses.get("class to room")));
 
             master.setInput(start, end);
             master.setPathButton("button");
@@ -56,7 +56,7 @@ svgMap.loaded(
 			//nodes.prettyPrintStuffToId();
         },
 		{
-			ignore: ["map image", "classes"]
+			ignore: ["map image", "classes", "class to room"]
 		});
     }
 );

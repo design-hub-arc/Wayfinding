@@ -7,7 +7,7 @@ module.exports = {
     classFinder: "./src/webpages/classFinder.js"
   },
   output: {
-    path: path.resolve(__dirname, "dist/src"),
+    path: path.resolve(__dirname, "dist/src/webpages"),
     filename: "[name].js"
   },
   module: {

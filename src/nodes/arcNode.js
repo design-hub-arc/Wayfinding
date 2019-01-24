@@ -1,17 +1,13 @@
 export class Node{
     constructor(id, x, y) {
         /*
-        x and y are coordinates on the map image
-
-        id is a unique identifier
+		id is a unique identifier
         like a primary key
-
-        adjIds is an array of ints,
-        each int represents the id
-        of an adjacent node.
-        i.e. you can travel from this point to that one
-        */
-        "use strict";
+		
+        x and y are coordinates on the map image,
+		as extracted from the node spreadsheet.
+		*/
+		
         try {
             this.id = parseInt(id);
             if (isNaN(this.id)) {
@@ -32,7 +28,18 @@ export class Node{
         }
 
         this.adjIds = [];
+		/*
+        adjIds is an array of ints,
+        each int represents the id
+        of an adjacent node.
+        i.e. you can travel from this point to that one
+        */
+		
         this.connectionImages = {};
+		/*
+		key is the id of a node this connects to,
+		value is the URL of an image of the path between this node and that one
+		*/
     }
 	loadAdj(nodeDB) {
 		/*

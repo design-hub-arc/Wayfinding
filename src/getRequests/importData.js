@@ -63,7 +63,8 @@ export function sequentialGets(urls, callbacks){
 
     performs a get request on each url, then...
     (a): if multiple callbacks are provided, passes in responses[i] to callback[i]
-    (b): if only one callback is passed (one element array, or just a function), passes in all responses as an array to that function
+    (b): if only one callback is passed (one element array, or just a function), passes in all responses as an Map to that function,
+		where the key is the URL, and the value is the response text
     */
     "use strict";
     let responses = new Map();
@@ -126,26 +127,41 @@ export function importMasterSheet(url, callback, options={}){
         let data = formatResponse(responseText);
         
 		let ignore = (options.hasOwnProperty("ignore")) ? options["ignore"] : [];
-		let keys = [];
-        let urls = [];
+		let urlToKey = new Map();
+		/*
+		since sequentialGets will return url-to-response,
+		we need to provide an easier way to identify what each response is giving.
+		since we are looking at key-to-url-to-response text,
+		and sequentialGets gives us url-to-response,
+		we can use this to get key-to-response text
+		*/
 		
         for(let i = 1; i < data.length; i++){ 
             if(data[i][1] !== "" && ignore.indexOf(data[i][0]) === -1){
-				keys.push(data[i][0]);
-                urls.push(data[i][1]);
+				/*
+				The data is a table, with the first column being a key,
+				such as "node coordinates", "buildings", etc,
+				
+				and the second being the url linking to that resource
+				*/
+				urlToKey.set(data[i][1], data[i][0]);
             }
         }
 		
-		function f(responses){
+		function reformat(responses){
+			/*
+			Convets the url-to-response result of seqGet
+			to an easier to use key-to-response
+			*/
 			let ret = new Map();
 			
-			for(let i = 0; i < keys.length; i++){
-				ret.set(keys[i], responses.get(urls[i]));
-			}
+			responses.forEach((responseText, url) => {
+				ret.set(urlToKey.get(url), responseText);
+			});
 			
 			callback(ret);
 		}
 		
-        sequentialGets(urls, f);
+        sequentialGets(Array.from(urlToKey.keys()), reformat);
     });
 }
