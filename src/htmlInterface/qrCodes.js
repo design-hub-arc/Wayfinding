@@ -3,10 +3,10 @@ export function getIDsFromURL() {
 	extracts variables from url.
 	defined as ?start=...&end=...
 	*/
-	"use strict";
 	const query = window.location.href;
 	const values = [14, 96];
-
+	// defaults to administration to design hub
+	
 	// check if parameters were passed
 	if (query.indexOf("?") > -1) {
 		let args = query.split("?")[1];
