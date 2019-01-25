@@ -11,6 +11,13 @@ textBox.addOptions(anArray);
 whenever the user types in the text box, 
 the result element will search through options for the closest match to what the user entered,
 then sets its text to that match.
+
+The program populates two TextBoxes - start and end,
+with all of the names in the node database it generates.
+Whenever the user clicks the "draw path" button,
+the program calls getResult on each of these textboxes,
+finds the nodes associated with those names,
+and generates a path based off of that.
 */
 
 export class TextBox{
@@ -22,7 +29,6 @@ export class TextBox{
 
         if either of the aforementioned elements don't exist, will create them instead
         */
-        "use strict";
         this.box = document.getElementById(textBoxId);
         this.resultElement = document.getElementById(resultElementId);
 
@@ -43,33 +49,36 @@ export class TextBox{
 
         this.box.oninput = this.updateResult.bind(this);
     }
+	
 	addOptions(options){
 		/*
 		@param options : an array of strings
 		*/
-		"use strict";
 		let b = this;
+		
+		if(!Array.isArray(options)){
+			options = [options];
+		}
 		options.forEach(option =>{
 			if(option){
+				//make sure option isn't null or undefined
 				b.options.push((option.toString().toUpperCase()));
 			}
 		});
 	}
+	
 	updateResult(){
 		// makes the result search for the closest match in options to what the user's entered
-		"use strict";
 		this.resultElement.innerHTML = closestMatch(this.box.value, this.options);
 	}
 	isValid(){
 		//legal input was entered
-		"use strict";
 		//want to make sure the closest match is both in the options, and not the default option
 		return (this.options.indexOf(this.resultElement.innerHTML.toUpperCase()) > 0);
 	}
 	setInput(str){
 		//@param str : a string, what to put in the input box
 		//basically makes the program act as the user, typing str in the box
-		"use strict";
 		this.box.value = str;
 		this.box.oninput();
 	}
@@ -77,16 +86,16 @@ export class TextBox{
 		/*
 		@return : a string, the closest match to what the user inputted
 		*/
-		"use strict";
 		return this.resultElement.innerHTML;
 	}
 };
 
 function matchCount(find, inString){
-	"use strict";
 	/*
 	returns the number of characters in find
-	that are in inString in order
+	that are in inString in order.
+	
+	Used in closestMatch
 	*/
 	find = find.toUpperCase();
 	inString = inString.toUpperCase();
@@ -129,36 +138,36 @@ function matchCount(find, inString){
 	return {"matches" : best, "spaces" : spaces};
 }
 
-function closestMatchIndex(string, options){
-	"use strict";
+function closestMatch(string, options){
+	/*
+	REGEX would be an easier way to do this,
+	but I'm not sure how much functionality 
+	we would be giving up if we switched to
+	using that.
+	*/
+	
 	let s = string.trim().toUpperCase();
 	let check = [];
-	let best = 0;
+	let bestMatches = 0;
 	let leastSpaces = string.length;
-	let idxOfBest = 0;
+	let best = options[0];
 	
 	let count;
 	for(let i = 0; i < options.length; i++){
 		check.push(options[i].trim().toUpperCase());
 		count = matchCount(s, check[i]);
-		if(count.matches > best){
-			best = count.matches;
+		if(count.matches > bestMatches){
+			bestMatches = count.matches;
 			leastSpaces = count.spaces;
-			idxOfBest = i;
-		} else if(count.matches === best){
+			best = options[i];
+		} else if(count.matches === bestMatches){
 			if(count.spaces < leastSpaces){
-				best = count.matches;
+				bestMatches = count.matches;
 				leastSpaces = count.spaces;
-				idxOfBest = i;
+				best = options[i];
 			}
 		}
 	}
 	
-	return idxOfBest;
-}
-
-function closestMatch(s, options){
-	// returns the string in options which most closely resembles s
-	"use strict";
-	return options[closestMatchIndex(s, options)];
+	return best;
 }

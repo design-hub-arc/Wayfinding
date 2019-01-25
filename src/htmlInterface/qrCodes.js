@@ -1,12 +1,12 @@
 export function getIDsFromURL() {
 	/*
 	extracts variables from url.
-	defined as ?startID=...&endID=...
+	defined as ?start=...&end=...
 	*/
-	"use strict";
 	const query = window.location.href;
-	const values = {startID: 14, endID: 96};
-
+	const values = [14, 96];
+	// defaults to administration to design hub
+	
 	// check if parameters were passed
 	if (query.indexOf("?") > -1) {
 		let args = query.split("?")[1];
@@ -14,8 +14,15 @@ export function getIDsFromURL() {
 		for (let i = 0; i < pairs.length; i++) {
 			let pair = pairs[i].split("=");
 			console.log("Pair: " + pair);
+			
+			if(pair[0].toUpperCase().includes("START")){
+				values[0] = pair[1];
+			} else if (pair[0].toUpperCase().includes("END")){
+				values[1] = pair[1];
+			}
+			
 			values[pair[0]] = parseFloat(pair[1]);
 		}
 	}
-	return [values.startID, values.endID];
+	return values;
 }

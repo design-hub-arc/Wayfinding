@@ -6,22 +6,21 @@ import {TextBox} from                                "../htmlInterface/input.js"
 import {get, sequentialGets, importMasterSheet} from "../getRequests/importData.js";
 import {formatResponse, CsvFile} from                "../dataFormatting/csv.js";
 import {mapURL, masterSheetURL} from                 "../getRequests/urls.js";
-import {NodeDB} from                                 "../dataFormatting/databases.js";
+import {NodeDB} from                                 "../dataFormatting/nodeDB.js";
 
-var master = new Main();
+let master = new Main();
 
 //http://svgjs.com/
-var svgDrawer = SVG('wrapper').size(1000, 1000).panZoom();
-var svgMap = svgDrawer.image(mapURL);
-svgMap.loaded(
-    function(){
+let svgDrawer = SVG('wrapper').size(1000, 1000).panZoom();
+let svgMap = svgDrawer.image(mapURL);
+svgMap.loaded(() => {
         console.time("Time to load");
         // need to wait to invoke since we need image width
-        var nodes = new NodeDB();
-        var masterCanvas = new Canvas();
-        var ids;
-        var start = new TextBox("start box", "start hint");
-        var end = new TextBox("end box", "end hint");
+        let nodes = new NodeDB();
+        let masterCanvas = new Canvas();
+        let ids;
+        let start = new TextBox("start box", "start hint");
+        let end = new TextBox("end box", "end hint");
 
         master.setNodeDB(nodes);
         masterCanvas.link(svgDrawer, document.getElementById("wrapper")
@@ -30,28 +29,20 @@ svgMap.loaded(
                    );
         masterCanvas.resize();
         master.setCanvas(masterCanvas);
-        master.setPathFinder(new PathFinder());
         
-        function asyncTest(){
-            return new Promise(resolve => {
-                get(masterSheetURL, console.log);
-            });
-        }
-        
-        async function w(){
-            await asyncTest();
-        }
-        
-        importMasterSheet(masterSheetURL, function(responses){
-            w();
-            nodes.parseNodeData(formatResponse(responses[0]));
-            nodes.parseConnData(formatResponse(responses[1]));
+		get(masterSheetURL, console.log);
+		
+        importMasterSheet(masterSheetURL, (responses) => {
+            nodes.parseNodeData(responses.get("Node coordinates"));
+            nodes.parseConnData(responses.get("Node connections"));
             masterCanvas.setCorners(nodes.getNode(-1).x, nodes.getNode(-1).y, nodes.getNode(-2).x, nodes.getNode(-2).y);
 
-            nodes.parseBuildingResponse(new CsvFile(responses[2]));
-            nodes.parseRoomResponse(new CsvFile(responses[3]));
-            nodes.parseImageResponse(new CsvFile(responses[4]));
-            nodes.parseClassResponse(new CsvFile(responses[5]));
+			nodes.parseNameToId(responses.get("buildings"));
+			nodes.parseNameToId(responses.get("rooms"));
+			
+			
+            nodes.parseImageResponse(new CsvFile(responses.get("images")));
+            //nodes.parseClassResponse(new CsvFile(responses.get("class to room")));
 
             master.setInput(start, end);
             master.setPathButton("button");
@@ -60,9 +51,12 @@ svgMap.loaded(
             master.setPath(new Path(ids[0], ids[1], master));
             master.getPath().draw(master.getCanvas());
             console.timeEnd("Time to load");
+			
+			//nodes.prettyPrintStuffToId();
         },
-            ["map image", "classes"]
-        );
+		{
+			ignore: ["map image", "classes", "class to room"]
+		});
     }
 );
 

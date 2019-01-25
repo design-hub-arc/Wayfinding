@@ -1,51 +1,45 @@
 /*
-The x and y coordinates given by the coordinate spreadsheet are those nodes' position on the autocad file where the data is extracted from.
-This means that we can't draw point directly onto the SVG canvas, as the scaling is way off (x coordinates upwards of 2300 do not draw on a 1000 pixel canvas), and the autocad y-axis points upward (oh cartesian coordinates, why don't you point the logical way?) so all y - coordinates are negative, as the autocad map assigns coordinates from the upper-left corner (go figure)
+The x and y coordinates given by the coordinate spreadsheet are those nodes' position in the node management program where the data is extracted from.
+Since the node manager and SVG canvas use different coordinate scales (node manager may be a 1000 by 1500 grid, SVG 800 by 1000, for example), 
+so we need to convert coordinates in the node manager to coordinates on the SVG canvas.
+This way, we can easily draw nodes on the canvas.
 
-This file is used to convert x y coordinates on the map image
-to x y coordinates on the SVG canvas.
-Also provides canvas functions
+Canvas provides a way to interface with the SVG element used by the program
+
+See http://svgjs.com for more information on the SVG elements used by the program
 */
-
 export class Canvas{
 	constructor(){
         this.draw = undefined;           // the svg image this corresponds to
         this.scalingElement = undefined; // the svg element this gets its size from
-        this.width = 0;                  // dimensions of the svg element
-        this.height = 0;
+        this.destWidth = 0;              // dimensions of the map image
+        this.destHeight = 0;
         
-        this.minX = 0;                   // coordinates of the upper-leftmost and lower-rightmost nodes
-        this.minY = 0;
-        this.maxX = 0;
-        this.maxY = 0;
+        this.sourceMinX = 0;             // coordinates of the upper-leftmost and lower-rightmost nodes
+        this.sourceMinY = 0;
+        this.sourceMaxX = 0;
+        this.sourceMaxY = 0;
         
         this.color = undefined;
     }
 	link(svgDrawer, scaler){
-		"use strict";
-		//better way?
-		//maybe built-in creating the svg?
+		/*
+		Connects this to an SVG element
+		and image.
+		Might be a better way to do this.
+		*/
 		try{
 			this.draw = svgDrawer;
 			this.scalingElement = scaler;
-			this.width = scaler.width;
-			this.height = scaler.height;
+			this.resize();
 		} catch(e){
 			console.log(e.stack);
 		}
 	}
 	setColor(color){
-		"use strict";
 		this.color = color;
 	}
-	rect(x, y, w, h){
-		"use strict";
-		return this.draw.rect(w, h)
-			.attr({fill: this.color})
-			.move(this.x(x), this.y(y));
-	}
 	clear(){
-		"use strict";
 		let a = this.draw.children();
 		for(let i = a.length - 1; i >= 0; i--){
 			if(a[i].type === "rect" || a[i].type === "line" || a[i].type === "text"){
@@ -53,27 +47,19 @@ export class Canvas{
 			}
 		}
 	}
-	resize(){
-		"use strict";
-		this.width = this.scalingElement
-			.width
-			.baseVal
-			.value;
-		this.height = this.scalingElement
-			.height
-			.baseVal
-			.value;
+	rect(x, y, w, h){
+		return this.draw.rect(w, h)
+			.attr({fill: this.color})
+			.move(this.x(x), this.y(y));
 	}
 	text(text, x, y){
-		"use strict";
-		this.draw.text(text.toString())
+		return this.draw.text(text.toString())
 			.move(this.x(x) - 10, 
 				  this.y(y) - 20
 				 ).attr({fill: this.color});
 	}
 	line(x1, y1, x2, y2){
-		"use strict";
-		this.draw.line(
+		return this.draw.line(
 			this.x(x1), 
 			this.y(y1), 
 			this.x(x2), 
@@ -82,29 +68,46 @@ export class Canvas{
 	}
 	setCorners(x1, y1, x2, y2){
 		// parameters are the corners of the map image used
-		// it's fine if the y axis is reversed
-		"use strict";
-		this.minX = x1;
-		this.minY = y1;
-		this.maxX = x2;
-		this.maxY = y2;
+		this.sourceMinX = x1;
+		this.sourceMinY = y1;
+		this.sourceMaxX = x2;
+		this.sourceMaxY = y2;
 		this.calcSize();
 	}
+	resize(){
+		/*
+		Recalculates the size of the SVG image,
+		so that way nodes don't appear skewed if the SVG changes size.
+		
+		Since the SVG isn't dynamic anymore, this isn't really used.
+		
+		Note that this doesn't change the size of the element,
+		notifies the Canvas of the new size.
+		*/
+		this.destWidth = this.scalingElement
+			.width
+			.baseVal
+			.value;
+		this.destHeight = this.scalingElement
+			.height
+			.baseVal
+			.value;
+	}
 	calcSize(){
-		"use strict";
-		this.mapWidth = this.maxX - this.minX;
-		this.mapHeight = this.maxY - this.minY;
+		/*
+		Calculates the width and height of the source coordinates
+		*/
+		this.mapWidth = this.sourceMaxX - this.sourceMinX;
+		this.mapHeight = this.sourceMaxY - this.sourceMinY;
 	}
 	x(coord){
 		// convert a coordinate on the map image
 		// to a point on the SVG canvas
-		"use strict";
-		let percRight = (coord - this.minX) / this.mapWidth;
-		return percRight * this.width;
+		let percRight = (coord - this.sourceMinX) / this.mapWidth;
+		return percRight * this.destWidth;
 	}
 	y(coord){
-		"use strict";
-		let percDown = (coord - this.minY) / this.mapHeight;
-		return percDown * this.height;
+		let percDown = (coord - this.sourceMinY) / this.mapHeight;
+		return percDown * this.destHeight;
 	}
 };

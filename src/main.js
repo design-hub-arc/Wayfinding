@@ -1,11 +1,14 @@
 /*
 The Main class is used to store data, preventing the need for global letiables.
 It also takes a lot of code out of the main HTML file.
+
+May clean this up more once we have access to the class database (not my fake one, the real one that eservices uses)
 */
+
+import { Path } from "./nodes/path.js";
 
 export class Main{
     constructor(){
-        "use strict";
         this.canvas = undefined;
 
         //html elements
@@ -16,16 +19,12 @@ export class Main{
         this.currentPath = undefined;
         this.nodeDatabase = undefined;
         this.classDatabase = undefined;
-
-        this.pathFinder = undefined; //need until we get rid of duplicate class ids
     }
 	setCanvas(canvas){
-		"use strict";
 		// canvas is my custom Canvas class, NOT HTML canvas
 		this.canvas = canvas;
 	}
 	getCanvas(){
-		"use strict";
 		return this.canvas;
 	}
 	
@@ -34,18 +33,11 @@ export class Main{
 		start and end are TextBoxes.
 		Populates said TextBoxes with the contents of this' fake database
 		*/
-		"use strict";
 		this.start = start;
 		this.end = end;
-		let db = this.getNodeDB();
 		
-		start.addOptions(db.getAllBuildingNames());
-		start.addOptions(db.getAllRooms());
-		start.addOptions(db.getAllClasses());
-		
-		end.addOptions(db.getAllBuildingNames());
-		end.addOptions(db.getAllRooms());
-		end.addOptions(db.getAllClasses());
+		start.addOptions(this.getNodeDB().getAllNames());
+		end.addOptions(this.getNodeDB().getAllNames());
 	}
 	
 	setClassFinder(nameTextBox, instructorTextBox, timesTextBox, buttonId, resultsId, clearId){
@@ -61,7 +53,6 @@ export class Main{
 		@param clearId : the id of an HTML element that can handle onclick events which, when clicked, will clear out each of the user input boxes
 		if either the buttonId, resultsId, or clearId elements do not exist, creates them for you
 		*/
-		"use strict";
 		let db = this.getClassDB();
 		let main = this;
 		let button = document.getElementById(buttonId);
@@ -172,7 +163,6 @@ export class Main{
 		id is the id of any HTML element
 		if it doesn't exist, will create it for you
 		*/
-		"use strict";
 		this.pathButton = document.getElementById(id);
 		if(this.pathButton === null){
 			this.pathButton = document.createElement("button");
@@ -192,14 +182,8 @@ export class Main{
 			}
 		};
 	}
-	setPathFinder(pathFinder){
-		"use strict";
-		this.pathFinder = pathFinder;
-		pathFinder.setDataSource(this);
-	}
 	
 	setPath(path){
-		"use strict";
 		if(path.valid){
 			this.currentPath = path;
 			try{
@@ -211,26 +195,24 @@ export class Main{
 		}
 	}
 	getPath(){
-		"use strict";
 		return this.currentPath;
 	}
 	
 	updatePath(data1, data2){
-		"use strict";
 		try{
-			let start = this.getNodeDB().getIdsByString(data1);
-			let end = this.getNodeDB().getIdsByString(data2);
+			let start = this.getNodeDB().getIdByString(data1);
+			let end = this.getNodeDB().getIdByString(data2);
 			
-			if(start.length >= 1 && end.length >= 1){ //otherwise some class numbers cause problems
-				//let newPath = new Path(start[0], end[0], this);
-				let newPath = this.pathFinder.find(data1, data2);
+			//single equal will catch both null and undefined
+			if(start != null && end != null){ //otherwise some class numbers cause problems
+				let newPath = new Path(start, end, this);
 				if(newPath.valid){
 					this.setPath(newPath);
 				} else {
 					throw new Error("Invalid path: " + newPath.idPath);
 				}
 			} else {
-				throw new Error("Invalid number of nodes: " + start.length + " " + end.length);
+				throw new Error("Invalid start and end points: " + data1 + " " + data2);
 			}
 		} catch(e){
 			console.log(e.stack);
@@ -239,25 +221,21 @@ export class Main{
 	
 	testAllPaths(){
 		//developer tool. Detects any paths between any two nodes that cannot exist
-		"use strict";
 		
 		let source = this;
 		let nodeDB = source.getNodeDB();
 		
 		let points = [];
-		points = points.concat(nodeDB.getAllBuildingNames());
-		points = points.concat(nodeDB.getAllRooms());
-		points = points.concat(nodeDB.getAllClasses());
+		points = points.concat(nodeDB.getAllNames());
 		
 		function checkPath(startStr, endStr){
 			try{
-				let id1 = nodeDB.getIdsByString(startStr);
-				let id2 = nodeDB.getIdsByString(endStr);
+				let id1 = nodeDB.getIdByString(startStr);
+				let id2 = nodeDB.getIdByString(endStr);
 				
-				if(id1.length !== 1 || id2.length !== 1){
-					throw new Error("Invalid node count: " + startStr + ": " + id1.length + " " + endStr + ": " + id2.length);
-				} else {
-					let path = new Path(id1[0], id2[0], source);
+				//getIdByString will log any errors
+				if(id1 != null && id2 != null){
+					let path = new Path(id1, id2, source);
 					if(!path.valid){
 						throw new Error("Invalid Path: " + path.idPath);
 					}
@@ -277,20 +255,16 @@ export class Main{
 	}
 	
 	setNodeDB(database){
-		"use strict";
 		this.nodeDatabase = database;
 	}
 	getNodeDB(){
-		"use strict";
 		return this.nodeDatabase;
 	}
 	
 	setClassDB(database){
-		"use strict";
 		this.classDatabase = database;
 	}
 	getClassDB(){
-		"use strict";
 		return this.classDatabase;
 	}
 };

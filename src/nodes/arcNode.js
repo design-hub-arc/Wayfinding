@@ -1,17 +1,18 @@
+/*
+Nodes are points on the ARC canvas.
+
+See path.js for how the program uses these nodes, and scaledCanvas for how it uses the coordinates
+*/
 export class Node{
     constructor(id, x, y) {
         /*
-        x and y are coordinates on the map image
-
-        id is a unique identifier
+		id is a unique identifier
         like a primary key
-
-        adjIds is an array of ints,
-        each int represents the id
-        of an adjacent node.
-        i.e. you can travel from this point to that one
-        */
-        "use strict";
+		
+        x and y are coordinates on the map image,
+		as extracted from the node spreadsheet.
+		*/
+		
         try {
             this.id = parseInt(id);
             if (isNaN(this.id)) {
@@ -32,7 +33,18 @@ export class Node{
         }
 
         this.adjIds = [];
+		/*
+        adjIds is an array of ints,
+        each int represents the id
+        of an adjacent node.
+        i.e. you can travel from this point to that one
+        */
+		
         this.connectionImages = {};
+		/*
+		key is the id of a node this connects to,
+		value is the URL of an image of the path between this node and that one
+		*/
     }
 	loadAdj(nodeDB) {
 		/*
@@ -44,10 +56,12 @@ export class Node{
 		initializing all Nodes,
 		otherwise you will reference
 		nonexistant variables.
+		
+		nodeDB is a node database object 
+		containing the nodes used by the program
 	
 		automatically invoked by importNodeData
 		*/
-		"use strict";
 		this.adj = [];
 		
         let check;
@@ -60,48 +74,41 @@ export class Node{
 	}
 	
 	distanceFrom(n2) {
-		"use strict";
 		return Math.sqrt(
 			Math.pow(this.x - n2.x, 2) + Math.pow(this.y - n2.y, 2)
 		);
 	}
 	
 	addAdjId(id){
-		"use strict";
+		// adds an adjacent ID
 		this.adjIds.push(id);
 	}
 	
 	setConnectionImage(id, url) {
 		// invoked by importImages in import data file
 		// sets the image going from this node to node with id equal to the id passed
-		"use strict";
 		this.connectionImages[id] = url;
 	}
 	getHasImage(id) {
 		// returns whether or not an image has been given showing the area 
 		//between this node and node with id equal to the id passed
-		"use strict";
 		return this.connectionImages.hasOwnProperty(id);
 	}
 	getImageTo(id) {
 		// returns the image of going from this node to node with id equal to the id passed
-		"use strict";
 		return this.connectionImages[id];
 	}
 
 	draw(canvas) {
-		"use strict";
 		canvas.setColor("red");
 		canvas.rect(this.x, this.y, 5, 5);
 	}
 	drawId(canvas){
-		"use strict";
 		canvas.setColor("red");
 		canvas.text(this.id, this.x, this.y);
 	}
 	drawLinks(canvas) {
 		// draws lines connecting this node to its adjacent nodes
-		"use strict";
 		canvas.setColor("red");
 		this.drawId(canvas);
 		for (let j = 0; j < this.adj.length; j++) {
@@ -111,7 +118,6 @@ export class Node{
 	}
 	generateDiv(main) {
 		// used for testing
-		"use strict";
 		let node = this;
 		let canvas = main.getCanvas();
 		
