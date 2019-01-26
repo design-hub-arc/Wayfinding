@@ -1,0 +1,3 @@
+In case webpack and babel don't work out:
+    Move the html and css files to this directory,
+    move the two svg files to the src folder
