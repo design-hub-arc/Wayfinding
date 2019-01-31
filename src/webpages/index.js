@@ -1,6 +1,6 @@
 import {getIDsFromURL} from                          "../htmlInterface/qrCodes.js";
 import {Canvas} from                                 "../htmlInterface/scaledCanvas.js";
-import {Path, PathFinder} from                       "../nodes/path.js";
+import {Path} from                                   "../nodes/path.js";
 import {Main} from                                   "../main.js";
 import {TextBox} from                                "../htmlInterface/input.js";
 import {get, sequentialGets, importMasterSheet} from "../getRequests/importData.js";
