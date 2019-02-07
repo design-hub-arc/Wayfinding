@@ -1,0 +1,54 @@
+body {
+	width: 100%;
+	height: 100%;
+	position: relative;
+}
+
+#imageTitle{
+	top:80%;
+	left:0%;
+	width:5%;
+	height:10%;
+	position: relative;
+	font-family: "Motserrat";
+	background-color: #BA0C2F;
+	color: #EEEFF1;
+	border-color: black;
+	border-style: solid;
+	border-width: 1px;
+	border-top-style: hidden;
+}
+#image{
+	top:100%;
+	left:30%;
+	height:600%;
+	position: absolute;
+}
+#wrapper{
+	position: relative;
+}
+#drawAll{
+	background-color: red;
+	position : relative;
+	width : 50px;
+	height : 50px;
+}
+#testAll{
+	background-color: green;
+	position : relative;
+	left : 50px;
+	top : -50px;
+	width : 50px;
+	height : 50px;
+}
+#nodeDivs{
+	background-color: blue;
+	position: relative;
+	left : 100px;
+	top : -100px;
+	width : 50px;
+	height : 50px;
+}
+html{
+	height : 100%;
+}

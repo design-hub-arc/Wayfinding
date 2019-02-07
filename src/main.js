@@ -53,7 +53,7 @@ export class Main{
 		@param clearId : the id of an HTML element that can handle onclick events which, when clicked, will clear out each of the user input boxes
 		if either the buttonId, resultsId, or clearId elements do not exist, creates them for you
 		*/
-		let db = this.getClassDB();
+		let db = this.classDatabase;
 		let main = this;
 		let button = document.getElementById(buttonId);
 		let result = document.getElementById(resultsId);
@@ -94,9 +94,9 @@ export class Main{
 				return parseInt(num);
 			}
 			let results = [
-				main.getClassDB().getNumbersByName      (nameTextBox.getResult())      .map(toInt),
-				main.getClassDB().getNumbersByInstructor(instructorTextBox.getResult()).map(toInt),
-				main.getClassDB().getNumbersByTime      (timesTextBox.getResult())     .map(toInt)
+				db.getNumbersByName      (nameTextBox.getResult())      .map(toInt),
+				db.getNumbersByInstructor(instructorTextBox.getResult()).map(toInt),
+				db.getNumbersByTime      (timesTextBox.getResult())     .map(toInt)
 			]; //this is an array of arrays
 			let validResults = []; //which results can be compared
 			let setTo = ["class not found"]; //what the dropbox will be set to
@@ -175,10 +175,7 @@ export class Main{
 		this.pathButton.onclick = function(){
 			if(main.start.isValid() && main.end.isValid()){
 				//updatepath does the finding
-				main.updatePath(
-					main.start.getResult(),
-					main.end.getResult()
-				);
+				main.updatePath();
 			}
 		};
 	}
@@ -198,10 +195,10 @@ export class Main{
 		return this.currentPath;
 	}
 	
-	updatePath(data1, data2){
+	updatePath(){
 		try{
-			let start = this.getNodeDB().getIdByString(data1);
-			let end = this.getNodeDB().getIdByString(data2);
+			let start = this.getNodeDB().getIdByString(this.start.getResult());
+			let end = this.getNodeDB().getIdByString(this.end.getResult());
 			
 			//single equal will catch both null and undefined
 			if(start != null && end != null){ //otherwise some class numbers cause problems
@@ -212,7 +209,7 @@ export class Main{
 					throw new Error("Invalid path: " + newPath.idPath);
 				}
 			} else {
-				throw new Error("Invalid start and end points: " + data1 + " " + data2);
+				throw new Error("Invalid start and end points: " + this.start.getResult() + " " + this.end.getResult());
 			}
 		} catch(e){
 			console.log(e.stack);
@@ -263,8 +260,5 @@ export class Main{
 	
 	setClassDB(database){
 		this.classDatabase = database;
-	}
-	getClassDB(){
-		return this.classDatabase;
 	}
 };

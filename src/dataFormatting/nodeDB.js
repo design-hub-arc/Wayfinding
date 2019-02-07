@@ -130,7 +130,6 @@ export class NodeDB{
 		}
 		let db = this;
 		this.getAll().forEach(node => node.loadAdj(db));
-		this.logOneWayNodes();
 	}
 	
 	parseImageResponse(csvFile){
@@ -270,38 +269,6 @@ export class NodeDB{
 			console.log(name + padding + id);
 		});
 	}
-	
-	logOneWayNodes(){
-		/*
-		Detects nodes with a one-way relationship with other nodes
-		ex. node 1 connects to node 2, but node 2 doesn't connect to node 1
-		fixes the errors
-		*/
-		let allNodes = this.getAll();
-		
-		for(let i = 0; i < allNodes.length; i++){
-			let current = allNodes[i];
-			for(let j = 0; j < current.adj.length && current.id >= 0; j++){
-				if(!current.adj[j].adjIds.includes(current.id)){
-					//console.log("Node with ID " + current.adj[j].id + " needs to connect with node " + current.id);
-					current.adj[j].adjIds.push(current.id);
-					current.adj[j].loadAdj(this);
-				}
-			}
-		}
-	}
-	
-	countConnections(){
-		// counts how many different connections exist
-		let nodeConn = 0;
-		let allNodes = this.getAll();
-		
-		for(let i = 0; i < allNodes.length; i++){
-			nodeConn += allNodes[i].adj.length;
-		}
-		console.log("Total connections between nodes: " + nodeConn);
-	}
-	
 	generateDivs(main) {
 		//used to detect connection errors
 		this.getAll().forEach(node => node.generateDiv(main));
