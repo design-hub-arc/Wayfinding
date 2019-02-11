@@ -1,10 +1,26 @@
-export function getIDsFromURL() {
+export function getParamsFromURL() {
 	/*
 	extracts variables from url.
-	defined as ?start=...&end=...
+	defined as ?start=...&end=...&mode=...
+	
+	returns a Map:
+	
+	"startID" : int
+	"endID"   : int
+	"mode"    : string
+	
+	start and end ids are the ids of the nodes for the 
+	start and end points of the default path
+	
+	mode is what application of wayfinding this is 
+	("WAYFINDING", "ARTFINDING", etc)
 	*/
+	
 	const query = window.location.href;
-	const values = [14, 96];
+	let values = new Map();
+	values.set("startID", 14);
+	values.set("endID", 96);
+	values.set("mode", "WAYFINDING");
 	// defaults to administration to design hub
 	
 	// check if parameters were passed
@@ -16,12 +32,12 @@ export function getIDsFromURL() {
 			console.log("Pair: " + pair);
 			
 			if(pair[0].toUpperCase().includes("START")){
-				values[0] = pair[1];
+				values.set("startID", pair[1]);
 			} else if (pair[0].toUpperCase().includes("END")){
-				values[1] = pair[1];
+				values.set("endID", pair[1]);
+			} else if(pair[0].toUpperCase().includes("MODE")){
+				values.set("mode", pair[1].toUpperCase());
 			}
-			
-			values[pair[0]] = parseFloat(pair[1]);
 		}
 	}
 	return values;

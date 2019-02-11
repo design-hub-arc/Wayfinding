@@ -28,3 +28,6 @@ export const classesURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREUv
 
 export const masterSheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSuRqzSZ2LyamtAz7Gs88JkOiBmyIx8ND6kqRhxbunGVPBw4Wqrc1yYgfjFeC6m_Dx0sbXTE4Q5k3uQ/pub?gid=0&single=true&output=csv";
 //the master spreadsheet containing links to all the data used by the program
+
+export const artFinderURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTF1ockLSS6RTguLW0pgY2HUPAbyiZQ8OG2-EqBBojtuBb662ra6I08LmvUC0ZTvyjKMGPdxgeCtbBf/pub?gid=0&single=true&output=csv";
+//WIP. The master sheet for artfinder

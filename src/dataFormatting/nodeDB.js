@@ -233,6 +233,21 @@ export class NodeDB{
 		return ret;
 	}
 	
+	getStringsById(id){
+		/*
+		returns all labels associated with the given node
+		*/
+		let ret = [];
+		
+		this.stuffToNodeId.forEach((nodeId, label) =>{
+			if(nodeId === id){
+				ret.push(label);
+			}
+		});
+		
+		return ret;
+	}
+	
 	getAllNames(){
 		/*
 		Returns an array of strings,

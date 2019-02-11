@@ -1,11 +1,11 @@
-import {getIDsFromURL} from                          "../htmlInterface/qrCodes.js";
+import {getParamsFromURL} from                          "../htmlInterface/qrCodes.js";
 import {Canvas} from                                 "../htmlInterface/scaledCanvas.js";
 import {Path} from                                   "../nodes/path.js";
 import {Main} from                                   "../main.js";
 import {TextBox} from                                "../htmlInterface/input.js";
 import {get, sequentialGets, importMasterSheet} from "../getRequests/importData.js";
 import {formatResponse, CsvFile} from                "../dataFormatting/csv.js";
-import {mapURL, masterSheetURL} from                 "../getRequests/urls.js";
+import {mapURL, masterSheetURL, artFinderURL} from                 "../getRequests/urls.js";
 import {NodeDB} from                                 "../dataFormatting/nodeDB.js";
 
 let master = new Main();
@@ -18,7 +18,7 @@ svgMap.loaded(() => {
         // need to wait to invoke since we need image width
         let nodes = new NodeDB();
         let masterCanvas = new Canvas();
-        let ids;
+        let params = getParamsFromURL();
         let start = new TextBox("start box", "start hint");
         let end = new TextBox("end box", "end hint");
 
@@ -47,8 +47,7 @@ svgMap.loaded(() => {
             master.setInput(start, end);
             master.setPathButton("button");
 
-            ids = getIDsFromURL();
-            master.setPath(new Path(ids[0], ids[1], master));
+            master.setPath(new Path(params.get("startID"), params.get("endID"), master));
             master.getPath().draw(master.getCanvas());
             console.timeEnd("Time to load");
 			
@@ -57,6 +56,33 @@ svgMap.loaded(() => {
 		{
 			ignore: ["map image", "classes", "class to room"]
 		});
+	
+		console.log("Current mode is " + params.get("mode"));
+		
+		if(params.get("mode").toUpperCase().includes("ART")){
+			//first, import the next data
+			importMasterSheet(artFinderURL, (responses) => {
+				nodes.parseNameToId(responses.get("labels"));
+			});
+			
+			//adds the more info button
+			let element = document.getElementById("moreInfo");
+			if(element === null){
+				element = document.createElement("a");
+				element.setAttribute("id", "moreInfo");
+				document.body.appendChild(element);
+			}
+			element.setAttribute("type", "button");
+			element.setAttribute("href", "https://en.wikipedia.org/wiki/Art");
+			element.setAttribute("target", "_blank");
+			element.innerHTML = "Click here to get more information about this piece of art";
+			
+			master.addOnUpdatePath((path) => {
+				nodes.getStringsById(path.endId).forEach(label => {
+					console.log(label);
+				});
+			});
+		}
     }
 );
 

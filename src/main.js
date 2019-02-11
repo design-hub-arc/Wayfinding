@@ -19,6 +19,8 @@ export class Main{
         this.currentPath = undefined;
         this.nodeDatabase = undefined;
         this.classDatabase = undefined;
+		
+		this.onUpdatePath = []; //an array of functions
     }
 	setCanvas(canvas){
 		// canvas is my custom Canvas class, NOT HTML canvas
@@ -183,6 +185,9 @@ export class Main{
 	setPath(path){
 		if(path.valid){
 			this.currentPath = path;
+			
+			this.onUpdatePath.forEach(func => func(path));
+			
 			try{
 				path.draw(this.canvas);
 			} catch(e){
@@ -260,5 +265,18 @@ export class Main{
 	
 	setClassDB(database){
 		this.classDatabase = database;
+	}
+	
+	/*
+	Adds a function that will be invoked whenever the path is updated.
+	passes the new Path to the function when this.setPath is called
+	*/
+	addOnUpdatePath(func){
+		if(func && {}.toString.call(func) === "[object Function]"){
+			this.onUpdatePath.push(func);	
+		} else {
+			throw new Error("Not a function! " + func.toString());
+		}
+		
 	}
 };
