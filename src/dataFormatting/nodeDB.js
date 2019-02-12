@@ -59,7 +59,7 @@ export class NodeDB{
 			x = parseFloat(row[1]);
 			y = parseFloat(row[2]);
 			
-			if(!isNaN(id) && !isNaN(x) && !isNaN(y)){
+			if(!isNaN(id) && !isNaN(x) && !isNaN(y) && !this.nodes.has(id)){
 				this.nodes.set(id, new Node(
 					id,
 					x,

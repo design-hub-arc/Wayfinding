@@ -4,7 +4,6 @@ These are invoked in the html files.
 */
 
 import {formatResponse} from "../dataFormatting/csv.js";
-import {masterSheetURL} from "./urls.js";
 
 export const newline = /\r?\n|\r/;
 
@@ -24,20 +23,16 @@ export const logger = {
 };
 
 // basic http request functions
-export async function get(url, callback){
-	return fetch(url)
+export function get(url, callback){
+	/*
+	fetch(url)
 		.then(
 		(response) => {
-			if(!response.ok){
-				throw new Error("GET request failed: " + response);
-			}
-			return response.text();
+			console.log(response);
+			callback(response.text());
 		}
-	);/*.then((responseText) => {
-		callback(responseText);
-	});*/
+	);*/
 	
-	/*
 	// callback is a function with a single parameter,
     // passes in the url's response text as that parameter
 	let req = new XMLHttpRequest();
@@ -45,7 +40,7 @@ export async function get(url, callback){
 		if(req.readyState === 4 && req.status === 200){
 			logger.add("Response from " + url + ":");
 			logger.add(req.responseText);			
-			callback(req.responseText.toString());
+			callback(req.responseText);
 		}
 	};
     req.onerror = function(e){
@@ -56,7 +51,7 @@ export async function get(url, callback){
     req.open("GET", url, true); // true means asynchronous
     req.setRequestHeader("Cache-Control", "max-age=0"); // prevent outdated data
     req.send(null);
-	*/
+	
 }
 
 export function sequentialGets(urls, callbacks){
@@ -103,36 +98,32 @@ export function sequentialGets(urls, callbacks){
 
     for(let i = 0; i < urls.length; i++){
         responses.set(urls[i], "No response from URL " + urls[i]);
-		console.log("getting...");
-		get(urls[i]).then(
-			(responseText) => {
-				console.log("resp");
-				f(urls[i])(responseText);
-			}
-		);
-        //get(urls[i], f(urls[i]));
+        get(urls[i], f(urls[i]));
     }
 }
 
 
+
+// improve this
 export function importMasterSheet(url, callback, options={}){
     /*
-	@param url : a string, the 
-	url of the master url file
-	on our google drive
+	 @param url : a string, the 
+	 url of the master url file
+	 on our google drive
 
-	@param callback : a function
+	 @param callback : a function
 
-	This performs a get request on the master url spreadsheet,
-	then performs a get request on each url on the spreadsheet,
-	then passes each URL into the callback function
+	 This performs a get request on the master url spreadsheet,
+	 then performs a get request on each url on the spreadsheet,
+	 then passes each URL into the callback function
 
-	passes a Map, 
-	with the keys being the identifier in the first column of the spreadsheet,
-	and the value is the response text from performing a get request on the url after that identifier, into the callback
-	*/
+	 passes a Map, 
+	 with the keys being the identifier in the first column of the spreadsheet,
+	 and the value is the response text from performing a get request on the url after that identifier;
+	 into the callback
+     */
     
-    get(url).then(responseText => {
+    get(url, responseText => {
         let data = formatResponse(responseText);
         
 		let ignore = (options.hasOwnProperty("ignore")) ? options["ignore"] : [];
@@ -170,20 +161,7 @@ export function importMasterSheet(url, callback, options={}){
 			
 			callback(ret);
 		}
-		console.log("getting here");
+		
         sequentialGets(Array.from(urlToKey.keys()), reformat);
     });
-}
-
-
-export function importWayfindingMasterSheet(nodeDB){
-	/*
-	Performs all the importing needed by the default wayfinding.
-	
-	nodeDB is a NodeDB object, which will be populated by this function
-	*/
-	importMasterSheet(masterSheetURL, (responses) => {
-		nodeDB.parseNodeData(responses.get("Node coordinates"));
-		nodeDB.parseConnData(responses.get("Node connections"));
-	});
 }

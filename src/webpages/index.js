@@ -3,9 +3,9 @@ import {Canvas} from                                 "../htmlInterface/scaledCan
 import {Path} from                                   "../nodes/path.js";
 import {Main} from                                   "../main.js";
 import {TextBox} from                                "../htmlInterface/input.js";
-import {get, importMasterSheet, importWayfindingMasterSheet} from "../getRequests/importData.js";
+import {get, sequentialGets, importMasterSheet} from "../getRequests/importData.js";
 import {formatResponse, CsvFile} from                "../dataFormatting/csv.js";
-import {mapURL, masterSheetURL, artFinderURL} from   "../getRequests/urls.js";
+import {mapURL, masterSheetURL, artFinderURL} from                 "../getRequests/urls.js";
 import {NodeDB} from                                 "../dataFormatting/nodeDB.js";
 
 let master = new Main();
@@ -32,9 +32,7 @@ svgMap.loaded(() => {
         
 		get(masterSheetURL, console.log);
 		
-		
         importMasterSheet(masterSheetURL, (responses) => {
-			//let pause = await importWayfindingMasterSheet(nodes);
             nodes.parseNodeData(responses.get("Node coordinates"));
             nodes.parseConnData(responses.get("Node connections"));
             masterCanvas.setCorners(nodes.getNode(-1).x, nodes.getNode(-1).y, nodes.getNode(-2).x, nodes.getNode(-2).y);
@@ -80,20 +78,9 @@ svgMap.loaded(() => {
 			element.innerHTML = "Click here to get more information about this piece of art";
 			
 			master.addOnUpdatePath((path) => {
-				let isLink = false;
 				nodes.getStringsById(path.endId).forEach(label => {
-					console.log(label.toLowerCase());
-					label = label.toLowerCase();
-					if(label.includes("http")){
-						element.innerHTML = label;
-						element.setAttribute("href", label);
-						isLink = true;
-					}
+					console.log(label);
 				});
-				if(!isLink){
-					element.innerHTML = " ";
-					element.setAttribute("href", "javascript:void(0)");
-				}
 			});
 		}
     }
