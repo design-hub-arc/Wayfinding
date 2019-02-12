@@ -63,6 +63,9 @@ svgMap.loaded(() => {
 			//first, import the next data
 			importMasterSheet(artFinderURL, (responses) => {
 				nodes.parseNameToId(responses.get("labels"));
+				if(master.getPath() != undefined){
+					master.setPath(master.getPath());
+				}
 			});
 			
 			//adds the more info button
@@ -78,9 +81,21 @@ svgMap.loaded(() => {
 			element.innerHTML = "Click here to get more information about this piece of art";
 			
 			master.addOnUpdatePath((path) => {
+				let isLink = false;
 				nodes.getStringsById(path.endId).forEach(label => {
+					console.log(label.toLowerCase());
+					label = label.toLowerCase();
+					if(label.includes("http")){
+						element.innerHTML = label;
+						element.setAttribute("href", label);
+						isLink = true;
+					}
 					console.log(label);
 				});
+				if(!isLink){
+					element.innerHTML = " ";
+					element.setAttribute("href", "javascript:void(0)");
+				}
 			});
 		}
     }
