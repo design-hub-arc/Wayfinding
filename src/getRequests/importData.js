@@ -3,7 +3,7 @@ Provides functions which are used to perform XMLHTTPRequests.
 These are invoked in the html files.
 */
 
-import {formatResponse} from "../dataFormatting/csv.js";
+import {formatResponse, CsvFile} from "../dataFormatting/csv.js";
 
 
 
@@ -96,13 +96,12 @@ export function sequentialGets(urls, callbacks){
 }
 
 
-export function importMasterSheet(url, callback, options={}){
-    /*
+export async function importMasterSheet(url, options={}){
+	/*
 	 @param url : a string, the 
 	 url of the master url file
 	 on our google drive
 
-	 @param callback : a function
 
 	 This performs a get request on the master url spreadsheet,
 	 then performs a get request on each url on the spreadsheet,
@@ -110,52 +109,54 @@ export function importMasterSheet(url, callback, options={}){
 
 	 passes a Map, 
 	 with the keys being the identifier in the first column of the spreadsheet,
-	 and the value is the response text from performing a get request on the url after that identifier;
-	 into the callback
+	 and the value is the response text from performing a get request on the url after that identifier
+	 returning the Map
      */
-    
-    get(url, responseText => {
-        let data = formatResponse(responseText);
-        
-		let ignore = (options.hasOwnProperty("ignore")) ? options["ignore"] : [];
-		let urlToKey = new Map();
-		/*
-		since sequentialGets will return url-to-response,
-		we need to provide an easier way to identify what each response is giving.
-		since we are looking at key-to-url-to-response text,
-		and sequentialGets gives us url-to-response,
-		we can use this to get key-to-response text
-		*/
-		
-        for(let i = 1; i < data.length; i++){ 
-            if(data[i][1] !== "" && ignore.indexOf(data[i][0]) === -1){
-				/*
-				The data is a table, with the first column being a key,
-				such as "node coordinates", "buildings", etc,
-				
-				and the second being the url linking to that resource
-				*/
-				urlToKey.set(data[i][1], data[i][0]);
-            }
-        }
-		
-		function reformat(responses){
+	let promise = new Promise((resolve, reject) => {
+		get(url, (responseText) => {
+			let data = formatResponse(responseText);
+			let ignore = (options.hasOwnProperty("ignore")) ? options["ignore"] : [];
+			let urlToKey = new Map();
 			/*
-			Convets the url-to-response result of seqGet
-			to an easier to use key-to-response
+			since sequentialGets will return url-to-response,
+			we need to provide an easier way to identify what each response is giving.
+			since we are looking at key-to-url-to-response text,
+			and sequentialGets gives us url-to-response,
+			we can use this to get key-to-response text
 			*/
-			let ret = new Map();
-			
-			responses.forEach((responseText, url) => {
-				ret.set(urlToKey.get(url), responseText);
-			});
-			
-			callback(ret);
-		}
-		
-        sequentialGets(Array.from(urlToKey.keys()), reformat);
-    });
+
+			for(let i = 1; i < data.length; i++){ 
+				if(data[i][1] !== "" && ignore.indexOf(data[i][0]) === -1){
+					/*
+					The data is a table, with the first column being a key,
+					such as "node coordinates", "buildings", etc,
+
+					and the second being the url linking to that resource
+					*/
+					urlToKey.set(data[i][1], data[i][0]);
+				}
+			}
+
+			function reformat(responses){
+				/*
+				Convets the url-to-response result of seqGet
+				to an easier to use key-to-response
+				*/
+				let ret = new Map();
+
+				responses.forEach((responseText, url) => {
+					ret.set(urlToKey.get(url), responseText);
+				});
+
+				resolve(ret);
+			}
+
+			sequentialGets(Array.from(urlToKey.keys()), reformat);
+		});
+	});
+	return promise;
 }
+
 
 export async function importWayfinding(url, nodeDB){
 	/*
@@ -169,7 +170,9 @@ export async function importWayfinding(url, nodeDB){
 			nodeDB.parseConnData(responses.get("Node connections"));
 			nodeDB.parseNameToId(responses.get("buildings"));
 			nodeDB.parseNameToId(responses.get("rooms"));
-			
+			nodeDB.parseImageResponse(new CsvFile(responses.get("images")));
+			//nodDB.parseClassResponse(new CsvFile(responses.get("class to room")));
+			console.log("resolving");
 			resolve(responses);
 		},
 		{
@@ -179,6 +182,11 @@ export async function importWayfinding(url, nodeDB){
 	
 }
 
-export function importArtfinding(){
-	
+export async function importArtfinding(url, nodeDB){
+	return new Promise((resolve, reject) => {
+		importMasterSheet2(url).then((responses) => {
+			nodeDB.parseNameToId(responses.get("labels"));
+			resolve(responses);
+		});
+	});
 }

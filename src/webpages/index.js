@@ -3,7 +3,7 @@ import {Canvas} from                                 "../htmlInterface/scaledCan
 import {Path} from                                   "../nodes/path.js";
 import {Main} from                                   "../main.js";
 import {TextBox} from                                "../htmlInterface/input.js";
-import {get, sequentialGets, importMasterSheet, importWayfinding} from "../getRequests/importData.js";
+import {importWayfinding, importArtfinding} from "../getRequests/importData.js";
 import {formatResponse, CsvFile} from                "../dataFormatting/csv.js";
 import {mapURL, masterSheetURL, artFinderURL} from                 "../getRequests/urls.js";
 import {NodeDB} from                                 "../dataFormatting/nodeDB.js";
@@ -33,47 +33,17 @@ svgMap.loaded(() => {
 	importWayfinding(masterSheetURL, nodes).then((responses) => {
 		console.log("doing stuff with response");
 		masterCanvas.setCorners(nodes.getNode(-1).x, nodes.getNode(-1).y, nodes.getNode(-2).x, nodes.getNode(-2).y);
-		nodes.parseImageResponse(new CsvFile(responses.get("images")));
 		master.setInput(start, end);
 		master.setPathButton("button");
-
 		master.setPath(new Path(params.get("startID"), params.get("endID"), master));
 		master.getPath().draw(master.getCanvas());
 		console.timeEnd("Time to load");
 	});
 
-	/*
-	importMasterSheet(masterSheetURL, (responses) => {
-		//nodes.parseNodeData(responses.get("Node coordinates"));
-		//nodes.parseConnData(responses.get("Node connections"));
-		masterCanvas.setCorners(nodes.getNode(-1).x, nodes.getNode(-1).y, nodes.getNode(-2).x, nodes.getNode(-2).y);
-
-		//nodes.parseNameToId(responses.get("buildings"));
-		//nodes.parseNameToId(responses.get("rooms"));
-
-
-		nodes.parseImageResponse(new CsvFile(responses.get("images")));
-		//nodes.parseClassResponse(new CsvFile(responses.get("class to room")));
-
-		master.setInput(start, end);
-		master.setPathButton("button");
-
-		master.setPath(new Path(params.get("startID"), params.get("endID"), master));
-		master.getPath().draw(master.getCanvas());
-		console.timeEnd("Time to load");
-
-		//nodes.prettyPrintStuffToId();
-	},
-	{
-		ignore: ["map image", "classes", "class to room"]
-	});*/
-
 	console.log("Current mode is " + params.get("mode"));
 
 	if(params.get("mode").toUpperCase().includes("ART")){
-		//first, import the next data
-		importMasterSheet(artFinderURL, (responses) => {
-			nodes.parseNameToId(responses.get("labels"));
+		importArtfinding(artFinderURL, nodes).then((responses) => {
 			if(master.getPath() != undefined){
 				master.setPath(master.getPath());
 			}
