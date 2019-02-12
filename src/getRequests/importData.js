@@ -24,15 +24,6 @@ export const logger = {
 
 // basic http request functions
 export function get(url, callback){
-	/*
-	fetch(url)
-		.then(
-		(response) => {
-			console.log(response);
-			callback(response.text());
-		}
-	);*/
-	
 	// callback is a function with a single parameter,
     // passes in the url's response text as that parameter
 	let req = new XMLHttpRequest();
@@ -103,8 +94,6 @@ export function sequentialGets(urls, callbacks){
 }
 
 
-
-// improve this
 export function importMasterSheet(url, callback, options={}){
     /*
 	 @param url : a string, the 
@@ -164,4 +153,12 @@ export function importMasterSheet(url, callback, options={}){
 		
         sequentialGets(Array.from(urlToKey.keys()), reformat);
     });
+}
+
+export function importWayfinding(){
+	
+}
+
+export function importArtfinding(){
+	
 }
