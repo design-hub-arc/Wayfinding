@@ -1,5 +1,5 @@
 /*
-Provides functions which are used to perform XMLHTTPRequests.
+Provides functions which are used to perform get requests.
 These are invoked in the html files.
 */
 
@@ -25,9 +25,9 @@ export const logger = {
 };
 
 // basic http request functions
-export function get(url, callback){
-	// callback is a function with a single parameter,
-    // passes in the url's response text as that parameter
+export async function get(url){
+    // passes in the url's response text as that parameter to the promise.resolve
+	/*
 	let req = new XMLHttpRequest();
 	req.onreadystatechange = function(){
 		if(req.readyState === 4 && req.status === 200){
@@ -44,55 +44,39 @@ export function get(url, callback){
     req.open("GET", url, true); // true means asynchronous
     req.setRequestHeader("Cache-Control", "max-age=0"); // prevent outdated data
     req.send(null);
-	
+	*/
+	return fetch(url).then((response) => {
+		let text = response.text();
+		logger.add("Response from " + url + ":");
+		logger.add(response);
+		logger.add(text);
+		return text;
+	});
 }
 
-export function sequentialGets(urls, callbacks){
+export async function sequentialGets(urls){
     /*
     @param urls : an array of strings, the urls to get
-    @param callbacks : either...
-    (a): an array of functions, each taking a string as a paramter
-    (b): a single element array or function, taking an array of strings as a parameter
-
-    performs a get request on each url, then...
-    (a): if multiple callbacks are provided, passes in responses[i] to callback[i]
-    (b): if only one callback is passed (one element array, or just a function), passes in all responses as an Map to that function,
-		where the key is the URL, and the value is the response text
+    
+    performs a get request on each url, then resolves the promise, 
+	passing in all responses as an Map to that function,
+	where the key is the URL, and the value is the response text
     */
-    "use strict";
-    let responses = new Map();
-    let received = 0;
-    let singleFunction = !Array.isArray(callbacks) || callbacks.length === 1;
-    
-    if(!Array.isArray(callbacks)){
-        callbacks = [callbacks]; //make sure it's an array. Can't use singleFunction b/c single element array would cause problems
-    }
-    
-    function finish(){
-        if(singleFunction){
-            callbacks[0](responses);
-        } else {
-			let respArray = Array.from(responses.values()); // Maps retain insertion order, so this works
-            for(let i = 0; i < respArray.length && i < callbacks.length; i++){
-                callbacks[i](respArray[i]);
-            }
-        }
-    }
-    
-    function f(url){
-        return function(responseText){
-            responses.set(url, responseText);
-            received++;
-            if(received === urls.length){
-                finish();
-            }
-        };
-    }
-
-    for(let i = 0; i < urls.length; i++){
-        responses.set(urls[i], "No response from URL " + urls[i]);
-        get(urls[i], f(urls[i]));
-    }
+	return new Promise((resolve, reject) => {
+		let responses = new Map();
+		let received = 0;
+		
+		for(let i = 0; i < urls.length; i++){
+			responses.set(urls[i], "No response from URL " + urls[i]);
+			get(urls[i]).then((responseText) => {
+				responses.set(urls[i], responseText);
+				received++;
+				if(received === urls.length){
+					resolve(responses);
+				}
+			});
+		}
+	});
 }
 
 
@@ -113,8 +97,9 @@ export async function importMasterSheet(url, options={}){
 	 returning the Map
      */
 	let promise = new Promise((resolve, reject) => {
-		get(url, (responseText) => {
+		get(url).then((responseText) => {
 			let data = formatResponse(responseText);
+			let only = (options.hasOwnProperty("only")) ? options["only"] : [];
 			let ignore = (options.hasOwnProperty("ignore")) ? options["ignore"] : [];
 			let urlToKey = new Map();
 			/*
@@ -126,7 +111,11 @@ export async function importMasterSheet(url, options={}){
 			*/
 
 			for(let i = 1; i < data.length; i++){ 
-				if(data[i][1] !== "" && ignore.indexOf(data[i][0]) === -1){
+				if(only.length > 0){
+					if(data[i][1] !== "" && only.indexOf(data[i][0]) !== -1){
+						urlToKey.set(data[i][1], data[i][0]);
+					}
+				} else if (data[i][1] !== "" && ignore.indexOf(data[i][0]) === -1){
 					/*
 					The data is a table, with the first column being a key,
 					such as "node coordinates", "buildings", etc,
@@ -137,21 +126,20 @@ export async function importMasterSheet(url, options={}){
 				}
 			}
 
-			function reformat(responses){
+			sequentialGets(Array.from(urlToKey.keys())).then((responses) => {
 				/*
 				Convets the url-to-response result of seqGet
 				to an easier to use key-to-response
 				*/
+				
 				let ret = new Map();
-
+				
 				responses.forEach((responseText, url) => {
 					ret.set(urlToKey.get(url), responseText);
 				});
 
 				resolve(ret);
-			}
-
-			sequentialGets(Array.from(urlToKey.keys()), reformat);
+			});
 		});
 	});
 	return promise;
@@ -165,18 +153,16 @@ export async function importWayfinding(url, nodeDB){
 	nodeDB will be populated by the data downloaded
 	*/
 	return new Promise((resolve, reject) => {
-		importMasterSheet(url, (responses) => {
+		importMasterSheet(url, {
+			ignore: ["map image", "classes", "class to room"]
+		}).then((responses) => {
 			nodeDB.parseNodeData(responses.get("Node coordinates"));
 			nodeDB.parseConnData(responses.get("Node connections"));
 			nodeDB.parseNameToId(responses.get("buildings"));
 			nodeDB.parseNameToId(responses.get("rooms"));
 			nodeDB.parseImageResponse(new CsvFile(responses.get("images")));
 			//nodDB.parseClassResponse(new CsvFile(responses.get("class to room")));
-			console.log("resolving");
 			resolve(responses);
-		},
-		{
-			ignore: ["map image", "classes", "class to room"]
 		});
 	});
 	
@@ -184,9 +170,12 @@ export async function importWayfinding(url, nodeDB){
 
 export async function importArtfinding(url, nodeDB){
 	return new Promise((resolve, reject) => {
-		importMasterSheet2(url).then((responses) => {
+		importMasterSheet(url).then((responses) => {
 			nodeDB.parseNameToId(responses.get("labels"));
 			resolve(responses);
+		},
+		{
+			only: ["labels"]
 		});
 	});
 }

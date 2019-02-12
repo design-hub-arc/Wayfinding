@@ -9,7 +9,7 @@ let db = new ClassDB();
 let master = new Main();
 master.setClassDB(db);
 
-get(classesURL, responseText =>{
+get(classesURL).then((responseText) =>{
     db.parseResponse(new CsvFile(responseText));
     master.setClassFinder(
         new TextBox("name box", "name hint"),
