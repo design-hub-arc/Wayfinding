@@ -1,12 +1,11 @@
-import {getParamsFromURL} from                          "../htmlInterface/qrCodes.js";
-import {Canvas} from                                 "../htmlInterface/scaledCanvas.js";
-import {Path} from                                   "../nodes/path.js";
-import {Main} from                                   "../main.js";
-import {TextBox} from                                "../htmlInterface/input.js";
-import {importWayfinding, importArtfinding} from "../getRequests/importData.js";
-import {formatResponse, CsvFile} from                "../dataFormatting/csv.js";
-import {mapURL, masterSheetURL, artFinderURL} from                 "../getRequests/urls.js";
-import {NodeDB} from                                 "../dataFormatting/nodeDB.js";
+import {getParamsFromURL} from                     "../htmlInterface/qrCodes.js";
+import {Canvas} from                               "../htmlInterface/scaledCanvas.js";
+import {Path} from                                 "../nodes/path.js";
+import {Main} from                                 "../main.js";
+import {TextBox} from                              "../htmlInterface/input.js";
+import {importWayfinding, importArtfinding} from   "../getRequests/importData.js";
+import {mapURL, masterSheetURL, artFinderURL} from "../getRequests/urls.js";
+import {NodeDB} from                               "../dataFormatting/nodeDB.js";
 
 let master = new Main();
 
@@ -31,21 +30,17 @@ svgMap.loaded(() => {
 	master.setCanvas(masterCanvas);
 
 	importWayfinding(masterSheetURL, nodes).then((responses) => {
-		console.log("doing stuff with response");
 		masterCanvas.setCorners(nodes.getNode(-1).x, nodes.getNode(-1).y, nodes.getNode(-2).x, nodes.getNode(-2).y);
 		master.setInput(start, end);
 		master.setPathButton("button");
 		master.setPath(new Path(params.get("startID"), params.get("endID"), master));
-		master.getPath().draw(master.getCanvas());
 		console.timeEnd("Time to load");
 	});
-
-	console.log("Current mode is " + params.get("mode"));
 
 	if(params.get("mode").toUpperCase().includes("ART")){
 		importArtfinding(artFinderURL, nodes).then((responses) => {
 			if(master.getPath() != undefined){
-				master.setPath(master.getPath());
+				master.setPath(master.getPath()); //reload path
 			}
 		});
 
