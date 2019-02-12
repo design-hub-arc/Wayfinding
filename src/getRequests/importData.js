@@ -5,6 +5,8 @@ These are invoked in the html files.
 
 import {formatResponse} from "../dataFormatting/csv.js";
 
+
+
 export const newline = /\r?\n|\r/;
 
 //used for debugging
@@ -155,7 +157,25 @@ export function importMasterSheet(url, callback, options={}){
     });
 }
 
-export function importWayfinding(){
+export async function importWayfinding(url, nodeDB){
+	/*
+	imports all of the data needed for wayfinding into the program
+	
+	nodeDB will be populated by the data downloaded
+	*/
+	return new Promise((resolve, reject) => {
+		importMasterSheet(url, (responses) => {
+			nodeDB.parseNodeData(responses.get("Node coordinates"));
+			nodeDB.parseConnData(responses.get("Node connections"));
+			nodeDB.parseNameToId(responses.get("buildings"));
+			nodeDB.parseNameToId(responses.get("rooms"));
+			
+			resolve(responses);
+		},
+		{
+			ignore: ["map image", "classes", "class to room"]
+		});
+	});
 	
 }
 
