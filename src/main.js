@@ -5,7 +5,8 @@ It also takes a lot of code out of the main HTML file.
 May clean this up more once we have access to the class database (not my fake one, the real one that eservices uses)
 */
 
-import { Path } from "./nodes/path.js";
+import { Path } from             "./nodes/path.js";
+import { getParamsFromURL } from "./htmlInterface/qrCodes.js";
 
 export class Main{
     constructor(){
@@ -33,13 +34,10 @@ export class Main{
 	setInput(start, end){
 		/*
 		start and end are TextBoxes.
-		Populates said TextBoxes with the contents of this' fake database
+		Populates said TextBoxes with the contents of this' fake database when notifyImportDone is called
 		*/
 		this.start = start;
 		this.end = end;
-		
-		start.addOptions(this.getNodeDB().getAllNames());
-		end.addOptions(this.getNodeDB().getAllNames());
 	}
 	
 	setClassFinder(nameTextBox, instructorTextBox, timesTextBox, buttonId, resultsId, clearId){
@@ -220,6 +218,48 @@ export class Main{
 			console.log(e.stack);
 		}
 	}
+	
+	
+	
+	
+	
+	
+	notifyImportDone(){
+		/*
+		Called after the initial import.
+		Updates this' various components with the newly imported data.
+		
+		1. Sets the size of the canvas
+		2. Populates the TextBoxes
+		3. Sets the default path
+		*/
+		
+		let upperLeft = this.nodeDatabase.getNode(-1);
+		let lowerRight = this.nodeDatabase.getNode(-2);
+		let params = getParamsFromURL();
+		
+		this.canvas.setCorners(
+			upperLeft.x,
+			upperLeft.y,
+			lowerRight.x,
+			lowerRight.y
+		);
+		
+		this.start.addOptions(this.getNodeDB().getAllNames());
+		this.end.addOptions(this.getNodeDB().getAllNames());
+		
+		this.setPath(new Path(
+			params.get("startID"), 
+			params.get("endID"), 
+			this
+		));
+	}
+	
+	
+	
+	
+	
+	
 	
 	testAllPaths(){
 		//developer tool. Detects any paths between any two nodes that cannot exist

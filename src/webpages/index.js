@@ -20,6 +20,7 @@ svgMap.loaded(() => {
 	let params = getParamsFromURL();
 	let start = new TextBox("start box", "start hint");
 	let end = new TextBox("end box", "end hint");
+	master.setInput(start, end);
 
 	master.setNodeDB(nodes);
 	masterCanvas.link(svgDrawer, document.getElementById("wrapper")
@@ -28,15 +29,16 @@ svgMap.loaded(() => {
 			   );
 	masterCanvas.resize();
 	master.setCanvas(masterCanvas);
-
-	importWayfinding(masterSheetURL, nodes).then((responses) => {
-		masterCanvas.setCorners(nodes.getNode(-1).x, nodes.getNode(-1).y, nodes.getNode(-2).x, nodes.getNode(-2).y);
-		master.setInput(start, end);
-		master.setPathButton("button");
-		master.setPath(new Path(params.get("startID"), params.get("endID"), master));
+	master.setPathButton("button");
+	
+	
+	
+	importWayfinding(masterSheetURL, master).then((responses) => {
 		console.timeEnd("Time to load");
 	});
-
+	
+	
+	
 	if(params.get("mode").toUpperCase().includes("ART")){
 		importArtfinding(artFinderURL, nodes).then((responses) => {
 			if(master.getPath() != undefined){

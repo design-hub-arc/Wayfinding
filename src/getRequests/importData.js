@@ -146,22 +146,28 @@ export async function importMasterSheet(url, options={}){
 }
 
 
-export async function importWayfinding(url, nodeDB){
+export async function importWayfinding(url, master){
 	/*
 	imports all of the data needed for wayfinding into the program
 	
-	nodeDB will be populated by the data downloaded
+	master is a Main object which will be populated by the imported data
 	*/
 	return new Promise((resolve, reject) => {
 		importMasterSheet(url, {
 			ignore: ["map image", "classes", "class to room"]
 		}).then((responses) => {
+			let nodeDB = master.getNodeDB();
+			let canvas = master.getCanvas();
+			
 			nodeDB.parseNodeData(responses.get("Node coordinates"));
 			nodeDB.parseConnData(responses.get("Node connections"));
 			nodeDB.parseNameToId(responses.get("buildings"));
 			nodeDB.parseNameToId(responses.get("rooms"));
 			nodeDB.parseImageResponse(new CsvFile(responses.get("images")));
 			//nodDB.parseClassResponse(new CsvFile(responses.get("class to room")));
+			
+			master.notifyImportDone();
+			
 			resolve(responses);
 		});
 	});
