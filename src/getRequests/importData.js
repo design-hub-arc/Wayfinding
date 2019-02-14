@@ -174,14 +174,14 @@ export async function importWayfinding(url, master){
 	
 }
 
-export async function importArtfinding(url, nodeDB){
+export async function importArtfinding(url, master){
 	return new Promise((resolve, reject) => {
-		importMasterSheet(url).then((responses) => {
-			nodeDB.parseNameToId(responses.get("labels"));
-			resolve(responses);
-		},
-		{
+		importMasterSheet(url, {
 			only: ["labels"]
+		}).then((responses) => {
+			master.getNodeDB().parseNameToId(responses.get("labels"));
+			master.notifyImportDone();
+			resolve(responses);
 		});
 	});
 }

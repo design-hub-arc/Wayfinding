@@ -219,11 +219,6 @@ export class Main{
 		}
 	}
 	
-	
-	
-	
-	
-	
 	notifyImportDone(){
 		/*
 		Called after the initial import.
