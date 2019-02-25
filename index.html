@@ -11,7 +11,7 @@
 		<script src="./src/svg.panzoom.js"></script>
 		
 		<script>
-			function testDrive(){
+			function initDrive(){
 				gapi.load("client:auth2", ()=>{
 					gapi.client.init({
 						apiKey: "AIzaSyCk-i3lAc_k5ngfJ-FDw37swWvPMYaEWZs",
@@ -20,12 +20,6 @@
 						scope: "https://www.googleapis.com/auth/drive.metadata.readonly"
 					}).then(()=> {
 						console.log(gapi);
-						gapi.client.drive.files.get({
-							fileId: "1-EG5WlskMn7s6lJ_283xb6xy-Bu0SAUU",
-							alt: "media"
-						}).then((result)=>{
-							console.log(result.body);
-						});
 					});
 				},
 						 (error)=>{
@@ -78,6 +72,6 @@
 		
         <script src="./src/webpages/index.js" type="module"></script>
 		<script async defer src="https://apis.google.com/js/api.js"
-				onload="testDrive()"></script>
+				onload="initDrive()"></script>
     </body>
 </html>

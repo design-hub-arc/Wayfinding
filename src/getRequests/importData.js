@@ -149,6 +149,22 @@ export async function importMasterSheet(url, options={}){
 
 
 /*
+
+
+Making sure this works first
+
+
+
+*/
+
+
+
+
+
+
+
+
+/*
 Gets a file's data from the google drive.
 fileId - a string, the id of the file in google drive.
 */
@@ -159,10 +175,131 @@ export async function driveGet(fileId){
 		fileId: fileId,
 		alt: "media"
 	}).then((result)=> {
+		logger.add("Response from " + fileId + ":");
+		logger.add(result);
+		logger.add(result.body);
 		return result.body;
 	});
 }
 
+/*
+*/
+export async function driveSeqGets(fileIds){
+	/*
+    @param fileIds : an array of strings, the ids of files to get
+    
+    performs a get request on each id, then resolves the promise, 
+	passing in all responses as an Map to that function,
+	where the key is the id, and the value is the response text
+    */
+	return new Promise((resolve, reject) => {
+		let responses = new Map();
+		let received = 0;
+		
+		for(let i = 0; i < urls.length; i++){
+			responses.set(urls[i], "No response from URL " + urls[i]);
+			driveGet(urls[i]).then((responseText) => {
+				responses.set(urls[i], responseText);
+				received++;
+				if(received === urls.length){
+					resolve(responses);
+				}
+			});
+		}
+	});
+}
+export async function importManifest(fileId, options={}){
+	/*
+	 @param fileId : a string, the 
+	 id of the master url file
+	 on our google drive
+
+
+	 This performs a get request on the master url spreadsheet,
+	 then performs a get request on each url on the spreadsheet,
+	 then passes each URL into the callback function
+
+	 passes a Map, 
+	 with the keys being the identifier in the first column of the spreadsheet,
+	 and the value is the response text from performing a get request on the url after that identifier
+	 returning the Map
+     */
+	let promise = new Promise((resolve, reject) => {
+		driveGet(fileId).then((responseText) => {
+			let data = formatResponse(responseText);
+			let only = (options.hasOwnProperty("only")) ? options["only"] : [];
+			let ignore = (options.hasOwnProperty("ignore")) ? options["ignore"] : [];
+			let urlToKey = new Map();
+			/*
+			since sequentialGets will return url-to-response,
+			we need to provide an easier way to identify what each response is giving.
+			since we are looking at key-to-url-to-response text,
+			and sequentialGets gives us url-to-response,
+			we can use this to get key-to-response text
+			*/
+
+			for(let i = 1; i < data.length; i++){ 
+				if(only.length > 0){
+					if(data[i][1] !== "" && only.indexOf(data[i][0]) !== -1){
+						urlToKey.set(data[i][1], data[i][0]);
+					}
+				} else if (data[i][1] !== "" && ignore.indexOf(data[i][0]) === -1){
+					/*
+					The data is a table, with the first column being a key,
+					such as "node coordinates", "buildings", etc,
+
+					and the second being the url linking to that resource
+					*/
+					urlToKey.set(data[i][1], data[i][0]);
+				}
+			}
+
+			driveSeqGets(Array.from(urlToKey.keys())).then((responses) => {
+				/*
+				Convets the url-to-response result of seqGet
+				to an easier to use key-to-response
+				*/
+				
+				let ret = new Map();
+				
+				responses.forEach((responseText, url) => {
+					ret.set(urlToKey.get(url), responseText);
+				});
+
+				resolve(ret);
+			});
+		});
+	});
+	return promise;
+}
+
+export async function importWayfindingDrive(fileId, master){
+	/*
+	imports all of the data needed for wayfinding into the program
+	
+	master is a Main object which will be populated by the imported data
+	*/
+	return new Promise((resolve, reject) => {
+		importManifest(fileId, {
+			ignore: ["map image", "classes", "class to room"]
+		}).then((responses) => {
+			let nodeDB = master.getNodeDB();
+			let canvas = master.getCanvas();
+			
+			nodeDB.parseNodeData(responses.get("Node coordinates"));
+			nodeDB.parseConnData(responses.get("Node connections"));
+			nodeDB.parseNameToId(responses.get("buildings"));
+			nodeDB.parseNameToId(responses.get("rooms"));
+			nodeDB.parseImageResponse(new CsvFile(responses.get("images")));
+			//nodDB.parseClassResponse(new CsvFile(responses.get("class to room")));
+			
+			master.notifyImportDone();
+			
+			resolve(responses);
+		});
+	});
+	
+}
 
 
 //user permission issues
@@ -171,6 +308,10 @@ export async function iterFolder(folderId){
 		console.log(result);
 	});
 }
+
+
+
+
 
 
 
