@@ -45,6 +45,8 @@ export async function get(url){
     req.setRequestHeader("Cache-Control", "max-age=0"); // prevent outdated data
     req.send(null);
 	*/
+	
+	
 	return fetch(url).then((response) => {
 		let text = response.text();
 		logger.add("Response from " + url + ":");
@@ -144,6 +146,34 @@ export async function importMasterSheet(url, options={}){
 	});
 	return promise;
 }
+
+
+/*
+Gets a file's data from the google drive.
+fileId - a string, the id of the file in google drive.
+*/
+export async function driveGet(fileId){
+	//gapi is defined in https://apis.google.com/js/api.js.
+	//if this doesn't work, make sure that the API has been loaded!
+	return gapi.client.drive.files.get({
+		fileId: fileId,
+		alt: "media"
+	}).then((result)=> {
+		return result.body;
+	});
+}
+
+
+
+//user permission issues
+export async function iterFolder(folderId){
+	gapi.client.drive.files.list(q="parents in " + folderId).then((result)=>{
+		console.log(result);
+	});
+}
+
+
+
 
 export async function importWayfinding(url, master){
 	/*

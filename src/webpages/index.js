@@ -17,6 +17,7 @@ import {
 	InfoElement
 } from "../htmlInterface/infoElement.js";
 import {
+	driveGet,
 	importWayfinding,
 	importArtfinding
 } from "../getRequests/importData.js";
@@ -53,7 +54,9 @@ svgMap.loaded(() => {
 	master.setCanvas(masterCanvas);
 	master.setPathButton("button");
 
-
+	driveGet("1-EG5WlskMn7s6lJ_283xb6xy-Bu0SAUU").then((data)=>{
+		console.log(data);
+	});
 
 	importWayfinding(masterSheetURL, master).then((responses) => {
 		console.timeEnd("Time to load (wayfinding)");
