@@ -21,9 +21,10 @@
 					}).then(()=> {
 						console.log(gapi);
 						gapi.client.drive.files.get({
-							fileId: "1-EG5WlskMn7s6lJ_283xb6xy-Bu0SAUU"
-						}).execute((result)=>{
-							console.log(typeof result);
+							fileId: "1-EG5WlskMn7s6lJ_283xb6xy-Bu0SAUU",
+							alt: "media"
+						}).then((result)=>{
+							console.log(result.body);
 						});
 					});
 				},
