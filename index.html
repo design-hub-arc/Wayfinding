@@ -9,6 +9,30 @@
         
 		<script src="./src/svg.js"></script>
 		<script src="./src/svg.panzoom.js"></script>
+		
+		<script>
+			function testDrive(){
+				gapi.load("client:auth2", ()=>{
+					gapi.client.init({
+						apiKey: "AIzaSyCk-i3lAc_k5ngfJ-FDw37swWvPMYaEWZs",
+						client_id: "123335625420-4t9oodh2j04umpau2m98dd2uvkn6s659.apps.googleusercontent.com",
+						discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
+						scope: "https://www.googleapis.com/auth/drive.metadata.readonly"
+					}).then(()=> {
+						console.log(gapi);
+						gapi.client.drive.files.get({
+							fileId: "1-EG5WlskMn7s6lJ_283xb6xy-Bu0SAUU"
+						}).execute((result)=>{
+							console.log(typeof result);
+						});
+					});
+				},
+						 (error)=>{
+					console.log(error);
+				});
+			}
+		</script>
+		
 	</head>
     <body>
 		<div id="imageTitle" onclick="nextImage()"> Next step </div>
@@ -50,6 +74,9 @@
         
 		<!--<a href="classFinder.html" target="_blank">Find a class</a>-->
 		
+		
         <script src="./src/webpages/index.js" type="module"></script>
+		<script async defer src="https://apis.google.com/js/api.js"
+				onload="testDrive()"></script>
     </body>
 </html>

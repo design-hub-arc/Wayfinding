@@ -145,7 +145,6 @@ export async function importMasterSheet(url, options={}){
 	return promise;
 }
 
-
 export async function importWayfinding(url, master){
 	/*
 	imports all of the data needed for wayfinding into the program
