@@ -17,7 +17,8 @@ import {
 	InfoElement
 } from "../htmlInterface/infoElement.js";
 import {
-	driveGet,
+    logger,
+	importManifest,
 	importWayfinding,
 	importArtfinding
 } from "../getRequests/importData.js";
@@ -54,9 +55,11 @@ svgMap.loaded(() => {
 	master.setCanvas(masterCanvas);
 	master.setPathButton("button");
 
-	driveGet("1-EG5WlskMn7s6lJ_283xb6xy-Bu0SAUU").then((data)=>{
-		console.log(data);
-	});
+	//driveGet("1bFY6eGQxUR7RsxENkHv0mh229rQROhox").then((data)=>{console.log(data);});
+	importManifest("1bFY6eGQxUR7RsxENkHv0mh229rQROhox").then((response)=>{
+        logger.displayAll();
+    });
+    
 
 	importWayfinding(masterSheetURL, master).then((responses) => {
 		console.timeEnd("Time to load (wayfinding)");

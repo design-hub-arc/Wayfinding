@@ -196,12 +196,12 @@ export async function driveSeqGets(fileIds){
 		let responses = new Map();
 		let received = 0;
 		
-		for(let i = 0; i < urls.length; i++){
-			responses.set(urls[i], "No response from URL " + urls[i]);
-			driveGet(urls[i]).then((responseText) => {
-				responses.set(urls[i], responseText);
+		for(let i = 0; i < fileIds.length; i++){
+			responses.set(fileIds[i], "No response from file ID " + fileIds[i]);
+			driveGet(fileIds[i]).then((responseText) => {
+				responses.set(fileIds[i], responseText);
 				received++;
-				if(received === urls.length){
+				if(received === fileIds.length){
 					resolve(responses);
 				}
 			});
@@ -229,32 +229,42 @@ export async function importManifest(fileId, options={}){
 			let data = formatResponse(responseText);
 			let only = (options.hasOwnProperty("only")) ? options["only"] : [];
 			let ignore = (options.hasOwnProperty("ignore")) ? options["ignore"] : [];
-			let urlToKey = new Map();
+			let fileIdToKey = new Map();
 			/*
-			since sequentialGets will return url-to-response,
+			since sequentialGets will return fileId-to-response,
 			we need to provide an easier way to identify what each response is giving.
-			since we are looking at key-to-url-to-response text,
-			and sequentialGets gives us url-to-response,
+			since we are looking at key-to-fileId-to-response text,
+			and sequentialGets gives us fileId-to-response,
 			we can use this to get key-to-response text
 			*/
+            console.log(data);
 
 			for(let i = 1; i < data.length; i++){ 
 				if(only.length > 0){
-					if(data[i][1] !== "" && only.indexOf(data[i][0]) !== -1){
-						urlToKey.set(data[i][1], data[i][0]);
+					if(data[i].length >= 2 && data[i][1] !== "" && only.indexOf(data[i][0]) !== -1){
+						if(data[i][1].indexOf("id=") > -1){
+                            fileIdToKey.set(data[i][1].split("id=")[1], data[i][0]);
+                        } else {
+                            fileIdToKey.set(data[i][1], data[i][0]);
+                        }
 					}
-				} else if (data[i][1] !== "" && ignore.indexOf(data[i][0]) === -1){
+				} else if (data[i].length >= 2 && data[i][1] !== "" && ignore.indexOf(data[i][0]) === -1){
 					/*
 					The data is a table, with the first column being a key,
 					such as "node coordinates", "buildings", etc,
 
 					and the second being the url linking to that resource
 					*/
-					urlToKey.set(data[i][1], data[i][0]);
+					if(data[i][1].indexOf("id=") > -1){
+                        fileIdToKey.set(data[i][1].split("id=")[1], data[i][0]);
+                    } else {
+                        fileIdToKey.set(data[i][1], data[i][0]);
+                    }
 				}
 			}
-
-			driveSeqGets(Array.from(urlToKey.keys())).then((responses) => {
+            
+            
+			driveSeqGets(Array.from(fileIdToKey.keys())).then((responses) => {
 				/*
 				Convets the url-to-response result of seqGet
 				to an easier to use key-to-response
@@ -263,7 +273,7 @@ export async function importManifest(fileId, options={}){
 				let ret = new Map();
 				
 				responses.forEach((responseText, url) => {
-					ret.set(urlToKey.get(url), responseText);
+					ret.set(fileIdToKey.get(url), responseText);
 				});
 
 				resolve(ret);
