@@ -24,7 +24,7 @@ export const logger = {
 	}
 };
 
-// basic http request functions
+// basic http request functions for normal URLs
 export async function get(url){
     // passes in the url's response text as that parameter to the promise.resolve
 	/*
@@ -148,22 +148,8 @@ export async function importMasterSheet(url, options={}){
 }
 
 
-/*
 
-
-Making sure this works first
-
-
-
-*/
-
-
-
-
-
-
-
-
+//using google drive
 /*
 Gets a file's data from the google drive.
 fileId - a string, the id of the file in google drive.
@@ -298,9 +284,10 @@ export async function importWayfindingDrive(fileId, master){
 			
 			nodeDB.parseNodeData(responses.get("Node coordinates"));
 			nodeDB.parseConnData(responses.get("Node connections"));
-			nodeDB.parseNameToId(responses.get("buildings"));
-			nodeDB.parseNameToId(responses.get("rooms"));
-			nodeDB.parseImageResponse(new CsvFile(responses.get("images")));
+			nodeDB.parseNameToId(responses.get("labels"));
+			//nodeDB.parseNameToId(responses.get("buildings"));
+			//nodeDB.parseNameToId(responses.get("rooms"));
+			//nodeDB.parseImageResponse(new CsvFile(responses.get("images")));
 			//nodDB.parseClassResponse(new CsvFile(responses.get("class to room")));
 			
 			master.notifyImportDone();
@@ -314,7 +301,7 @@ export async function importWayfindingDrive(fileId, master){
 
 //user permission issues
 export async function iterFolder(folderId){
-	gapi.client.drive.files.list(q="parents in " + folderId).then((result)=>{
+	gapi.client.drive.files.list(q='parents in "' + folderId + '"').then((result)=>{
 		console.log(result);
 	});
 }

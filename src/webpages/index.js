@@ -19,6 +19,7 @@ import {
 import {
     logger,
 	importManifest,
+	importWayfindingDrive,
 	importWayfinding,
 	importArtfinding
 } from "../getRequests/importData.js";
@@ -61,7 +62,7 @@ svgMap.loaded(() => {
     });
     
 
-	importWayfinding(masterSheetURL, master).then((responses) => {
+	importWayfindingDrive("1tmfEsdpDWx4eqojigOy9qCnm8NQUJpDl", master).then((responses) => {
 		console.timeEnd("Time to load (wayfinding)");
 		if (params.get("mode").toUpperCase().includes("ART")) {
 			console.time("Time to load (art)");
