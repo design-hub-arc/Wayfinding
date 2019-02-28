@@ -55,8 +55,8 @@ svgMap.loaded(() => {
 	master.setCanvas(masterCanvas);
 	master.setPathButton("button");
 
-	//driveGet("1bFY6eGQxUR7RsxENkHv0mh229rQROhox").then((data)=>{console.log(data);});
-	importManifest("1bFY6eGQxUR7RsxENkHv0mh229rQROhox").then((response)=>{
+	//driveGet("1tmfEsdpDWx4eqojigOy9qCnm8NQUJpDl").then((data)=>{console.log(data);});
+	importManifest("1tmfEsdpDWx4eqojigOy9qCnm8NQUJpDl").then((response)=>{
         logger.displayAll();
     });
     
