@@ -18,6 +18,7 @@ import {
 } from "../htmlInterface/infoElement.js";
 import {
     logger,
+    driveGet,
 	importManifest,
 	importWayfindingDrive,
 	importWayfinding,
@@ -56,7 +57,7 @@ svgMap.loaded(() => {
 	master.setCanvas(masterCanvas);
 	master.setPathButton("button");
 
-	//driveGet("1tmfEsdpDWx4eqojigOy9qCnm8NQUJpDl").then((data)=>{console.log(data);});
+	driveGet("1QhBIkE_ubA-dVqubZZ0OAE49CiDwNNwi").then((data)=>{console.log(data);});
 	importManifest("1tmfEsdpDWx4eqojigOy9qCnm8NQUJpDl").then((response)=>{
         logger.displayAll();
     });
