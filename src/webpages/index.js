@@ -21,6 +21,7 @@ import {
     driveGet,
 	importManifest,
 	importWayfindingDrive,
+	importArtfindingDrive,
 	importWayfinding,
 	importArtfinding
 } from "../getRequests/importData.js";
@@ -75,7 +76,7 @@ svgMap.loaded(() => {
 				info.update(master);
 			});
 			
-			importArtfinding(artFinderURL, master).then((responses) => {
+			importArtfindingDrive("1QhBIkE_ubA-dVqubZZ0OAE49CiDwNNwi", master).then((responses) => {
 				console.timeEnd("Time to load (art)");
 			});
 		}

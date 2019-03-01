@@ -24,7 +24,13 @@ export const logger = {
 	}
 };
 
-// basic http request functions for normal URLs
+
+/*
+**********************************************************************************************
+using regular get requests
+**********************************************************************************************
+*/
+// can I get rid of these?
 export async function get(url){
     // passes in the url's response text as that parameter to the promise.resolve
 	/*
@@ -80,7 +86,6 @@ export async function sequentialGets(urls){
 		}
 	});
 }
-
 
 export async function importMasterSheet(url, options={}){
 	/*
@@ -148,8 +153,52 @@ export async function importMasterSheet(url, options={}){
 }
 
 
+export async function importWayfinding(url, master){
+	/*
+	imports all of the data needed for wayfinding into the program
+	
+	master is a Main object which will be populated by the imported data
+	*/
+	return new Promise((resolve, reject) => {
+		importMasterSheet(url, {
+			ignore: ["map image", "classes", "class to room"]
+		}).then((responses) => {
+			let nodeDB = master.getNodeDB();
+			let canvas = master.getCanvas();
+			
+			nodeDB.parseNodeData(responses.get("Node coordinates"));
+			nodeDB.parseConnData(responses.get("Node connections"));
+			nodeDB.parseNameToId(responses.get("buildings"));
+			nodeDB.parseNameToId(responses.get("rooms"));
+			nodeDB.parseImageResponse(new CsvFile(responses.get("images")));
+			//nodDB.parseClassResponse(new CsvFile(responses.get("class to room")));
+			
+			master.notifyImportDone();
+			
+			resolve(responses);
+		});
+	});
+	
+}
 
-//using google drive
+export async function importArtfinding(url, master){
+	return new Promise((resolve, reject) => {
+		importMasterSheet(url, {
+			only: ["labels"]
+		}).then((responses) => {
+			master.getNodeDB().parseNameToId(responses.get("labels"));
+			master.notifyImportDone();
+			resolve(responses);
+		});
+	});
+}
+
+
+/*
+**********************************************************************************************
+using google drive
+**********************************************************************************************
+*/
 /*
 Gets a file's data from the google drive.
 fileId - a string, the id of the file in google drive.
@@ -159,7 +208,7 @@ export async function driveGet(fileId){
 	//if this doesn't work, make sure that the API has been loaded!
 	return gapi.client.drive.files.get({
 		fileId: fileId,
-		alt: "media"
+		alt: "media" //this means download the file's contents, not its metadata
 	}).then((result)=> {
 		logger.add("Response from " + fileId + ":");
 		logger.add(result);
@@ -269,12 +318,12 @@ export async function importManifest(fileId, options={}){
 	return promise;
 }
 
+/*
+imports all of the data needed for wayfinding into the program
+
+master is a Main object which will be populated by the imported data
+*/
 export async function importWayfindingDrive(fileId, master){
-	/*
-	imports all of the data needed for wayfinding into the program
-	
-	master is a Main object which will be populated by the imported data
-	*/
 	return new Promise((resolve, reject) => {
 		importManifest(fileId, {
 			ignore: ["map image", "classes", "class to room"]
@@ -285,10 +334,6 @@ export async function importWayfindingDrive(fileId, master){
 			nodeDB.parseNodeData(responses.get("Node coordinates"));
 			nodeDB.parseConnData(responses.get("Node connections"));
 			nodeDB.parseNameToId(responses.get("labels"));
-			//nodeDB.parseNameToId(responses.get("buildings"));
-			//nodeDB.parseNameToId(responses.get("rooms"));
-			//nodeDB.parseImageResponse(new CsvFile(responses.get("images")));
-			//nodDB.parseClassResponse(new CsvFile(responses.get("class to room")));
 			
 			master.notifyImportDone();
 			
@@ -296,6 +341,18 @@ export async function importWayfindingDrive(fileId, master){
 		});
 	});
 	
+}
+
+export async function importArtfindingDrive(fileId, master){
+	return new Promise((resolve, reject) => {
+		importManifest(fileId, {
+			only: ["labels"]
+		}).then((responses) => {
+			master.getNodeDB().parseNameToId(responses.get("labels"));
+			master.notifyImportDone();
+			resolve(responses);
+		});
+	});
 }
 
 
@@ -303,52 +360,5 @@ export async function importWayfindingDrive(fileId, master){
 export async function iterFolder(folderId){
 	gapi.client.drive.files.list(q='parents in "' + folderId + '"').then((result)=>{
 		console.log(result);
-	});
-}
-
-
-
-
-
-
-
-
-export async function importWayfinding(url, master){
-	/*
-	imports all of the data needed for wayfinding into the program
-	
-	master is a Main object which will be populated by the imported data
-	*/
-	return new Promise((resolve, reject) => {
-		importMasterSheet(url, {
-			ignore: ["map image", "classes", "class to room"]
-		}).then((responses) => {
-			let nodeDB = master.getNodeDB();
-			let canvas = master.getCanvas();
-			
-			nodeDB.parseNodeData(responses.get("Node coordinates"));
-			nodeDB.parseConnData(responses.get("Node connections"));
-			nodeDB.parseNameToId(responses.get("buildings"));
-			nodeDB.parseNameToId(responses.get("rooms"));
-			nodeDB.parseImageResponse(new CsvFile(responses.get("images")));
-			//nodDB.parseClassResponse(new CsvFile(responses.get("class to room")));
-			
-			master.notifyImportDone();
-			
-			resolve(responses);
-		});
-	});
-	
-}
-
-export async function importArtfinding(url, master){
-	return new Promise((resolve, reject) => {
-		importMasterSheet(url, {
-			only: ["labels"]
-		}).then((responses) => {
-			master.getNodeDB().parseNameToId(responses.get("labels"));
-			master.notifyImportDone();
-			resolve(responses);
-		});
 	});
 }
