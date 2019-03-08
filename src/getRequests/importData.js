@@ -412,6 +412,14 @@ export async function importDataInto(master){
 		let url;
 		let found = false;
 		
+		
+		
+		/*
+		this will need to be recursive.
+		since checkexists is async, 
+		I need to make this wait to check the next url
+		until after it knows it works or doesnt
+		*/
 		for(let i = rows.length - 1; i > 0 && !found; i--){
 			url = rows[i][mode];
 			console.log(url);

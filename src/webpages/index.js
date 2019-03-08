@@ -64,13 +64,13 @@ svgMap.loaded(() => {
 	
 	
 	
-	importDataInto(master);
+	//importDataInto(master);
     
 	
 	
 	
 
-	importWayfindingDrive("1O3yihsZK09MbFsqbXs517omh8ao6IyoT", master).then((responses) => {
+	importWayfindingDrive("1Ngyyorf2qiSK407tT65_57vNJkgFYsH6", master).then((responses) => {
 		console.timeEnd("Time to load (wayfinding)");
 		if (params.get("mode").toUpperCase().includes("ART")) {
 			console.time("Time to load (art)");
@@ -82,7 +82,7 @@ svgMap.loaded(() => {
 				info.update(master);
 			});
 			
-			importArtfindingDrive("1O3yihsZK09MbFsqbXs517omh8ao6IyoT", master).then((responses) => {
+			importArtfindingDrive("1tb4tmPU6IvRerphft3qr8Irh01rfM13l", master).then((responses) => {
 				console.timeEnd("Time to load (art)");
 			});
 		}
