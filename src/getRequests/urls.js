@@ -31,3 +31,18 @@ export const masterSheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1v
 
 export const artFinderURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTF1ockLSS6RTguLW0pgY2HUPAbyiZQ8OG2-EqBBojtuBb662ra6I08LmvUC0ZTvyjKMGPdxgeCtbBf/pub?gid=0&single=true&output=csv";
 //WIP. The master sheet for artfinder
+
+
+
+/*
+The version log is used to keep track of data exports from the Node Manager.
+This allows the program to automatically update to use the latest data we export
+and we don't need to do ANYTHING:
+no changing URLs,
+no changing files,
+NOTHING.
+
+With that said, if this gets broken, everything stops working.
+Not good.
+*/
+export const VERSION_LOG_URL = "https://drive.google.com/export=download?id=1Q99ku0cMctu3kTN9OerjFsM9Aj-nW6H5";

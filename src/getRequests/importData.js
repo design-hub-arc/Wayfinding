@@ -4,7 +4,8 @@ These are invoked in the html files.
 */
 
 import {formatResponse, CsvFile} from "../dataFormatting/csv.js";
-
+import {VERSION_LOG_URL}         from "./urls.js";
+import {getParamsFromURL}        from "../htmlInterface/qrCodes.js";
 
 
 export const newline = /\r?\n|\r/;
@@ -194,6 +195,8 @@ export async function importArtfinding(url, master){
 }
 
 
+
+
 /*
 **********************************************************************************************
 using google drive
@@ -214,6 +217,8 @@ export async function driveGet(fileId){
 		logger.add(result);
 		logger.add(result.body);
 		return result.body;
+	}).catch((error)=>{
+		throw new Error(error);
 	});
 }
 
@@ -356,9 +361,85 @@ export async function importArtfindingDrive(fileId, master){
 }
 
 
-//user permission issues
-export async function iterFolder(folderId){
-	gapi.client.drive.files.list(q='parents in "' + folderId + '"').then((result)=>{
-		console.log(result);
+
+
+async function checkExists(id){
+	return gapi.client.drive.files.get({
+		fileId: id
+	}).then(()=>{
+		console.log("exist: " + id);
+		return true;
+	}).catch(()=>{
+		console.log("not exist: " + id);
+		return false;
+	});
+}
+/*
+Imports all the data needed by the program into master
+@param master : the Main object used by the program.
+
+What it does:
+1. Downloads the version log, then temporarily stores its data
+2. Checks to see what mode of Wayfinding this is by looking at the URL, defaulting to wayfinding
+3. Stores all the URLs in the column headed by that version
+4. Starting at the end of URL list, goes backwards until it finds a version that works
+*/
+export async function importDataInto(master){
+	//get the file id, not the URL
+	let id = (VERSION_LOG_URL.indexOf("id=") === -1) ? VERSION_LOG_URL : VERSION_LOG_URL.split("id=")[1];
+	driveGet(id).then((responseText)=>{
+		//get the contents of the version log
+		let rows = responseText.split(newline);
+		rows = rows.map((row)=>{
+			return row.split(",");
+		});
+		
+		//since getParamsFromURL converts to upper case, we need the headers to be uppercase as well
+		rows[0] = rows[0].map((header)=>header.toUpperCase());
+		
+		//check the wayfinding mode
+		//mode is an int, the index of the column it is contained in the version log
+		let mode = rows[0].indexOf(getParamsFromURL().get("mode"));
+		if(mode === -1){
+			/*
+			The mode is not present in the version log,
+			so default to wayfinding.
+			*/
+			mode = 0;
+		}
+		
+		//keep goind until you hit a version that works
+		let url;
+		let found = false;
+		
+		for(let i = rows.length - 1; i > 0 && !found; i--){
+			url = rows[i][mode];
+			console.log(url);
+			if(url === ""){
+				//skip blanks
+				continue;
+			}
+			
+			id = (url.indexOf("id=") === -1) ? url : url.split("id=")[1];
+			// now we use the url as the file url
+			
+			
+			//check if the file exists
+			checkExists(id).then((doesExist)=>{
+				if(doesExist){
+					found = true;
+				} else {
+					//make this call the next instead of loop
+					if(i === 1 && mode != 0){
+						//on last URL, still none valid, so switch to wayfinding
+						alert("No valid manifests were found for " + rows[0][mode] + ". Switching to Wayfinding");
+						i = rows.length; //will automatically subtract 1 at the end of the loop
+						mode = 0;
+					}
+				}
+			});
+		}	
+	}).catch((error)=>{
+		console.log(error);
 	});
 }

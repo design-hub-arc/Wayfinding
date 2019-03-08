@@ -23,7 +23,8 @@ import {
 	importWayfindingDrive,
 	importArtfindingDrive,
 	importWayfinding,
-	importArtfinding
+	importArtfinding,
+	importDataInto
 } from "../getRequests/importData.js";
 import {
 	mapURL,
@@ -58,11 +59,16 @@ svgMap.loaded(() => {
 	master.setCanvas(masterCanvas);
 	master.setPathButton("button");
 
-	driveGet("1QhBIkE_ubA-dVqubZZ0OAE49CiDwNNwi").then((data)=>{console.log(data);});
-	importManifest("1tmfEsdpDWx4eqojigOy9qCnm8NQUJpDl").then((response)=>{
-        logger.displayAll();
-    });
+	
+	
+	
+	
+	
+	importDataInto(master);
     
+	
+	
+	
 
 	importWayfindingDrive("1O3yihsZK09MbFsqbXs517omh8ao6IyoT", master).then((responses) => {
 		console.timeEnd("Time to load (wayfinding)");
