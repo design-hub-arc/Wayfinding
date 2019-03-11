@@ -201,6 +201,7 @@ export async function importArtfinding(url, master){
 **********************************************************************************************
 using google drive
 **********************************************************************************************
+
 */
 /*
 Gets a file's data from the google drive.
@@ -222,16 +223,17 @@ export async function driveGet(fileId){
 	});
 }
 
+
 /*
+@param fileIds : an array of strings, the ids of files to get
+
+
+calls driveGet on each id, then resolves the promise, 
+passing in all responses to a Map,
+where the key is the id, and the value is the response text,
+then resolves with that Map once each id's response has been obtained.
 */
 export async function driveSeqGets(fileIds){
-	/*
-    @param fileIds : an array of strings, the ids of files to get
-    
-    performs a get request on each id, then resolves the promise, 
-	passing in all responses as an Map to that function,
-	where the key is the id, and the value is the response text
-    */
 	return new Promise((resolve, reject) => {
 		let responses = new Map();
 		let received = 0;
@@ -248,6 +250,7 @@ export async function driveSeqGets(fileIds){
 		}
 	});
 }
+
 export async function importManifest(fileId, options={}){
 	/*
 	 @param fileId : a string, the 
@@ -267,8 +270,7 @@ export async function importManifest(fileId, options={}){
 	let promise = new Promise((resolve, reject) => {
 		driveGet(fileId).then((responseText) => {
 			let data = formatResponse(responseText);
-			let only = (options.hasOwnProperty("only")) ? options["only"] : [];
-			let ignore = (options.hasOwnProperty("ignore")) ? options["ignore"] : [];
+			let only = [];
 			let fileIdToKey = new Map();
 			/*
 			since sequentialGets will return fileId-to-response,
@@ -288,7 +290,7 @@ export async function importManifest(fileId, options={}){
                             fileIdToKey.set(data[i][1], data[i][0]);
                         }
 					}
-				} else if (data[i].length >= 2 && data[i][1] !== "" && ignore.indexOf(data[i][0]) === -1){
+				} else if (data[i].length >= 2 && data[i][1] !== ""){
 					/*
 					The data is a table, with the first column being a key,
 					such as "node coordinates", "buildings", etc,
@@ -323,131 +325,125 @@ export async function importManifest(fileId, options={}){
 	return promise;
 }
 
-/*
-imports all of the data needed for wayfinding into the program
 
-master is a Main object which will be populated by the imported data
-*/
-export async function importWayfindingDrive(fileId, master){
-	return new Promise((resolve, reject) => {
-		importManifest(fileId, {
-			ignore: ["map image", "classes", "class to room"]
-		}).then((responses) => {
-			let nodeDB = master.getNodeDB();
-			let canvas = master.getCanvas();
-			
-			nodeDB.parseNodeData(responses.get("Node coordinates"));
-			nodeDB.parseConnData(responses.get("Node connections"));
-			nodeDB.parseNameToId(responses.get("labels"));
-			
-			master.notifyImportDone();
-			
-			resolve(responses);
-		});
-	});
-	
-}
-
-export async function importArtfindingDrive(fileId, master){
-	return new Promise((resolve, reject) => {
-		importManifest(fileId, {
-			only: ["labels"]
-		}).then((responses) => {
-			master.getNodeDB().parseNameToId(responses.get("labels"));
-			master.notifyImportDone();
-			resolve(responses);
-		});
-	});
-}
-
-
-
-
+//returns whether or not a file with the given ID exists in the google drive
 async function checkExists(id){
 	return gapi.client.drive.files.get({
 		fileId: id
 	}).then(()=>{
-		console.log("exist: " + id);
 		return true;
 	}).catch(()=>{
-		console.log("not exist: " + id);
 		return false;
 	});
 }
+
+
 /*
-Imports all the data needed by the program into master
-@param master : the Main object used by the program.
+Returns the id of the most recently added manifest that works.
 
 What it does:
 1. Downloads the version log, then temporarily stores its data
 2. Checks to see what mode of Wayfinding this is by looking at the URL, defaulting to wayfinding
 3. Stores all the URLs in the column headed by that version
 4. Starting at the end of URL list, goes backwards until it finds a version that works
+5. If no valid manifests exist for the current version, check for the most recent wayfinding manifest.
+6. If no valid manifests exist for wayfinding, something went VERY wrong.
+*/
+async function getLatestManifest(){
+	//get the file id, not the URL
+	let versionLogId = (VERSION_LOG_URL.indexOf("id=") === -1) ? VERSION_LOG_URL : VERSION_LOG_URL.split("id=")[1];
+	
+	return new Promise((resolve, reject)=>{
+		driveGet(versionLogId).then((responseText)=>{
+			//get the contents of the version log
+			let rows = responseText.split(newline);
+			rows = rows.map((row)=>{
+				return row.split(",");
+			});
+
+			//since getParamsFromURL converts to upper case, we need the headers to be uppercase as well
+			rows[0] = rows[0].map((header)=>header.toUpperCase());
+
+			//check the wayfinding mode
+			//mode is an int, the index of the column it is contained in the version log
+			let mode = rows[0].indexOf(getParamsFromURL().get("mode"));
+			if(mode === -1){
+				/*
+				The mode is not present in the version log,
+				so default to wayfinding.
+				*/
+				mode = 0;
+			}
+
+			//keep goind until you hit a version that works
+			let url;
+			let id;
+
+			function recursiveCheck(row, col){
+				/*
+				Remember suffering through recursuion back in CISP 300?
+				Yes, it does have valid uses.
+
+				We need to check if an id in the version log works.
+				This needs to be done using drive.files.get, which is asynchronus.
+				Async + iteration = BAD.
+				Instead, make each check call the next check as needed.
+				*/
+				if(row === 0 && col === 0){
+					console.log("No valid manifests exist. Something went very wrong.");
+				} else if(row === 0){
+					//couldn't find a valid URL in the current column
+					console.log("No valid manifests were found for " + rows[row][col] + ". Switching to default wayfinding.");
+					recursiveCheck(rows.length - 1, 0);
+				} else if(rows[row][col] === ""){
+					//skip blank
+					recursiveCheck(row - 1, col);
+				} else {
+					//not blank, not header: we're ready to check.
+					url = rows[row][col];
+					id = (url.indexOf("id=") === -1) ? url : url.split("id=")[1];
+					console.log("Checking " + id);
+					checkExists(id).then((doesExist)=>{
+						if(doesExist){
+							console.log("Yup, that works!");
+							resolve(id);
+						} else {
+							console.log("Nope.");
+							recursiveCheck(row - 1, col);
+						}
+					});
+				}
+			}
+
+			recursiveCheck(rows.length - 1, mode);
+		}).catch((error)=>{
+			console.log(error);
+		});
+	});
+}
+
+/*
+Imports all the data needed by the program into master
+@param master : the Main object used by the program.
+
+
 */
 export async function importDataInto(master){
-	//get the file id, not the URL
-	let id = (VERSION_LOG_URL.indexOf("id=") === -1) ? VERSION_LOG_URL : VERSION_LOG_URL.split("id=")[1];
-	driveGet(id).then((responseText)=>{
-		//get the contents of the version log
-		let rows = responseText.split(newline);
-		rows = rows.map((row)=>{
-			return row.split(",");
-		});
-		
-		//since getParamsFromURL converts to upper case, we need the headers to be uppercase as well
-		rows[0] = rows[0].map((header)=>header.toUpperCase());
-		
-		//check the wayfinding mode
-		//mode is an int, the index of the column it is contained in the version log
-		let mode = rows[0].indexOf(getParamsFromURL().get("mode"));
-		if(mode === -1){
-			/*
-			The mode is not present in the version log,
-			so default to wayfinding.
-			*/
-			mode = 0;
-		}
-		
-		//keep goind until you hit a version that works
-		let url;
-		let found = false;
-		
-		
-		
-		/*
-		this will need to be recursive.
-		since checkexists is async, 
-		I need to make this wait to check the next url
-		until after it knows it works or doesnt
-		*/
-		for(let i = rows.length - 1; i > 0 && !found; i--){
-			url = rows[i][mode];
-			console.log(url);
-			if(url === ""){
-				//skip blanks
-				continue;
-			}
-			
-			id = (url.indexOf("id=") === -1) ? url : url.split("id=")[1];
-			// now we use the url as the file url
-			
-			
-			//check if the file exists
-			checkExists(id).then((doesExist)=>{
-				if(doesExist){
-					found = true;
-				} else {
-					//make this call the next instead of loop
-					if(i === 1 && mode != 0){
-						//on last URL, still none valid, so switch to wayfinding
-						alert("No valid manifests were found for " + rows[0][mode] + ". Switching to Wayfinding");
-						i = rows.length; //will automatically subtract 1 at the end of the loop
-						mode = 0;
-					}
-				}
+	return new Promise((resolve, reject)=>{
+		getLatestManifest().then((id)=>{
+			console.log("id is " + id);
+			importManifest(id).then((responses)=>{
+				let nodeDB = master.getNodeDB();
+				let canvas = master.getCanvas();
+
+				nodeDB.parseNodeData(responses.get("Node coordinates"));
+				nodeDB.parseConnData(responses.get("Node connections"));
+				nodeDB.parseNameToId(responses.get("labels"));
+
+				master.notifyImportDone();
+
+				resolve(responses);
 			});
-		}	
-	}).catch((error)=>{
-		console.log(error);
+		});
 	});
 }
