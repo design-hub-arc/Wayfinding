@@ -184,12 +184,9 @@ export class Main{
 	}
 	
 	setPath(path){
-		console.log(path);
 		if(path.valid){
 			this.currentPath = path;
-			console.log("setPath");
 			this.onUpdatePath.forEach(func => {
-				console.log(path);
 				func(path);
 			});
 			

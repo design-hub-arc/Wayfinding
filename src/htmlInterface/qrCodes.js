@@ -29,7 +29,6 @@ export function getParamsFromURL() {
 		let pairs = args.split("&");
 		for (let i = 0; i < pairs.length; i++) {
 			let pair = pairs[i].split("=");
-			console.log("Pair: " + pair);
 			
 			if(pair[0].toUpperCase().includes("START")){
 				values.set("startID", pair[1]);
