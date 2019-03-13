@@ -173,18 +173,25 @@ export class Main{
 		
 		let main = this;
 		this.pathButton.onclick = function(){
+			console.log("click");
 			if(main.start.isValid() && main.end.isValid()){
 				//updatepath does the finding
 				main.updatePath();
+			} else {
+				console.log("Not valid: " + main.start.getResult() + " " + main.end.getResult());
 			}
 		};
 	}
 	
 	setPath(path){
+		console.log(path);
 		if(path.valid){
 			this.currentPath = path;
-			
-			this.onUpdatePath.forEach(func => func(path));
+			console.log("setPath");
+			this.onUpdatePath.forEach(func => {
+				console.log(path);
+				func(path);
+			});
 			
 			try{
 				path.draw(this.canvas);
@@ -192,6 +199,8 @@ export class Main{
 				console.log("Main's canvas is not defined yet");
 				console.log(e.stack);
 			}
+		} else {
+			console.log("Not valid: " + path);
 		}
 	}
 	getPath(){
@@ -200,6 +209,7 @@ export class Main{
 	
 	updatePath(){
 		try{
+			console.log("update");
 			let start = this.getNodeDB().getIdByString(this.start.getResult());
 			let end = this.getNodeDB().getIdByString(this.end.getResult());
 			

@@ -74,7 +74,7 @@ export class TextBox{
 	isValid(){
 		//legal input was entered
 		//want to make sure the closest match is both in the options, and not the default option
-		return (this.options.indexOf(this.resultElement.innerHTML.toUpperCase()) > 0);
+		return (this.options.indexOf(this.resultElement.innerText.toUpperCase()) > 0);
 	}
 	setInput(str){
 		//@param str : a string, what to put in the input box
@@ -86,7 +86,7 @@ export class TextBox{
 		/*
 		@return : a string, the closest match to what the user inputted
 		*/
-		return this.resultElement.innerHTML;
+		return this.resultElement.innerText;
 	}
 };
 

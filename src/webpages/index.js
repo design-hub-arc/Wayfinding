@@ -43,6 +43,8 @@ svgMap.loaded(() => {
 	let params = getParamsFromURL();
 	let start = new TextBox("start box", "start hint");
 	let end = new TextBox("end box", "end hint");
+	let info = new InfoElement("moreInfo");
+	
 	master.setInput(start, end);
 
 	master.setNodeDB(nodes);
@@ -53,17 +55,12 @@ svgMap.loaded(() => {
 	masterCanvas.resize();
 	master.setCanvas(masterCanvas);
 	master.setPathButton("button");
+	master.addOnUpdatePath((path) => {
+		info.update(master);
+	});
 	
 	importDataInto(master).then((responses)=>{
 		console.timeEnd("Time to load (wayfinding)");
-		if (params.get("mode").toUpperCase().includes("ART")) {
-			//adds the more info button
-			let info = new InfoElement("moreInfo");
-
-			master.addOnUpdatePath((path) => {
-				info.update(master);
-			});
-		}
 	});
 });
 
