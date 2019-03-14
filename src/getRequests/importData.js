@@ -153,7 +153,6 @@ export async function importMasterSheet(url, options={}){
 	return promise;
 }
 
-
 export async function importWayfinding(url, master){
 	/*
 	imports all of the data needed for wayfinding into the program
@@ -439,6 +438,8 @@ export async function importDataInto(master){
 				nodeDB.parseNodeData(responses.get("Node coordinates"));
 				nodeDB.parseConnData(responses.get("Node connections"));
 				nodeDB.parseNameToId(responses.get("labels"));
+				//need to get svgMap so I can call .load on it
+				//master.getCanvas().draw.load(responses.get("map image"));
 
 				master.notifyImportDone();
 
