@@ -209,7 +209,32 @@ fileId - a string, the id of the file in google drive.
 export async function driveGet(fileId){
 	//gapi is defined in https://apis.google.com/js/api.js.
 	//if this doesn't work, make sure that the API has been loaded!
-	return gapi.client.drive.files.get({
+	return new Promise((resolve, reject)=>{
+        gapi.client.drive.files.get({
+            fileId: fileId
+        }).then((metadata)=>{
+            if(metadata.result.mimeType.includes("image")){
+                resolve("https://drive.google.com/uc?export=download&id=" + metadata.result.id);
+            } else {
+                gapi.client.drive.files.get({
+                    fileId: fileId,
+                    alt: "media" //this means download the file's contents, not its metadata
+                }).then((result)=> {
+                    logger.add("Response from " + fileId + ":");
+                    logger.add(result);
+                    logger.add(result.body);
+                    resolve(result.body);
+                }).catch((error)=>{
+                    throw new Error(error);
+                });
+            }
+        }).catch((error)=>{
+            throw new Error(error);
+        });    
+    });
+    
+    
+    return gapi.client.drive.files.get({
 		fileId: fileId,
 		alt: "media" //this means download the file's contents, not its metadata
 	}).then((result)=> {
@@ -438,10 +463,13 @@ export async function importDataInto(master){
 				nodeDB.parseNodeData(responses.get("Node coordinates"));
 				nodeDB.parseConnData(responses.get("Node connections"));
 				nodeDB.parseNameToId(responses.get("labels"));
-				//need to get svgMap so I can call .load on it
-				//master.getCanvas().draw.load(responses.get("map image"));
-
-				master.notifyImportDone();
+                
+                let image = master.getCanvas().draw.image(responses.get("map image"));
+                image.loaded(()=>{
+                    master.getCanvas().setScaler(image);
+                });
+                
+				master.notifyImportDone(image);
 
 				resolve(responses);
 			});

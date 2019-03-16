@@ -36,6 +36,11 @@ export class Canvas{
 			console.log(e.stack);
 		}
 	}
+    setScaler(scaler){
+        //scaler is an svg image
+        this.scalingElement = scaler;
+		this.resize();
+    }
 	setColor(color){
 		this.color = color;
 	}
@@ -84,6 +89,8 @@ export class Canvas{
 		Note that this doesn't change the size of the element,
 		notifies the Canvas of the new size.
 		*/
+        console.log(this.scalingElement);
+       
 		this.destWidth = this.scalingElement
 			.width
 			.baseVal
