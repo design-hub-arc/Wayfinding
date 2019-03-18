@@ -4,11 +4,23 @@ These are invoked in the html files.
 */
 
 import {formatResponse, CsvFile} from "../dataFormatting/csv.js";
-import {VERSION_LOG_URL}         from "./urls.js";
 import {getParamsFromURL}        from "../htmlInterface/qrCodes.js";
 
 
 export const newline = /\r?\n|\r/;
+
+/*
+The version log is used to keep track of data exports from the Node Manager.
+This allows the program to automatically update to use the latest data we export
+and we don't need to do ANYTHING:
+no changing URLs,
+no changing files,
+NOTHING.
+
+With that said, if this gets broken, everything stops working.
+Not good.
+*/
+export const VERSION_LOG_URL = "https://drive.google.com/export=download?id=1Q99ku0cMctu3kTN9OerjFsM9Aj-nW6H5";
 
 //used for debugging
 export const logger = {

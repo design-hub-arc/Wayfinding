@@ -20,7 +20,6 @@ export class Main{
 
         this.currentPath = undefined;
         this.nodeDatabase = new NodeDB();
-        this.classDatabase = undefined;
 		
 		this.onUpdatePath = []; //an array of functions
     }
@@ -258,12 +257,6 @@ export class Main{
 		));
 	}
 	
-	
-	
-	
-	
-	
-	
 	testAllPaths(){
 		//developer tool. Detects any paths between any two nodes that cannot exist
 		
@@ -304,10 +297,6 @@ export class Main{
 	}
 	getNodeDB(){
 		return this.nodeDatabase;
-	}
-	
-	setClassDB(database){
-		this.classDatabase = database;
 	}
 	
 	/*
