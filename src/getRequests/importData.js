@@ -1,6 +1,15 @@
 /*
-Provides functions which are used to perform get requests.
-These are invoked in the html files.
+Provides functions which are used to download the data the program 
+needs to find paths.
+
+We currently store the data on the google drive as csv and png files,
+but we will soon (hopefully) store everything on a database soon.
+
+We have a file, "versions.csv" on the google drive. The Node Manager 
+appends each of its exports to this file.
+
+If you really want to know how this works, scroll to the bottom, and work your way up;
+each of the functions has their own documentation
 */
 
 import {formatResponse, CsvFile} from "../dataFormatting/csv.js";
@@ -39,55 +48,10 @@ export const logger = {
 
 
 /*
-**********************************************************************************************
-using regular get requests
-**********************************************************************************************
-*/
-// can I get rid of these?
-export async function get(url){
-    // passes in the url's response text as that parameter to the promise.resolve
-	/*
-	let req = new XMLHttpRequest();
-	req.onreadystatechange = function(){
-		if(req.readyState === 4 && req.status === 200){
-			logger.add("Response from " + url + ":");
-			logger.add(req.responseText);			
-			callback(req.responseText);
-		}
-	};
-    req.onerror = function(e){
-        console.log(e);
-        callback("");
-    };
-
-    req.open("GET", url, true); // true means asynchronous
-    req.setRequestHeader("Cache-Control", "max-age=0"); // prevent outdated data
-    req.send(null);
-	*/
-	
-	
-	return fetch(url).then((response) => {
-		let text = response.text();
-		logger.add("Response from " + url + ":");
-		logger.add(response);
-		logger.add(text);
-		return text;
-	});
-}
-
-
-
-/*
-**********************************************************************************************
-using google drive
-**********************************************************************************************
-
-*/
-/*
 Gets a file's data from the google drive.
 fileId - a string, the id of the file in google drive.
 */
-export async function driveGet(fileId){
+async function driveGet(fileId){
 	//gapi is defined in https://apis.google.com/js/api.js.
 	//if this doesn't work, make sure that the API has been loaded!
 	return new Promise((resolve, reject)=>{
@@ -132,13 +96,12 @@ export async function driveGet(fileId){
 /*
 @param fileIds : an array of strings, the ids of files to get
 
-
 calls driveGet on each id, then resolves the promise, 
 passing in all responses to a Map,
 where the key is the id, and the value is the response text,
 then resolves with that Map once each id's response has been obtained.
 */
-export async function driveSeqGets(fileIds){
+async function driveSeqGets(fileIds){
 	return new Promise((resolve, reject) => {
 		let responses = new Map();
 		let received = 0;
@@ -156,26 +119,25 @@ export async function driveSeqGets(fileIds){
 	});
 }
 
-export async function importManifest(fileId, options={}){
-	/*
-	 @param fileId : a string, the 
-	 id of the master url file
-	 on our google drive
 
+/*
+ @param fileId : a string, the 
+ id of the master url file
+ on our google drive
 
-	 This performs a get request on the master url spreadsheet,
-	 then performs a get request on each url on the spreadsheet,
-	 then passes each URL into the callback function
+ This performs a get request on the master url spreadsheet,
+ then performs a get request on each url on the spreadsheet,
+ then passes each URL into the callback function
 
-	 passes a Map, 
-	 with the keys being the identifier in the first column of the spreadsheet,
-	 and the value is the response text from performing a get request on the url after that identifier
-	 returning the Map
-     */
+ passes a Map, 
+ with the keys being the identifier in the first column of the spreadsheet,
+ and the value is the response text from performing a get request on the url after that identifier
+ returning the Map
+ */
+async function importManifest(fileId){
 	let promise = new Promise((resolve, reject) => {
 		driveGet(fileId).then((responseText) => {
 			let data = formatResponse(responseText);
-			let only = [];
 			let fileIdToKey = new Map();
 			/*
 			since sequentialGets will return fileId-to-response,
@@ -184,18 +146,9 @@ export async function importManifest(fileId, options={}){
 			and sequentialGets gives us fileId-to-response,
 			we can use this to get key-to-response text
 			*/
-            console.log(data);
 
 			for(let i = 1; i < data.length; i++){ 
-				if(only.length > 0){
-					if(data[i].length >= 2 && data[i][1] !== "" && only.indexOf(data[i][0]) !== -1){
-						if(data[i][1].indexOf("id=") > -1){
-                            fileIdToKey.set(data[i][1].split("id=")[1], data[i][0]);
-                        } else {
-                            fileIdToKey.set(data[i][1], data[i][0]);
-                        }
-					}
-				} else if (data[i].length >= 2 && data[i][1] !== ""){
+				if (data[i].length >= 2 && data[i][1] !== ""){
 					/*
 					The data is a table, with the first column being a key,
 					such as "node coordinates", "buildings", etc,
@@ -330,8 +283,6 @@ async function getLatestManifest(){
 /*
 Imports all the data needed by the program into master
 @param master : the Main object used by the program.
-
-
 */
 export async function importDataInto(master){
 	master.mode = getParamsFromURL().get("mode");
