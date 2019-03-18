@@ -11,7 +11,7 @@ See http://svgjs.com for more information on the SVG elements used by the progra
 export class Canvas{
 	constructor(){
         this.draw = undefined;           // the svg image this corresponds to
-        this.scalingElement = undefined; // the svg element this gets its size from
+        this.image = undefined;          // the image element this gets its size from
         this.destWidth = 0;              // dimensions of the map image
         this.destHeight = 0;
         
@@ -22,24 +22,26 @@ export class Canvas{
         
         this.color = undefined;
     }
-	link(svgDrawer, scaler){
+	link(svgDrawer){
 		/*
 		Connects this to an SVG element
 		and image.
 		Might be a better way to do this.
 		*/
-		try{
-			this.draw = svgDrawer;
-			this.scalingElement = scaler;
-			this.resize();
-		} catch(e){
-			console.log(e.stack);
-		}
+		this.draw = svgDrawer;
 	}
-    setScaler(scaler){
+	
+	//needs to be async because draw.image makes a requests to get the image
+    async setImage(src){
         //scaler is an svg image
-        this.scalingElement = scaler;
-		this.resize();
+		return new Promise((resolve, reject)=>{
+			this.image = this.draw.image(src);
+			this.image.loaded(()=>{
+				this.resize();
+				resolve();
+			});
+		});
+        
     }
 	setColor(color){
 		this.color = color;
@@ -89,16 +91,8 @@ export class Canvas{
 		Note that this doesn't change the size of the element,
 		notifies the Canvas of the new size.
 		*/
-        console.log(this.scalingElement);
-       
-		this.destWidth = this.scalingElement
-			.width
-			.baseVal
-			.value;
-		this.destHeight = this.scalingElement
-			.height
-			.baseVal
-			.value;
+		this.destWidth = this.image.node.width.baseVal.value;
+		this.destHeight = this.image.node.height.baseVal.value;
 	}
 	calcSize(){
 		/*

@@ -1,5 +1,5 @@
 /*
-The Main class is used to store data, preventing the need for global letiables.
+The Main class is used to store data, preventing the need for global variables.
 It also takes a lot of code out of the main HTML file.
 
 May clean this up more once we have access to the class database (not my fake one, the real one that eservices uses)
@@ -7,6 +7,7 @@ May clean this up more once we have access to the class database (not my fake on
 
 import { Path } from             "./nodes/path.js";
 import { getParamsFromURL } from "./htmlInterface/qrCodes.js";
+import { NodeDB } from           "./dataFormatting/nodeDB.js";
 
 export class Main{
     constructor(){
@@ -18,7 +19,7 @@ export class Main{
         this.pathButton = undefined;
 
         this.currentPath = undefined;
-        this.nodeDatabase = undefined;
+        this.nodeDatabase = new NodeDB();
         this.classDatabase = undefined;
 		
 		this.onUpdatePath = []; //an array of functions

@@ -20,6 +20,19 @@
 						scope: "https://www.googleapis.com/auth/drive.metadata.readonly"
 					}).then(()=> {
 						console.log(gapi);
+						document.getElementById("wrapper").onload(); 
+						/*
+						this was the only way I could find to make sure
+						I initialize the program after gapi loads.
+						index.js is always going to finish loading before gapi does,
+						but index.js requires gapi to work.
+						So, index.js puts its init function in "wrapper"'s .onload
+						so it will be executed after gapi loads.
+						
+						Stupid, I know, but I couldn't find any way to combine 
+						gapi as a non-module
+						and index.js as a module
+						*/
 					});
 				},
 						 (error)=>{
@@ -39,10 +52,6 @@
 		<div id="testAll" onClick="master.testAllPaths()">Test All Paths</div>
 		<div id="nodeDivs" onClick="master.getNodeDB().generateDivs(master)">Generate Node Connections</div>
 		-->
-        
-        
-        
-        
         
 		<table style="background-color: #D34C0F">
 			<tr>
@@ -70,9 +79,9 @@
         
 		<!--<a href="classFinder.html" target="_blank">Find a class</a>-->
 		
-		
-        <script src="./src/webpages/index.js" type="module"></script>
+        
 		<script async defer src="https://apis.google.com/js/api.js"
 				onload="initDrive()"></script>
+		<script src="./src/webpages/index.js" type="module"></script>
     </body>
 </html>
