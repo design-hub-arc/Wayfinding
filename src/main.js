@@ -21,6 +21,8 @@ export class Main{
         this.currentPath = undefined;
         this.nodeDatabase = new NodeDB();
 		
+		this.mode = "WAYFINDING";
+		
 		this.onUpdatePath = []; //an array of functions
     }
 	setCanvas(canvas){
@@ -38,124 +40,6 @@ export class Main{
 		*/
 		this.start = start;
 		this.end = end;
-	}
-	
-	setClassFinder(nameTextBox, instructorTextBox, timesTextBox, buttonId, resultsId, clearId){
-		/*
-		loads the contents of this' Class database into the options of the three passed in text boxes,
-		then makes button change the contents of result based on the results of each of the three boxes when clicked
-		
-		@param nameTextBox : a TextBox, used to allow the user to enter the name of their class
-		@param instructorTextBox : also a TextBox, where the user enters the name of the instructor for their class
-		@param timesTextBox : once more, a TextBox, used to enter the meeting time(s) for the class
-		@param buttonId : the id of an HTML element that can handle onclick events
-		@param resultsId : the id of a select element which will display the class numbers the user is searching for once the button is clicked
-		@param clearId : the id of an HTML element that can handle onclick events which, when clicked, will clear out each of the user input boxes
-		if either the buttonId, resultsId, or clearId elements do not exist, creates them for you
-		*/
-		let db = this.classDatabase;
-		let main = this;
-		let button = document.getElementById(buttonId);
-		let result = document.getElementById(resultsId);
-		let clear = document.getElementById(clearId);
-		
-		if(button === null){
-			button = document.createElement("button");
-			button.setAttribute("id", buttonId);
-			button.innerHTML = "Find class number";
-			document.body.appendChild(button);
-		}
-		if(result === null){
-			result = document.createElement("select");
-			result.setAttribute("id", resultsId);
-			document.body.appendChild(result);
-		}
-		if(clear === null){
-			clear = document.createElement("button");
-			clear.setAttribute("id", clearId);
-			clear.innerHTML = "Clear input";
-			document.body.appendChild(clear);
-		}
-		
-		nameTextBox.addOptions(db.getAllClassNames());
-		instructorTextBox.addOptions(db.getAllInstructors());
-		timesTextBox.addOptions(db.getAllMeetingTimes());
-		
-		button.onclick = function(){
-			//first, gather all the data fields, then get class numbers from them
-			function toInt(num){
-				/*
-				can't just do .map(parseInt), 
-				as map will implicitly pass in the index as the second parameter of parseInt,
-				which is the base of the string passed in,
-				causing errors.
-				If no second parameter is given, parseInt defaults to base 10
-				*/
-				return parseInt(num);
-			}
-			let results = [
-				db.getNumbersByName      (nameTextBox.getResult())      .map(toInt),
-				db.getNumbersByInstructor(instructorTextBox.getResult()).map(toInt),
-				db.getNumbersByTime      (timesTextBox.getResult())     .map(toInt)
-			]; //this is an array of arrays
-			let validResults = []; //which results can be compared
-			let setTo = ["class not found"]; //what the dropbox will be set to
-			
-			//then, check if the result set contains any data.
-			//this way, we won't be comparing valid data to an empty set
-			results.forEach(array =>{
-				if(array.length > 0){
-					validResults.push(array);
-				}
-			});
-			
-			if(validResults.length === 0){
-				setTo = ["class not found"];
-			} else if(validResults.length === 1){
-				setTo = validResults[0];
-			} else {
-				//find a class present in each data set
-				//iterate through each element in the first set of valid results
-				validResults[0].forEach(item => {
-					setTo = [];
-					let match = true;
-					
-					//check if each other valid result set contains said value
-					for(let i = 1; i < validResults.length && match; i++){
-						match = (validResults[i].indexOf(item) !== -1);
-					}
-					if(match){
-						setTo.push(item);
-					}
-				});
-			}
-			
-			//erase the current contents of dropdown
-			while(result.length > 0){
-				result.remove(result.length - 1);
-			}
-			
-			//then repopulate it
-			let newElem;
-			setTo.forEach(opt =>{
-				newElem = document.createElement("option");
-				newElem.text = opt;
-				result.add(newElem);
-			});
-			result.onchange();
-		};
-		
-		clear.onclick = function(){
-			nameTextBox.setInput("");
-			instructorTextBox.setInput("");
-			timesTextBox.setInput("");
-		};
-		
-		result.onchange = function(){
-			nameTextBox.setInput(      db.select(db.NAME, db.NUMBER, result.value)[0]);
-			instructorTextBox.setInput(db.select(db.INSTRUCTOR, db.NUMBER, result.value)[0]);
-			timesTextBox.setInput(     db.select(db.MEETING_TIME, db.NUMBER, result.value)[0]);
-		};
 	}
 	
 	setPathButton(id){
@@ -226,6 +110,26 @@ export class Main{
 		}
 	}
 	
+	addDevTools(){
+		/*
+		Adds divs to to webpage which will allow
+		us to test various features
+		*/
+		function addTool(text, onclick){
+			let element = document.getElementById(text);
+			if(element === null){
+				element = document.createElement("div");
+				element.setAttribute("id", text);
+				document.body.appendChild(element);
+			}
+			element.onclick = onclick;
+			element.innerHTML = text;
+		}
+		let self = this;
+		addTool("Test all paths", ()=>self.testAllPaths());
+		addTool("get current path URL", ()=>console.log(self.getPath().getURL()));
+	}
+	
 	notifyImportDone(){
 		/*
 		Called after the initial import.
@@ -255,6 +159,11 @@ export class Main{
 			params.get("endID"), 
 			this
 		));
+		
+		if(params.get("dev")){
+			this.addDevTools();
+			console.log("adding dev");
+		}
 	}
 	
 	testAllPaths(){

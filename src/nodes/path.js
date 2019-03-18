@@ -24,6 +24,9 @@ export class Path{
         images is an array of strings, the URLs of the path's images
         imageInd is the index of the image currently displayed in main (in development)
         */
+		
+		this.mode = dataSource.mode;
+		
         this.startId = parseInt(startId);
         this.endId = parseInt(endId);
         this.dataSource = dataSource;
@@ -152,7 +155,7 @@ export class Path{
 	getURL() {
 		let origURL = window.location.href;
 		let split = origURL.split("?");
-		return split[0] + "?startID=" + this.idPath[0] + "&endID=" + this.idPath[this.idPath.length - 1];
+		return split[0] + "?startID=" + this.idPath[0] + "&endID=" + this.idPath[this.idPath.length - 1] + "&mode=" + this.mode;
 	}
 
 	draw(canvas) {

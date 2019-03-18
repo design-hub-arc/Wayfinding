@@ -14,7 +14,6 @@ import {
 	importDataInto
 } from "../getRequests/importData.js";
 
-
 export function init(){
 	console.time("Time to load (wayfinding)");
 	

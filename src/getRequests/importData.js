@@ -334,6 +334,7 @@ Imports all the data needed by the program into master
 
 */
 export async function importDataInto(master){
+	master.mode = getParamsFromURL().get("mode");
 	return new Promise((resolve, reject)=>{
 		getLatestManifest().then((id)=>{
 			console.log("id is " + id);

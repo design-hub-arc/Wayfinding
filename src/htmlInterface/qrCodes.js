@@ -21,6 +21,7 @@ export function getParamsFromURL() {
 	values.set("startID", 14);
 	values.set("endID", 96);
 	values.set("mode", "WAYFINDING");
+	values.set("dev", false);
 	// defaults to administration to design hub
 	
 	// check if parameters were passed
@@ -36,6 +37,8 @@ export function getParamsFromURL() {
 				values.set("endID", pair[1]);
 			} else if(pair[0].toUpperCase().includes("MODE")){
 				values.set("mode", pair[1].toUpperCase());
+			} else if(pair[0].toUpperCase().includes("DEV")){
+				values.set("dev", true);
 			}
 		}
 	}
