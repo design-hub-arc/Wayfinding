@@ -127,7 +127,40 @@ export class Main{
 		}
 		let self = this;
 		addTool("Test all paths", ()=>self.testAllPaths());
-		addTool("get current path URL", ()=>console.log(self.getPath().getURL()));
+		addTool("get current path URL", ()=>document.getElementById("get current path URL").innerHTML = self.getPath().getURL());
+		addTool("Save as SVG", ()=>self.saveAsSvg());
+	}
+	
+	saveAsSvg(){
+		gapi.auth2.getAuthInstance().signIn();
+		
+		console.log(this.canvas.draw.svg());
+		
+		let folderId = "176GK1W_9BOqWf0rHpM3cMNhQjSHIjfF2";
+		let metadata = {
+			"name" : this.currentPath.getURL() + ".svg",
+			"mimeType" : "image/svg+xml",
+			"parents" : [folderId]
+		};
+		
+		let body = {
+			"mimeType": "image/svg+xml",
+			"body": this.canvas.draw.svg()
+		}
+		gapi.client.drive.files.create({
+			"resource" : metadata
+		}).then((r)=>{
+			console.log(r);
+			gapi.client.drive.files.update({
+				fileId: r.result.id,
+				media: body
+			}).then((r)=>{
+				console.log(r);
+			});
+			
+		}).catch((r)=>{
+			console.log(r);
+		});
 	}
 	
 	notifyImportDone(){
