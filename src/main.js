@@ -137,6 +137,7 @@ export class Main{
 		console.log(this.canvas.draw.svg());
 		
 		let folderId = "176GK1W_9BOqWf0rHpM3cMNhQjSHIjfF2";
+		
 		let metadata = {
 			"name" : this.currentPath.getURL() + ".svg",
 			"mimeType" : "image/svg+xml",
@@ -146,7 +147,38 @@ export class Main{
 		let body = {
 			"mimeType": "image/svg+xml",
 			"body": this.canvas.draw.svg()
-		}
+		};
+		
+		
+		
+		//https://tanaikech.github.io/2018/08/13/upload-files-to-google-drive-using-javascript/
+		
+		let form = new FormData();
+		form.append("metadata", new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+		//form.append("file", new Blob([this.canvas.draw.svg()], {type: 'image/svg+xml'}));
+		
+		fetch("https://www.googleapis.com/upload/drive/v3/files", {
+			method: "POST",
+			headers: new Headers({
+				"Authorization": "Bearer " + gapi.auth.getToken().access_token
+			}),
+			body: form
+		}).then((response)=>{
+			console.log(response);
+			//                                                      how to get this from the response?
+			fetch("https://www.googleapis.com/upload/drive/v3/files/1RcSjDErpDMhTSikZENpOp1oAgj-d0Elj?uploadType=media", {
+				method: "PATCH",
+				headers: new Headers({
+					"Authorization": "Bearer " + gapi.auth.getToken().access_token
+				}),
+				"Content-Type": "image/svg+xml",
+				"body": this.canvas.draw.svg()
+			})
+		}).catch((error)=>{
+			console.log(error);
+		});
+		
+		/*
 		gapi.client.drive.files.create({
 			"resource" : metadata
 		}).then((r)=>{
@@ -161,6 +193,7 @@ export class Main{
 		}).catch((r)=>{
 			console.log(r);
 		});
+		*/
 	}
 	
 	notifyImportDone(){
