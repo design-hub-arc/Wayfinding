@@ -132,6 +132,8 @@ export class Main{
 	}
 	
 	saveAsSvg(){
+		//This is just awfull. Will clean up later.
+		
 		gapi.auth2.getAuthInstance().signIn();
 		
 		console.log(this.canvas.draw.svg());
@@ -149,13 +151,8 @@ export class Main{
 			"body": this.canvas.draw.svg()
 		};
 		
-		
-		
-		//https://tanaikech.github.io/2018/08/13/upload-files-to-google-drive-using-javascript/
-		
 		let form = new FormData();
 		form.append("metadata", new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-		//form.append("file", new Blob([this.canvas.draw.svg()], {type: 'image/svg+xml'}));
 		
 		fetch("https://www.googleapis.com/upload/drive/v3/files", {
 			method: "POST",
@@ -165,35 +162,22 @@ export class Main{
 			body: form
 		}).then((response)=>{
 			console.log(response);
-			//                                                      how to get this from the response?
-			fetch("https://www.googleapis.com/upload/drive/v3/files/1RcSjDErpDMhTSikZENpOp1oAgj-d0Elj?uploadType=media", {
-				method: "PATCH",
-				headers: new Headers({
-					"Authorization": "Bearer " + gapi.auth.getToken().access_token
-				}),
-				"Content-Type": "image/svg+xml",
-				"body": this.canvas.draw.svg()
-			})
+			response.json().then((json)=>{
+				let fileId = json.id;
+				console.log(fileId);
+				//                                                      how to get this from the response?
+				fetch("https://www.googleapis.com/upload/drive/v3/files/" + fileId + "?uploadType=media", {
+					method: "PATCH",
+					headers: new Headers({
+						"Authorization": "Bearer " + gapi.auth.getToken().access_token
+					}),
+					"Content-Type": "image/svg+xml",
+					"body": this.canvas.draw.svg()
+				})
+			});
 		}).catch((error)=>{
 			console.log(error);
 		});
-		
-		/*
-		gapi.client.drive.files.create({
-			"resource" : metadata
-		}).then((r)=>{
-			console.log(r);
-			gapi.client.drive.files.update({
-				fileId: r.result.id,
-				media: body
-			}).then((r)=>{
-				console.log(r);
-			});
-			
-		}).catch((r)=>{
-			console.log(r);
-		});
-		*/
 	}
 	
 	notifyImportDone(){
