@@ -132,51 +132,48 @@ export class Main{
 	}
 	
 	saveAsSvg(){
-		//This is just awfull. Will clean up later.
-		
-		gapi.auth2.getAuthInstance().signIn();
-		
-		console.log(this.canvas.draw.svg());
-		
-		let folderId = "176GK1W_9BOqWf0rHpM3cMNhQjSHIjfF2";
-		
+		/*
+		This is just awfull. 
+		Google's 'how to post to drive' guides are useless,
+		I've tried at least 10 different solutions,
+		and nothing else works.
+		Yes, this is horrible,
+		but unless someone else can figure this out,
+		it'll have to stay this way.
+		*/
+		let folderId = "176GK1W_9BOqWf0rHpM3cMNhQjSHIjfF2"; //the generatedSvgImages folder on the google drive
 		let metadata = {
 			"name" : this.currentPath.getURL() + ".svg",
 			"mimeType" : "image/svg+xml",
 			"parents" : [folderId]
 		};
-		
-		let body = {
-			"mimeType": "image/svg+xml",
-			"body": this.canvas.draw.svg()
-		};
-		
 		let form = new FormData();
 		form.append("metadata", new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
 		
-		fetch("https://www.googleapis.com/upload/drive/v3/files", {
-			method: "POST",
-			headers: new Headers({
-				"Authorization": "Bearer " + gapi.auth.getToken().access_token
-			}),
-			body: form
-		}).then((response)=>{
-			console.log(response);
-			response.json().then((json)=>{
-				let fileId = json.id;
-				console.log(fileId);
-				//                                                      how to get this from the response?
-				fetch("https://www.googleapis.com/upload/drive/v3/files/" + fileId + "?uploadType=media", {
-					method: "PATCH",
-					headers: new Headers({
-						"Authorization": "Bearer " + gapi.auth.getToken().access_token
-					}),
-					"Content-Type": "image/svg+xml",
-					"body": this.canvas.draw.svg()
-				})
+		gapi.auth2.getAuthInstance().signIn().then((response)=>{
+			let h = new Headers({
+				"Authorization" : "Bearer " + gapi.auth.getToken().access_token,
 			});
-		}).catch((error)=>{
-			console.log(error);
+			
+			fetch("https://www.googleapis.com/upload/drive/v3/files", {
+				method: "POST",
+				headers: h,
+				body: form
+			}).then((response)=>{
+				console.log(response);
+				response.json().then((json)=>{
+					let fileId = json.id;
+					console.log(fileId);
+					fetch("https://www.googleapis.com/upload/drive/v3/files/" + fileId + "?uploadType=media", {
+						method: "PATCH",
+						headers: h,
+						"Content-Type": "image/svg+xml",
+						body: this.canvas.draw.svg()
+					});
+				});
+			}).catch((error)=>{
+				console.log(error);
+			});
 		});
 	}
 	
