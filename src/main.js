@@ -57,7 +57,6 @@ export class Main{
 		
 		let main = this;
 		this.pathButton.onclick = function(){
-			console.log("click");
 			if(main.start.isValid() && main.end.isValid()){
 				//updatepath does the finding
 				main.updatePath();
@@ -90,7 +89,6 @@ export class Main{
 	
 	updatePath(){
 		try{
-			console.log("update");
 			let start = this.getNodeDB().getIdByString(this.start.getResult());
 			let end = this.getNodeDB().getIdByString(this.end.getResult());
 			

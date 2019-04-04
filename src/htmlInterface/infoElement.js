@@ -2,7 +2,7 @@ export class InfoElement{
 	constructor(elementId){
 		this.element = document.getElementById(elementId);
 		if(this.element === null){
-			this.element = document.createElement("a");
+			this.element = document.createElement("ul");
 			this.element.setAttribute("id", "moreInfo");
 			document.body.appendChild(this.element);
 		}
@@ -13,21 +13,23 @@ export class InfoElement{
 	}
 	
 	update(main){
-		let isLink = false;
 		let nodes = main.getNodeDB();
 		let path = main.getPath();
 		
+		while(this.element.hasChildNodes()){
+			this.element.removeChild(this.element.childNodes[0]);
+		}
 		nodes.getStringsById(path.endId).forEach(label => {
 			label = label.toLowerCase();
 			if (label.includes("http")) {
-				this.element.innerHTML = label;
-				this.element.setAttribute("href", label);
-				isLink = true;
+				let ele = document.createElement("li");
+				let a = document.createElement("a");
+				a.innerHTML = label;
+				a.setAttribute("href", label);
+				a.setAttribute("target", "_blank");
+				ele.appendChild(a);
+				this.element.appendChild(ele);
 			}
 		});
-		if (!isLink) {
-			this.element.innerHTML = " ";
-			this.element.setAttribute("href", "javascript:void(0)");
-		}
 	}
 }
