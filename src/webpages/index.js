@@ -30,11 +30,9 @@ export function init(){
 	master.setCanvas(masterCanvas);
 	
 	master.setInput(start, end);
+	master.setInfoElement(info);
 	
 	master.setPathButton("button");
-	master.addOnUpdatePath((path) => {
-		info.update(master);
-	});
 	
 	importDataInto(master).then((responses)=>{
 		console.timeEnd("Time to load (wayfinding)");
