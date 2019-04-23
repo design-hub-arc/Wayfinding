@@ -15,8 +15,6 @@ import {
 } from "../getRequests/importData.js";
 
 export function init(){
-	console.time("Time to load (wayfinding)");
-	
 	let master = new Main();
 	
 	let start = new TextBox("start box", "start hint");
@@ -34,19 +32,10 @@ export function init(){
 	
 	master.setPathButton("button");
 	
-	importDataInto(master).then((responses)=>{
-		console.timeEnd("Time to load (wayfinding)");
-	});
+	importDataInto(master);
 }
 
 //need this (see index.html)
 document.getElementById("wrapper").onload = function(){
 	init();
-}
-console.log("done with index.js");
-
-function nextImage() {
-	if (master.getPath() !== undefined) {
-		document.getElementById("image").src = master.getPath().nextImage();
-	}
 }

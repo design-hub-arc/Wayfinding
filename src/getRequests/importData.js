@@ -12,7 +12,7 @@ If you really want to know how this works, scroll to the bottom, and work your w
 each of the functions has their own documentation
 */
 
-import {formatResponse, CsvFile} from "../dataFormatting/csv.js";
+import {formatResponse} from "../dataFormatting/csv.js";
 import {getParamsFromURL}        from "../htmlInterface/qrCodes.js";
 
 
@@ -260,13 +260,10 @@ async function getLatestManifest(){
 					//not blank, not header: we're ready to check.
 					url = rows[row][col];
 					id = (url.indexOf("id=") === -1) ? url : url.split("id=")[1];
-					console.log("Checking " + id);
 					checkExists(id).then((doesExist)=>{
 						if(doesExist){
-							console.log("Yup, that works!");
 							resolve(id);
 						} else {
-							console.log("Nope.");
 							recursiveCheck(row - 1, col);
 						}
 					});
@@ -288,7 +285,6 @@ export async function importDataInto(master){
 	master.mode = getParamsFromURL().get("mode");
 	return new Promise((resolve, reject)=>{
 		getLatestManifest().then((id)=>{
-			console.log("id is " + id);
 			importManifest(id).then((responses)=>{
 				let nodeDB = master.getNodeDB();
 				let canvas = master.getCanvas();

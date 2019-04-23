@@ -130,7 +130,7 @@ export class Main{
 		let self = this;
 		addTool("Test all paths", ()=>self.testAllPaths());
 		addTool("get current path URL", ()=>document.getElementById("get current path URL").innerHTML = self.getPath().getURL());
-		addTool("Save as SVG", ()=>self.saveAsSvg());
+		//addTool("Save as SVG", ()=>self.saveAsSvg());
 	}
 	
 	saveAsSvg(){
@@ -211,7 +211,6 @@ export class Main{
 		
 		if(params.get("dev")){
 			this.addDevTools();
-			console.log("adding dev");
 		}
 	}
 	

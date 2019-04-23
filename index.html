@@ -19,7 +19,6 @@
 						discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
 						scope: "https://www.googleapis.com/auth/drive"
 					}).then(()=> {
-						console.log(gapi);
 						document.getElementById("wrapper").onload(); 
 						/*
 						this was the only way I could find to make sure
@@ -43,15 +42,7 @@
 		
 	</head>
     <body>
-		<div id="imageTitle" onclick="nextImage()"> Next step </div>
-		<img id="image" alt="the next image in your path will appear here!"/>
 		<div id="wrapper"></div>
-        
-        <!--
-		<div id="drawAll" onClick="master.getNodeDB().drawAll(master.getCanvas())">Draw All Nodes</div>
-		<div id="testAll" onClick="master.testAllPaths()">Test All Paths</div>
-		<div id="nodeDivs" onClick="master.getNodeDB().generateDivs(master)">Generate Node Connections</div>
-		-->
         
 		<table style="background-color: #D34C0F">
 			<tr>

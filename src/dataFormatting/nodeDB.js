@@ -100,7 +100,6 @@ export class NodeDB{
 				
 				if(isNaN(id)){
 					// the first row will fail, because of the header, so don't throw an error
-					console.log("Oops! Node ID of " + row[1]);
 				} else {
 					db.stuffToNodeId.set(name, id);
 				}
@@ -130,71 +129,6 @@ export class NodeDB{
 		}
 		let db = this;
 		this.getAll().forEach(node => node.loadAdj(db));
-	}
-	
-	parseImageResponse(csvFile){
-		/*
-        @param csvFile : a CsvFile object containing the result of a HTTP request to our image spreadsheet
-        sets the connection images of nodes.
-		
-		Might redo this once we start working on images
-        */
-		let data = csvFile.getNonHeaders();
-		let fromCol = csvFile.indexOfCol(["From", "node1", "n1"]);
-		let toCol = csvFile.indexOfCol(["to", "node2", "n2"]);
-		let imgCol = csvFile.indexOfCol(["image", "img", "photo", "url"]);
-		
-		//Skip header
-		for(let i = 1; i < data.length; i++){
-			//make sure all 3 rows exist
-			if(data[i][fromCol] !== "" && data[i][toCol] !== "" && data[i][imgCol] !== ""){
-				try{
-					this.getNode(parseInt(data[i][fromCol])).setConnectionImage(data[i][toCol], data[i][imgCol]);
-				} catch(e){
-					console.log("An error occured while parsing image data:");
-					console.log(e.stack);
-				}
-			}
-		}
-	}
-	
-	parseClassResponse(csvFile){
-		/*
-		@param responseText : the response from an XMLHTTP request 
-		to a sheet containing class numbers and rooms
-		
-		We currenly can't use parseNameToId on this, as the class to building-room table does not use node IDs.
-		Once I implement that feature to the node manager, we can eliminate this.
-		*/
-		let missingRooms = [];
-		
-		let data =        csvFile.getNonHeaders();
-		let classCol =    csvFile.indexOfCol(["CLASS NUMBER", "CLASS"]);
-        let buildingCol = csvFile.indexOfCol(["BUILDING"]);
-		let roomCol =     csvFile.indexOfCol(["ROOM"]);
-		
-		let row;
-		let nodeId;
-		
-		for(let i = 1; i < data.length; i++){
-			row = data[i];
-			nodeId = this.getIdByString((row[buildingCol] + " " + row[roomCol]).toUpperCase());
-			
-			if(nodeId == undefined){
-				if(!missingRooms.includes(row[buildingCol] + " " + row[roomCol])){
-					missingRooms.push(row[buildingCol] + " " + row[roomCol]);
-				}
-			} else{
-				if(!isNaN(parseInt(nodeId))){
-					this.stuffToNodeId.set(row[classCol].toString().toUpperCase(), parseInt(nodeId));
-				}
-			}
-		}
-		if(missingRooms.length !== 0){
-			console.log("Could not find a node connected to rooms...");
-			missingRooms.forEach(room => console.log("-" + room));
-			console.log("Check the current room to node file in the google drive to see if these rooms are missing nodes.");
-		}
 	}
 	
 	getNode(id){

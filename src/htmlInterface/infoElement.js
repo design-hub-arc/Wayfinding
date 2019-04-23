@@ -3,13 +3,9 @@ export class InfoElement{
 		this.element = document.getElementById(elementId);
 		if(this.element === null){
 			this.element = document.createElement("ul");
-			this.element.setAttribute("id", "moreInfo");
+			this.element.setAttribute("id", elementId);
 			document.body.appendChild(this.element);
 		}
-		this.element.setAttribute("type", "button");
-		this.element.setAttribute("target", "_blank");
-		this.element.innerHTML = " ";
-		this.element.setAttribute("href", "javascript:void(0)");
 	}
 	
 	update(main){
@@ -19,6 +15,7 @@ export class InfoElement{
 		while(this.element.hasChildNodes()){
 			this.element.removeChild(this.element.childNodes[0]);
 		}
+		
 		nodes.getStringsById(path.endId).forEach(label => {
 			label = label.toLowerCase();
 			if (label.includes("http")) {
