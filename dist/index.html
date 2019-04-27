@@ -9,21 +9,40 @@
         
 		<script src="./src/svg.js"></script>
 		<script src="./src/svg.panzoom.js"></script>
+		
+		<script>
+			function initDrive(){
+				gapi.load("client:auth2", ()=>{
+					gapi.client.init({
+						apiKey: "AIzaSyCk-i3lAc_k5ngfJ-FDw37swWvPMYaEWZs",
+						client_id: "123335625420-4t9oodh2j04umpau2m98dd2uvkn6s659.apps.googleusercontent.com",
+						discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
+						scope: "https://www.googleapis.com/auth/drive"
+					}).then(()=> {
+						document.getElementById("wrapper").onload(); 
+						/*
+						this was the only way I could find to make sure
+						I initialize the program after gapi loads.
+						index.js is always going to finish loading before gapi does,
+						but index.js requires gapi to work.
+						So, index.js puts its init function in "wrapper"'s .onload
+						so it will be executed after gapi loads.
+						
+						Stupid, I know, but I couldn't find any way to combine 
+						gapi as a non-module
+						and index.js as a module
+						*/
+					});
+				},
+						 (error)=>{
+					console.log(error);
+				});
+			}
+		</script>
+		
 	</head>
     <body>
-		<div id="imageTitle" onclick="nextImage()"> Next step </div>
-		<img id="image" alt="the next image in your path will appear here!"/>
 		<div id="wrapper"></div>
-        
-        <!--
-		<div id="drawAll" onClick="master.getNodeDB().drawAll(master.getCanvas())">Draw All Nodes</div>
-		<div id="testAll" onClick="master.testAllPaths()">Test All Paths</div>
-		<div id="nodeDivs" onClick="master.getNodeDB().generateDivs(master)">Generate Node Connections</div>
-		-->
-        
-        
-        
-        
         
 		<table style="background-color: #D34C0F">
 			<tr>
@@ -47,9 +66,10 @@
 				</td>
 			</tr>
 		</table>
+		<ul id="moreInfo"></ul>
         
-		<a href="classFinder.html" target="_blank">Find a class</a>
-		
-        <script src="./src/webpages/index.js" type="module"></script>
+		<script async defer src="https://apis.google.com/js/api.js"
+				onload="initDrive()"></script>
+		<script src="./src/webpages/index.js" type="module"></script>
     </body>
 </html>
