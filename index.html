@@ -19,33 +19,32 @@
 						discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
 						scope: "https://www.googleapis.com/auth/drive"
 					}).then(()=> {
-						console.log(document.getElementById("wrapper"));
-						document.getElementById("wrapper").onload(); 
-						/*
-						this was the only way I could find to make sure
-						I initialize the program after gapi loads.
-						index.js is always going to finish loading before gapi does,
-						but index.js requires gapi to work.
-						So, index.js puts its init function in "wrapper"'s .onload
-						so it will be executed after gapi loads.
-						
-						Stupid, I know, but I couldn't find any way to combine 
-						gapi as a non-module
-						and index.js as a module
-						*/
+                        /*
+                        Since gapi loads asynchronously,
+                        whereas index.js is loaded synchronously,
+                        and index.js requires gapi to work, gapi must load first.
+                        To solve this problem, gapi, upon loading, 
+                        inserts the script tag for index.js once it loads.
+                        This allows both gapi and modules to coexist with minimal polution of the global namespace.
+                         */
+                        let script = document.createElement("script");
+                        script.type = "module";
+                        script.src = "./src/webpages/index.js";
+                        document.getElementsByTagName("head")[0].appendChild(script);
 					});
 				},
-						 (error)=>{
-					console.log(error);
+                (error)=>{
+					console.error(error);
 				});
 			}
 		</script>
 		
 	</head>
     <body>
-		<div id="imageTitle" onclick="nextImage()"> Next step </div>
-		<img id="image" alt="the next image in your path will appear here!"/>
-		<div id="wrapper"></div>
+		<!--<div id="imageTitle" onclick="nextImage()"> Next step </div>
+		<img id="image" alt="the next image in your path will appear here!"/>-->
+		
+        <div id="wrapper"></div>
         
         <!--
 		<div id="drawAll" onClick="master.getNodeDB().drawAll(master.getCanvas())">Draw All Nodes</div>
@@ -78,6 +77,7 @@
 		<ul id="moreInfo"></ul>
         
 		<script async defer src="https://apis.google.com/js/api.js"onload="initDrive()"></script>
-		<script src="./src/webpages/index.js" type="module"></script>
+		<!--See head for why this is commented out-->
+        <!--<script src="./src/webpages/index.js" type="module"></script>-->
     </body>
 </html>

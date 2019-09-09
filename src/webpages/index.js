@@ -39,14 +39,11 @@ export function init(){
 	});
 }
 
-//need this (see index.html)
-document.getElementById("wrapper").onload = function(){
-	init();
-}
-console.log("done with index.js");
+init();
 
+/*
 function nextImage() {
 	if (master.getPath() !== undefined) {
 		document.getElementById("image").src = master.getPath().nextImage();
 	}
-}
+}*/
