@@ -24,7 +24,7 @@ export function init(){
 	let info = new InfoElement("moreInfo");
 	
 	//http://svgjs.com/
-	let svgDrawer = SVG('wrapper').size(1000, 1000).panZoom();
+	let svgDrawer = SVG('wrapper').size(1000, 1000);//.panZoom();
 	let masterCanvas = new Canvas();
 	masterCanvas.link(svgDrawer);
 	master.setCanvas(masterCanvas);

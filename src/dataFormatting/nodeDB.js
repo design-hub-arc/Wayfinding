@@ -92,23 +92,27 @@ export class NodeDB{
 		let name;
 		let id;
 		let data = formatResponse(responseText);
-		
+		let firstRow = true;
+        
 		data.forEach(row => {
-			try{
-				name = row[0].toString().toUpperCase();
-				id = parseInt(row[1]);
+			if(firstRow){
+                firstRow = false;
+                //skip first row
+            } else {
+                try{
+                    name = row[0].toString().toUpperCase();
+                    id = parseInt(row[1]);
+        			if(isNaN(id)){
+        				throw new Error(`Oops! Node ID of "${row[1]}": ID must be a number`);
+        			} else {
+            			db.stuffToNodeId.set(name, id);
+                	}
 				
-				if(isNaN(id)){
-					// the first row will fail, because of the header, so don't throw an error
-					console.log("Oops! Node ID of " + row[1]);
-				} else {
-					db.stuffToNodeId.set(name, id);
-				}
-				
-			} catch(err){
-				console.log("Invalid row: " + row);
-				console.log(err.message);
-			}
+            	} catch(err){
+                	console.error("Invalid row: " + row);
+                    console.error(err.message);
+                }
+            }
 		});
 	}
 	
