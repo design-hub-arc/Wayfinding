@@ -1,2 +1,4 @@
 /node_modules/*
 /nbproject/private/
+.DS_Store
+
