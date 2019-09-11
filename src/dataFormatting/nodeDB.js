@@ -1,5 +1,6 @@
 import {Node} from '../nodes/arcNode.js';
 import {formatResponse} from '../dataFormatting/csv.js';
+import {closestMatch} from "../htmlInterface/input.js";
 
 /*
 NodeDB is used by the Main class to store the data used by the program.
@@ -33,6 +34,8 @@ export class NodeDB{
 		-Object
 		-Array
 		*/
+       
+       this.allLabels = []; //need this for closest match
     }
     
 	parseNodeData(responseText){
@@ -106,6 +109,7 @@ export class NodeDB{
         				throw new Error(`Oops! Node ID of "${row[1]}": ID must be a number`);
         			} else {
             			db.stuffToNodeId.set(name, id);
+                        this.allLabels.push(name);
                 	}
 				
             	} catch(err){
@@ -228,10 +232,12 @@ export class NodeDB{
 		may move this to getNode, just making it check if parameter is integer or string. Could cause problems with class numbers
 		*/
 		
+        //first, try the easy solution
 		let ret = this.stuffToNodeId.get(string.toString().toUpperCase());
 		
+        //nope. Need to find the closest match
         if(ret === undefined){
-            
+            ret = this.stuffToNodeId.get(closestMatch(string.toString().toUpperCase(), this.allLabels));
         }
 		if(ret === undefined){
 			console.log("Couldn't find node identified by " + string);

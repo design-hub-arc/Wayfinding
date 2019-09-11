@@ -193,11 +193,10 @@ export class Main{
 		let lowerRight = this.nodeDatabase.getNode(-2);
 		//let params = getParamsFromURL();
 		let params = new QrCodeParams();
-        
-        //wait... now the nodeDB will need to do the partial string recognition to match "raef" to "Raef Hall"
         let startId = (params.startMode === QrCodeParams.ID_MODE) ? params.start : this.nodeDatabase.getIdByString(params.start);
         let endId = (params.endMode === QrCodeParams.ID_MODE) ? params.end : this.nodeDatabase.getIdByString(params.end);
         
+        console.log(startId, endId);
         params.displayData();
         
 		this.canvas.setCorners(

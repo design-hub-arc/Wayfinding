@@ -107,6 +107,9 @@ export class QrCodeParams{
                     let intVal = Number.parseInt(pair[1]);
                     if(Number.isNaN(intVal)){
                         //is name, not ID
+                        while(pair[1].indexOf("%20") !== -1){
+                            pair[1] = pair[1].replace("%20", " ");
+                        }
                         this.start = pair[1];
                         this.startMode = QrCodeParams.NAME_MODE;
                     } else {
@@ -117,6 +120,9 @@ export class QrCodeParams{
                     let intVal = Number.parseInt(pair[1]);
                     if(Number.isNaN(intVal)){
                         //is name, not ID
+                        while(pair[1].indexOf("%20") !== -1){
+                            pair[1] = pair[1].replace("%20", " ");
+                        }
                         this.end = pair[1];
                         this.endMode = QrCodeParams.NAME_MODE;
                     } else {
@@ -129,14 +135,14 @@ export class QrCodeParams{
                 }
             });
         }
-        
-        function displayData(){
-            console.log("QR code parameters:");
-            console.log(`* Start is ${this.start} (${(this.startMode === 0) ? "ID" : "name"})`);
-            console.log(`* End is ${this.end} (${(this.endMode === 0) ? "ID" : "name"})`);
-            console.log(`* Wayfinding Mode is ${this.wayfindingMode}`);
-            console.log(`* Developer mode is ${(this.devMode) ? "on" : "off"}`);
-        }
+    }
+    
+    displayData(){
+        console.log("QR code parameters:");
+        console.log(`* Start is ${this.start} (${(this.startMode === 0) ? "ID" : "name"})`);
+        console.log(`* End is ${this.end} (${(this.endMode === 0) ? "ID" : "name"})`);
+        console.log(`* Wayfinding Mode is ${this.wayfindingMode}`);
+        console.log(`* Developer mode is ${(this.devMode) ? "on" : "off"}`);
     }
 }
 QrCodeParams.ID_MODE = 0;

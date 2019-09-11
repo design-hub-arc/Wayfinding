@@ -138,7 +138,8 @@ function matchCount(find, inString){
 	return {"matches" : best, "spaces" : spaces};
 }
 
-function closestMatch(string, options){
+//used by NodeDb
+export function closestMatch(string, options){
 	/*
 	REGEX would be an easier way to do this,
 	but I'm not sure how much functionality 
