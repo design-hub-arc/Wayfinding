@@ -6,7 +6,7 @@ May clean this up more once we have access to the class database (not my fake on
 */
 
 import { Path } from             "./nodes/path.js";
-import { getParamsFromURL } from "./htmlInterface/qrCodes.js";
+import { QrCodeParams } from "./htmlInterface/qrCodes.js";
 import { NodeDB } from           "./dataFormatting/nodeDB.js";
 
 export class Main{
@@ -191,8 +191,15 @@ export class Main{
 		
 		let upperLeft = this.nodeDatabase.getNode(-1);
 		let lowerRight = this.nodeDatabase.getNode(-2);
-		let params = getParamsFromURL();
-		
+		//let params = getParamsFromURL();
+		let params = new QrCodeParams();
+        
+        //wait... now the nodeDB will need to do the partial string recognition to match "raef" to "Raef Hall"
+        let startId = (params.startMode === QrCodeParams.ID_MODE) ? params.start : this.nodeDatabase.getIdByString(params.start);
+        let endId = (params.endMode === QrCodeParams.ID_MODE) ? params.end : this.nodeDatabase.getIdByString(params.end);
+        
+        params.displayData();
+        
 		this.canvas.setCorners(
 			upperLeft.x,
 			upperLeft.y,
@@ -204,12 +211,12 @@ export class Main{
 		this.end.addOptions(this.getNodeDB().getAllNames());
 		
 		this.setPath(new Path(
-			params.get("startID"), 
-			params.get("endID"), 
+			startId, 
+			endId, 
 			this
 		));
 		
-		if(params.get("dev")){
+		if(params.devMode){
 			this.addDevTools();
 			console.log("adding dev");
 		}

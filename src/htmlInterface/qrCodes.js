@@ -1,3 +1,9 @@
+/*
+ *
+ */
+
+
+
 export function getParamsFromURL() {
 	/*
 	extracts variables from url.
@@ -93,7 +99,7 @@ export class QrCodeParams{
             pairs.forEach((pair)=>{
                 pair = pair.split("=");
                 pair[0] = pair[0].toUpperCase();
-                console.log(pair[0] + ": " + pair[1]);
+                //console.log(pair[0] + ": " + pair[1]);
                 if(pair[0].includes("MODE")){
                     this.wayfindingMode = pair[1].toUpperCase();
                 } else if(pair[0].includes("START")){
@@ -122,6 +128,14 @@ export class QrCodeParams{
                     //note: not logically = to this.devMode = ~~~
                 }
             });
+        }
+        
+        function displayData(){
+            console.log("QR code parameters:");
+            console.log(`* Start is ${this.start} (${(this.startMode === 0) ? "ID" : "name"})`);
+            console.log(`* End is ${this.end} (${(this.endMode === 0) ? "ID" : "name"})`);
+            console.log(`* Wayfinding Mode is ${this.wayfindingMode}`);
+            console.log(`* Developer mode is ${(this.devMode) ? "on" : "off"}`);
         }
     }
 }

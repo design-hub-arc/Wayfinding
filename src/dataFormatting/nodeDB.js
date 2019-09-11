@@ -230,6 +230,9 @@ export class NodeDB{
 		
 		let ret = this.stuffToNodeId.get(string.toString().toUpperCase());
 		
+        if(ret === undefined){
+            
+        }
 		if(ret === undefined){
 			console.log("Couldn't find node identified by " + string);
 		}
