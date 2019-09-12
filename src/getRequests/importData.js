@@ -13,7 +13,7 @@ each of the functions has their own documentation
 */
 
 import {formatResponse, CsvFile} from "../dataFormatting/csv.js";
-import {getParamsFromURL}        from "../htmlInterface/qrCodes.js";
+import {getParamsFromURL, QrCodeParams}        from "../htmlInterface/qrCodes.js";
 
 
 export const newline = /\r?\n|\r/;
@@ -219,12 +219,12 @@ async function getLatestManifest(){
 				return row.split(",");
 			});
 
-			//since getParamsFromURL converts to upper case, we need the headers to be uppercase as well
+			//since QR code parameters converts to upper case, we need the headers to be uppercase as well
 			rows[0] = rows[0].map((header)=>header.toUpperCase());
 
 			//check the wayfinding mode
 			//mode is an int, the index of the column it is contained in the version log
-			let mode = rows[0].indexOf(getParamsFromURL().get("mode"));
+			let mode = rows[0].indexOf(new QrCodeParams().wayfindingMode);
 			if(mode === -1){
 				/*
 				The mode is not present in the version log,
@@ -285,7 +285,7 @@ Imports all the data needed by the program into master
 @param master : the Main object used by the program.
 */
 export async function importDataInto(master){
-	master.mode = getParamsFromURL().get("mode");
+	master.mode = new QrCodeParams().wayfindingMode;
 	return new Promise((resolve, reject)=>{
 		getLatestManifest().then((id)=>{
 			console.log("id is " + id);

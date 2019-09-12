@@ -5,9 +5,9 @@ It also takes a lot of code out of the main HTML file.
 May clean this up more once we have access to the class database (not my fake one, the real one that eservices uses)
 */
 
-import { Path } from             "./nodes/path.js";
+import { Path } from         "./nodes/path.js";
 import { QrCodeParams } from "./htmlInterface/qrCodes.js";
-import { NodeDB } from           "./dataFormatting/nodeDB.js";
+import { NodeDB } from       "./dataFormatting/nodeDB.js";
 
 export class Main{
     constructor(){
@@ -221,7 +221,7 @@ export class Main{
             this.end.setInput(params.end);
         }
         
-        params.displayData();
+        //params.displayData();
         
 		this.canvas.setCorners(
 			upperLeft.x,
