@@ -109,6 +109,7 @@ export class NodeDB{
         				throw new Error(`Oops! Node ID of "${row[1]}": ID must be a number`);
         			} else {
             			db.stuffToNodeId.set(name, id);
+                        this.getNode(id).addLabel(name);
                         this.allLabels.push(name);
                 	}
 				

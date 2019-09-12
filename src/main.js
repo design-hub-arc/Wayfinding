@@ -189,14 +189,38 @@ export class Main{
 		3. Sets the default path
 		*/
 		
-		let upperLeft = this.nodeDatabase.getNode(-1);
-		let lowerRight = this.nodeDatabase.getNode(-2);
-		//let params = getParamsFromURL();
-		let params = new QrCodeParams();
-        let startId = (params.startMode === QrCodeParams.ID_MODE) ? params.start : this.nodeDatabase.getIdByString(params.start);
-        let endId = (params.endMode === QrCodeParams.ID_MODE) ? params.end : this.nodeDatabase.getIdByString(params.end);
+		const upperLeft = this.nodeDatabase.getNode(-1);
+		const lowerRight = this.nodeDatabase.getNode(-2);
+		const params = new QrCodeParams();
+        let startId;
+        let endId;
         
-        console.log(startId, endId);
+        this.start.addOptions(this.getNodeDB().getAllNames());
+		this.end.addOptions(this.getNodeDB().getAllNames());
+        
+        if(params.startMode === QrCodeParams.ID_MODE){
+            let names = this.nodeDatabase.getNode(params.start).getLabels();
+            if(names.length > 0){
+                this.start.setInput(names[0]);
+            }
+            startId = params.start;
+            
+        } else {
+            startId = this.nodeDatabase.getIdByString(params.start);
+            this.start.setInput(params.start);
+        }
+        
+        if(params.endMode === QrCodeParams.ID_MODE){
+            let names = this.nodeDatabase.getNode(params.end).getLabels();
+            if(names.length > 0){
+                this.end.setInput(names[0]);
+            }
+            endId = params.end;
+        } else {
+            endId = this.nodeDatabase.getIdByString(params.end);
+            this.end.setInput(params.end);
+        }
+        
         params.displayData();
         
 		this.canvas.setCorners(
@@ -205,10 +229,7 @@ export class Main{
 			lowerRight.x,
 			lowerRight.y
 		);
-		
-		this.start.addOptions(this.getNodeDB().getAllNames());
-		this.end.addOptions(this.getNodeDB().getAllNames());
-		
+        
 		this.setPath(new Path(
 			startId, 
 			endId, 
