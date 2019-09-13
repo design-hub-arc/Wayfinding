@@ -1,8 +1,7 @@
 /*
 The Main class is used to store data, preventing the need for global variables.
+It also serves to link all of the GUI elements together
 It also takes a lot of code out of the main HTML file.
-
-May clean this up more once we have access to the class database (not my fake one, the real one that eservices uses)
 */
 
 import { Path } from         "./nodes/path.js";
@@ -11,9 +10,8 @@ import { NodeDB } from       "./dataFormatting/nodeDB.js";
 
 export class Main{
     constructor(){
-        this.canvas = undefined;
-
         //html elements
+        this.canvas = undefined;
         this.start = undefined;
         this.end = undefined;
         this.pathButton = undefined;
@@ -55,14 +53,11 @@ export class Main{
 		*/
 		this.pathButton = document.getElementById(id);
 		if(this.pathButton === null){
-			this.pathButton = document.createElement("button");
-			this.pathButton.setAttribute("id", id);
-			this.pathButton.innerHTML = "Draw Path";
-			document.body.appendChild(this.pathButton);
+			throw new Error(`No element with an ID of ${id} exists.`);
 		}
 		
 		let main = this;
-		this.pathButton.onclick = function(){
+		this.pathButton.onclick = ()=>{
 			if(main.start.isValid() && main.end.isValid()){
 				//updatepath does the finding
 				main.updatePath();
@@ -102,13 +97,13 @@ export class Main{
 				if(newPath.valid){
 					this.setPath(newPath);
 				} else {
-					throw new Error("Invalid path: " + newPath.idPath);
+					throw new Error("Invalid path: ", newPath);
 				}
 			} else {
 				throw new Error("Invalid start and end points: " + this.start.getResult() + " " + this.end.getResult());
 			}
 		} catch(e){
-			console.log(e.stack);
+			console.error(e.stack);
 		}
 	}
 	

@@ -13,7 +13,7 @@ each of the functions has their own documentation
 */
 
 import {formatResponse, CsvFile} from "../dataFormatting/csv.js";
-import {getParamsFromURL, QrCodeParams}        from "../htmlInterface/qrCodes.js";
+import {QrCodeParams}            from "../htmlInterface/qrCodes.js";
 
 
 export const newline = /\r?\n|\r/;
@@ -102,6 +102,18 @@ where the key is the id, and the value is the response text,
 then resolves with that Map once each id's response has been obtained.
 */
 async function driveSeqGets(fileIds){
+    console.time("seq get");
+    
+    Promise.all(fileIds.map((id)=>{
+        return new Promise((resolve, reject)=>{
+            driveGet(id).then((responseText)=>{
+                resolve(responseText);
+            });
+        });
+    })).then((rs)=>{
+        console.log(rs);
+    });
+    
 	return new Promise((resolve, reject) => {
 		let responses = new Map();
 		let received = 0;
@@ -112,6 +124,8 @@ async function driveSeqGets(fileIds){
 				responses.set(fileIds[i], responseText);
 				received++;
 				if(received === fileIds.length){
+                    console.timeEnd("seq get");
+                    console.log(responses);
 					resolve(responses);
 				}
 			});
@@ -287,21 +301,38 @@ Imports all the data needed by the program into master
 export async function importDataInto(master){
 	master.mode = new QrCodeParams().wayfindingMode;
 	return new Promise((resolve, reject)=>{
-		getLatestManifest().then((id)=>{
+		console.time("get latest manifest");
+        getLatestManifest().then((id)=>{
 			console.log("id is " + id);
+            console.time("import manifest");
 			importManifest(id).then((responses)=>{
 				let nodeDB = master.getNodeDB();
-				let canvas = master.getCanvas();
 
 				nodeDB.parseNodeData(responses.get("Node coordinates"));
 				nodeDB.parseConnData(responses.get("Node connections"));
 				nodeDB.parseNameToId(responses.get("labels"));
                 
+                console.time("set image");
+                
+                //setimage causing most of the lag
                 master.getCanvas().setImage(responses.get("map image")).then(()=>{
-					master.notifyImportDone();
+					console.timeEnd("set image");
+                    master.notifyImportDone();
 					resolve(responses);
 				});
+                console.timeEnd("import manifest");
 			});
+            console.timeEnd("get latest manifest");
 		});
 	});
+}
+
+//maybe use this to replace all of the ugly importing?
+export class DataSet{
+    constructor(){
+        this.nodeCoordFile = null;
+        this.nodeConnFile = null;
+        this.labelFile = null;
+        this.imageUrl = null;
+    }
 }

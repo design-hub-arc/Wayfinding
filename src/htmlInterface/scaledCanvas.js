@@ -33,9 +33,8 @@ export class Canvas{
 	
 	//needs to be async because draw.image makes a requests to get the image
     async setImage(src){
-        //scaler is an svg image
 		return new Promise((resolve, reject)=>{
-			this.image = this.draw.image(src);
+            this.image = this.draw.image(src);
 			this.image.loaded(()=>{
 				this.resize();
 				resolve();
@@ -86,11 +85,10 @@ export class Canvas{
 		Recalculates the size of the SVG image,
 		so that way nodes don't appear skewed if the SVG changes size.
 		
-		Since the SVG isn't dynamic anymore, this isn't really used.
-		
 		Note that this doesn't change the size of the element,
 		notifies the Canvas of the new size.
 		*/
+        
 		this.destWidth = this.image.node.width.baseVal.value;
 		this.destHeight = this.image.node.height.baseVal.value;
 	}
