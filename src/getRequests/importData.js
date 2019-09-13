@@ -103,7 +103,7 @@ then resolves with that Map once each id's response has been obtained.
 */
 async function driveSeqGets(fileIds){
     console.time("seq get");
-    
+    /*
     Promise.all(fileIds.map((id)=>{
         return new Promise((resolve, reject)=>{
             driveGet(id).then((responseText)=>{
@@ -112,7 +112,7 @@ async function driveSeqGets(fileIds){
         });
     })).then((rs)=>{
         console.log(rs);
-    });
+    });*/
     
 	return new Promise((resolve, reject) => {
 		let responses = new Map();
@@ -125,7 +125,7 @@ async function driveSeqGets(fileIds){
 				received++;
 				if(received === fileIds.length){
                     console.timeEnd("seq get");
-                    console.log(responses);
+                    //console.log(responses);
 					resolve(responses);
 				}
 			});
@@ -149,52 +149,43 @@ async function driveSeqGets(fileIds){
  returning the Map
  */
 async function importManifest(fileId){
-	let promise = new Promise((resolve, reject) => {
-		driveGet(fileId).then((responseText) => {
-			let data = formatResponse(responseText);
-			let fileIdToKey = new Map();
-			/*
-			since sequentialGets will return fileId-to-response,
-			we need to provide an easier way to identify what each response is giving.
-			since we are looking at key-to-fileId-to-response text,
-			and sequentialGets gives us fileId-to-response,
-			we can use this to get key-to-response text
-			*/
+	let responseText = await driveGet(fileId);
+    let data = formatResponse(responseText);
+    let fileIdToKey = new Map();
+    /*
+    since sequentialGets will return fileId-to-response,
+    we need to provide an easier way to identify what each response is giving.
+    since we are looking at key-to-fileId-to-response text,
+    and sequentialGets gives us fileId-to-response,
+    we can use this to get key-to-response text
+    */
 
-			for(let i = 1; i < data.length; i++){ 
-				if (data[i].length >= 2 && data[i][1] !== ""){
-					/*
-					The data is a table, with the first column being a key,
-					such as "node coordinates", "buildings", etc,
+    for(let i = 1; i < data.length; i++){ 
+        if (data[i].length >= 2 && data[i][1] !== ""){
+            /*
+            The data is a table, with the first column being a key,
+            such as "node coordinates", "buildings", etc,
 
-					and the second being the url linking to that resource
-					*/
-					if(data[i][1].indexOf("id=") > -1){
-                        fileIdToKey.set(data[i][1].split("id=")[1], data[i][0]);
-                    } else {
-                        fileIdToKey.set(data[i][1], data[i][0]);
-                    }
-				}
-			}
-            
-            
-			driveSeqGets(Array.from(fileIdToKey.keys())).then((responses) => {
-				/*
-				Convets the url-to-response result of seqGet
-				to an easier to use key-to-response
-				*/
-				
-				let ret = new Map();
-				
-				responses.forEach((responseText, url) => {
-					ret.set(fileIdToKey.get(url), responseText);
-				});
+            and the second being the url linking to that resource
+            */
+            if(data[i][1].indexOf("id=") > -1){
+                fileIdToKey.set(data[i][1].split("id=")[1], data[i][0]);
+            } else {
+                fileIdToKey.set(data[i][1], data[i][0]);
+            }
+        }
+    }
 
-				resolve(ret);
-			});
-		});
-	});
-	return promise;
+    /*
+    Convets the url-to-response result of seqGet
+    to an easier to use key-to-response
+     */
+    let ret = new Map();
+    let responses = await driveSeqGets(Array.from(fileIdToKey.keys()));
+    responses.forEach((responseText, url) => {
+        ret.set(fileIdToKey.get(url), responseText);
+    });
+    return ret;
 }
 
 
