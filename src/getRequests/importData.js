@@ -242,7 +242,7 @@ async function getLatestManifest(){
 			let url;
 			let id;
 
-			function recursiveCheck(row, col){
+			async function recursiveCheck(row, col){
 				/*
 				Remember suffering through recursuion back in CISP 300?
 				Yes, it does have valid uses.
@@ -266,15 +266,13 @@ async function getLatestManifest(){
 					url = rows[row][col];
 					id = (url.indexOf("id=") === -1) ? url : url.split("id=")[1];
 					console.log("Checking " + id);
-					checkExists(id).then((doesExist)=>{
-						if(doesExist){
-							console.log("Yup, that works!");
-							resolve(id);
-						} else {
-							console.log("Nope.");
-							recursiveCheck(row - 1, col);
-						}
-					});
+					if(await checkExists(id)){
+                        console.log("Yup, that works!");
+						resolve(id);
+                    } else {
+                        console.log("Nope. Check the next one.");
+                        recursiveCheck(row - 1, col);
+                    }
 				}
 			}
 
