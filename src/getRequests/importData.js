@@ -105,35 +105,21 @@ async function driveSeqGets(fileIds){
     console.time("seq get");
     
     let responses = new Map();
-    let received = 0;
     let promises = [];
     
     for(let i = 0; i < fileIds.length; i++){
         responses.set(fileIds[i], "No response from file ID " + fileIds[i]);
         promises.push(
             new Promise(async(resolve, reject)=>{
-                responses.set(fileIds[i], await driveGet(fileIds[i]));
+                let file = await driveGet(fileIds[i]);
+                responses.set(fileIds[i], file);
+                resolve(file);
             })
         );
     }
-    console.log("got here");
-    await Promise.all(promises).then(()=>0);
-    console.log("got here");
+    await Promise.all(promises).then((r)=>console.log(r));
     console.timeEnd("seq get");
     return responses;
-    
-    
-    for(let i = 0; i < fileIds.length; i++){
-        responses.set(fileIds[i], "No response from file ID " + fileIds[i]);
-        let responseText = await driveGet(fileIds[i]);
-        responses.set(fileIds[i], responseText);
-        received++;
-        if(received === fileIds.length){
-            console.timeEnd("seq get");
-            //console.log(responses);
-            return responses;
-        }
-    }
 }
 
 
