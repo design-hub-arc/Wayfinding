@@ -268,7 +268,7 @@ export class NodeDB{
 		the names of all named nodes
 		(buildings, rooms, etc)
 		*/
-		return Array.from(this.stuffToNodeId.keys())
+		return Array.from(this.stuffToNodeId.keys());
 	}
 	
 	getAll(){

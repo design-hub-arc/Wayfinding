@@ -103,34 +103,37 @@ then resolves with that Map once each id's response has been obtained.
 */
 async function driveSeqGets(fileIds){
     console.time("seq get");
-    /*
-    Promise.all(fileIds.map((id)=>{
-        return new Promise((resolve, reject)=>{
-            driveGet(id).then((responseText)=>{
-                resolve(responseText);
-            });
-        });
-    })).then((rs)=>{
-        console.log(rs);
-    });*/
     
-	return new Promise((resolve, reject) => {
-		let responses = new Map();
-		let received = 0;
-		
-		for(let i = 0; i < fileIds.length; i++){
-			responses.set(fileIds[i], "No response from file ID " + fileIds[i]);
-			driveGet(fileIds[i]).then((responseText) => {
-				responses.set(fileIds[i], responseText);
-				received++;
-				if(received === fileIds.length){
-                    console.timeEnd("seq get");
-                    //console.log(responses);
-					resolve(responses);
-				}
-			});
-		}
-	});
+    let responses = new Map();
+    let received = 0;
+    let promises = [];
+    
+    for(let i = 0; i < fileIds.length; i++){
+        responses.set(fileIds[i], "No response from file ID " + fileIds[i]);
+        promises.push(
+            new Promise(async(resolve, reject)=>{
+                responses.set(fileIds[i], await driveGet(fileIds[i]));
+            })
+        );
+    }
+    console.log("got here");
+    await Promise.all(promises).then(()=>0);
+    console.log("got here");
+    console.timeEnd("seq get");
+    return responses;
+    
+    
+    for(let i = 0; i < fileIds.length; i++){
+        responses.set(fileIds[i], "No response from file ID " + fileIds[i]);
+        let responseText = await driveGet(fileIds[i]);
+        responses.set(fileIds[i], responseText);
+        received++;
+        if(received === fileIds.length){
+            console.timeEnd("seq get");
+            //console.log(responses);
+            return responses;
+        }
+    }
 }
 
 
@@ -202,6 +205,9 @@ async function checkExists(id){
 
 
 /*
+
+This thing is pretty ugly, so I'll try to simplify it later
+
 Returns the id of the most recently added manifest that works.
 
 What it does:
@@ -216,71 +222,66 @@ async function getLatestManifest(){
 	//get the file id, not the URL
 	let versionLogId = (VERSION_LOG_URL.indexOf("id=") === -1) ? VERSION_LOG_URL : VERSION_LOG_URL.split("id=")[1];
 	
-	return new Promise((resolve, reject)=>{
-		driveGet(versionLogId).then((responseText)=>{
-			//get the contents of the version log
-			let rows = responseText.split(newline);
-			rows = rows.map((row)=>{
-				return row.split(",");
-			});
+    let responseText = await driveGet(versionLogId);
+    //get the contents of the version log
+    let rows = responseText.split(newline);
+    rows = rows.map((row)=>{
+        return row.split(",");
+    });
 
-			//since QR code parameters converts to upper case, we need the headers to be uppercase as well
-			rows[0] = rows[0].map((header)=>header.toUpperCase());
+    //since QR code parameters converts to upper case, we need the headers to be uppercase as well
+    rows[0] = rows[0].map((header)=>header.toUpperCase());
 
-			//check the wayfinding mode
-			//mode is an int, the index of the column it is contained in the version log
-			let mode = rows[0].indexOf(new QrCodeParams().wayfindingMode);
-			if(mode === -1){
-				/*
-				The mode is not present in the version log,
-				so default to wayfinding.
-				*/
-				mode = 0;
-			}
+    //check the wayfinding mode
+    //mode is an int, the index of the column it is contained in the version log
+    let mode = rows[0].indexOf(new QrCodeParams().wayfindingMode);
+    if(mode === -1){
+        /*
+        The mode is not present in the version log,
+        so default to wayfinding.
+        */
+        mode = 0;
+    }
 
-			//keep goind until you hit a version that works
-			let url;
-			let id;
+    //keep goind until you hit a version that works
+    let url;
+    let id;
 
-			async function recursiveCheck(row, col){
-				/*
-				Remember suffering through recursuion back in CISP 300?
-				Yes, it does have valid uses.
+    async function recursiveCheck(row, col){
+        /*
+        Remember suffering through recursuion back in CISP 300?
+        Yes, it does have valid uses.
 
-				We need to check if an id in the version log works.
-				This needs to be done using drive.files.get, which is asynchronus.
-				Async + iteration = BAD.
-				Instead, make each check call the next check as needed.
-				*/
-				if(row === 0 && col === 0){
-					console.log("No valid manifests exist. Something went very wrong.");
-				} else if(row === 0){
-					//couldn't find a valid URL in the current column
-					console.log("No valid manifests were found for " + rows[row][col] + ". Switching to default wayfinding.");
-					recursiveCheck(rows.length - 1, 0);
-				} else if(rows[row][col] === ""){
-					//skip blank
-					recursiveCheck(row - 1, col);
-				} else {
-					//not blank, not header: we're ready to check.
-					url = rows[row][col];
-					id = (url.indexOf("id=") === -1) ? url : url.split("id=")[1];
-					console.log("Checking " + id);
-					if(await checkExists(id)){
-                        console.log("Yup, that works!");
-						resolve(id);
-                    } else {
-                        console.log("Nope. Check the next one.");
-                        recursiveCheck(row - 1, col);
-                    }
-				}
-			}
+        We need to check if an id in the version log works.
+        This needs to be done using drive.files.get, which is asynchronus.
+        Async + iteration = BAD.
+        Instead, make each check call the next check as needed.
+        */
+        if(row === 0 && col === 0){
+            console.error("No valid manifests exist. Something went very wrong.");
+        } else if(row === 0){
+            //couldn't find a valid URL in the current column
+            console.log("No valid manifests were found for " + rows[row][col] + ". Switching to default wayfinding.");
+            return await recursiveCheck(rows.length - 1, 0);
+        } else if(rows[row][col] === ""){
+            //skip blank
+            return await recursiveCheck(row - 1, col);
+        } else {
+            //not blank, not header: we're ready to check.
+            url = rows[row][col];
+            id = (url.indexOf("id=") === -1) ? url : url.split("id=")[1];
+            console.log("Checking " + id);
+            if(await checkExists(id)){
+                console.log("Yup, that works!");
+                return id;
+            } else {
+                console.log("Nope. Check the next one.");
+                return await recursiveCheck(row - 1, col);
+            }
+        }
+    }
 
-			recursiveCheck(rows.length - 1, mode);
-		}).catch((error)=>{
-			console.log(error);
-		});
-	});
+    return await recursiveCheck(rows.length - 1, mode);
 }
 
 /*
@@ -288,32 +289,32 @@ Imports all the data needed by the program into master
 @param master : the Main object used by the program.
 */
 export async function importDataInto(master){
-	master.mode = new QrCodeParams().wayfindingMode;
-	return new Promise((resolve, reject)=>{
-		console.time("get latest manifest");
-        getLatestManifest().then((id)=>{
-			console.log("id is " + id);
-            console.time("import manifest");
-			importManifest(id).then((responses)=>{
-				let nodeDB = master.getNodeDB();
+    console.time("begin importing data");
+	
+    master.mode = new QrCodeParams().wayfindingMode;
+    
+    console.time("get latest manifest");
+    let id = await getLatestManifest();
+    console.timeEnd("get latest manifest");
+    console.log("id is " + id);
+    
+    console.time("import manifest");
+    let responses = await importManifest(id);
+    console.timeEnd("import manifest");
+    
+    let nodeDB = master.getNodeDB();
+    nodeDB.parseNodeData(responses.get("Node coordinates"));
+    nodeDB.parseConnData(responses.get("Node connections"));
+    nodeDB.parseNameToId(responses.get("labels"));
 
-				nodeDB.parseNodeData(responses.get("Node coordinates"));
-				nodeDB.parseConnData(responses.get("Node connections"));
-				nodeDB.parseNameToId(responses.get("labels"));
-                
-                console.time("set image");
-                
-                //setimage causing most of the lag
-                master.getCanvas().setImage(responses.get("map image")).then(()=>{
-					console.timeEnd("set image");
-                    master.notifyImportDone();
-					resolve(responses);
-				});
-                console.timeEnd("import manifest");
-			});
-            console.timeEnd("get latest manifest");
-		});
-	});
+    console.time("set image");
+    //setimage causing most of the lag
+    await master.getCanvas().setImage(responses.get("map image"));
+    console.timeEnd("set image");
+
+    console.timeEnd("begin importing data");
+    master.notifyImportDone();
+    return responses;
 }
 
 //maybe use this to replace all of the ugly importing?
