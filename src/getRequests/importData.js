@@ -35,147 +35,15 @@ export const VERSION_LOG_URL = "https://drive.google.com/export=download?id=1Q99
 export const logger = {
 	contents : [],
 	add(msg){
-		"use strict";
 		this.contents.push(msg);
 	},
 	displayAll(){
-		"use strict";
 		for(let i = 0; i < this.contents.length; i++){
 			console.log(this.contents[i]);
 		}
 	}
 };
 
-
-/*
-Gets a file's data from the google drive.
-fileId - a string, the id of the file in google drive.
-*/
-async function driveGet(fileId){
-	//gapi is defined in https://apis.google.com/js/api.js.
-	//if this doesn't work, make sure that the API has been loaded!
-	return new Promise((resolve, reject)=>{
-        gapi.client.drive.files.get({
-            fileId: fileId
-        }).then((metadata)=>{
-            if(metadata.result.mimeType.includes("image")){
-                resolve("https://drive.google.com/uc?export=download&id=" + metadata.result.id);
-            } else {
-                gapi.client.drive.files.get({
-                    fileId: fileId,
-                    alt: "media" //this means download the file's contents, not its metadata
-                }).then((result)=> {
-                    logger.add("Response from " + fileId + ":");
-                    logger.add(result);
-                    logger.add(result.body);
-                    resolve(result.body);
-                }).catch((error)=>{
-                    throw new Error(error);
-                });
-            }
-        }).catch((error)=>{
-            throw new Error(error);
-        });    
-    });
-    
-    
-    return gapi.client.drive.files.get({
-		fileId: fileId,
-		alt: "media" //this means download the file's contents, not its metadata
-	}).then((result)=> {
-		logger.add("Response from " + fileId + ":");
-		logger.add(result);
-		logger.add(result.body);
-		return result.body;
-	}).catch((error)=>{
-		throw new Error(error);
-	});
-}
-
-
-/*
-@param fileIds : an array of strings, the ids of files to get
-
-calls driveGet on each id, then resolves the promise, 
-passing in all responses to a Map,
-where the key is the id, and the value is the response text,
-then resolves with that Map once each id's response has been obtained.
-*/
-async function driveSeqGets(fileIds){
-    console.time("seq get");
-    
-    let responses = new Map();
-    let promises = [];
-    
-    for(let i = 0; i < fileIds.length; i++){
-        responses.set(fileIds[i], "No response from file ID " + fileIds[i]);
-        promises.push(
-            new Promise(async(resolve, reject)=>{
-                let file = await driveGet(fileIds[i]);
-                responses.set(fileIds[i], file);
-                resolve(file);
-            })
-        );
-    }
-    await Promise.all(promises).then((r)=>console.log(r));
-    console.timeEnd("seq get");
-    return responses;
-}
-
-
-/*
- @param fileId : a string, the 
- id of the master url file
- on our google drive
-
- This performs a get request on the master url spreadsheet,
- then performs a get request on each url on the spreadsheet,
- then passes each URL into the callback function
-
- passes a Map, 
- with the keys being the identifier in the first column of the spreadsheet,
- and the value is the response text from performing a get request on the url after that identifier
- returning the Map
- */
-async function importManifest(fileId){
-	let responseText = await driveGet(fileId);
-    let data = formatResponse(responseText);
-    let fileIdToKey = new Map();
-    /*
-    since sequentialGets will return fileId-to-response,
-    we need to provide an easier way to identify what each response is giving.
-    since we are looking at key-to-fileId-to-response text,
-    and sequentialGets gives us fileId-to-response,
-    we can use this to get key-to-response text
-    */
-
-    for(let i = 1; i < data.length; i++){ 
-        if (data[i].length >= 2 && data[i][1] !== ""){
-            /*
-            The data is a table, with the first column being a key,
-            such as "node coordinates", "buildings", etc,
-
-            and the second being the url linking to that resource
-            */
-            if(data[i][1].indexOf("id=") > -1){
-                fileIdToKey.set(data[i][1].split("id=")[1], data[i][0]);
-            } else {
-                fileIdToKey.set(data[i][1], data[i][0]);
-            }
-        }
-    }
-
-    /*
-    Convets the url-to-response result of seqGet
-    to an easier to use key-to-response
-     */
-    let ret = new Map();
-    let responses = await driveSeqGets(Array.from(fileIdToKey.keys()));
-    responses.forEach((responseText, url) => {
-        ret.set(fileIdToKey.get(url), responseText);
-    });
-    return ret;
-}
 
 
 //returns whether or not a file with the given ID exists in the google drive
@@ -188,6 +56,86 @@ async function checkExists(id){
 		return false;
 	});
 }
+
+/*
+Gets a file's data from the google drive.
+fileId - a string, the id of the file in google drive.
+*/
+async function driveGet(fileId){
+	//gapi is defined in https://apis.google.com/js/api.js.
+	//if this doesn't work, make sure that the API has been loaded!
+    let metadata = await gapi.client.drive.files.get({fileId: fileId});
+    let ret;
+    if(metadata.result.mimeType.includes("image")){
+        ret = "https://drive.google.com/uc?export=download&id=" + metadata.result.id;
+    } else {
+        let result = await gapi.client.drive.files.get({
+            fileId: fileId,
+            alt: "media" //this means download the file's contents, not its metadata
+        });
+        logger.add("Response from " + fileId + ":");
+        logger.add(result);
+        logger.add(result.body);
+        ret = result.body;
+    }
+    return ret;
+}
+
+
+
+/*
+ * Downloads the manifest with the given ID.
+ * 
+ * A manifest lists all the different files used by a version of Wayfinding.
+ * this function downloads each file referenced in that manifest, returning a Map:
+ * (*) each key in the Map is the purpose of the file, and can have the following values:
+ *      - "Node coordinates"
+ *      - "Node connections"
+ *      - "labels"
+ *      - "map image"
+ * (*) the value will be the text of the file referenced in the manifest, 
+ *      for example, map.get("Node coordinates") returns the node coordinate file associated with the manifest
+ *      the only exception is the map image, which is stored in the Map as a link to the image
+ */
+async function importManifest(manifestFileId){
+    let manifestText = await driveGet(manifestFileId);
+    let data = formatResponse(manifestText);
+    let keyToFileText = new Map();
+    let promises = [];
+    
+    let key;
+    let fileId;
+    
+    //need this to preserve values of fileId and key despite iteration
+    async function getFile(fileId, key){
+        let file = await driveGet(fileId);
+        keyToFileText.set(key, file);
+        return file;
+    }
+    //          avoid the header
+    for(let i = 1; i < data.length; i++){ 
+        if (data[i].length >= 2 && data[i][1] !== ""){
+            /*
+            The data is a table, with the first column being a key,
+            such as "node coordinates", "buildings", etc,
+
+            and the second being the url linking to that resource
+            */
+            
+            key = data[i][0];
+            //make sure to get just the file id
+            fileId = (data[i][1].indexOf("id=") === -1) ? data[i][1] : data[i][1].split("id=")[1];
+            
+            keyToFileText.set(key, "No response from file ID " + fileId);
+            promises.push(getFile(fileId, key));
+        }
+    }
+    
+    await Promise.all(promises).then((r)=>console.log(r));
+    
+    return keyToFileText;
+}
+
 
 
 /*
