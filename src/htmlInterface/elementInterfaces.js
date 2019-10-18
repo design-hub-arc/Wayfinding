@@ -74,10 +74,10 @@ function levDist2D(str1, str2){
     
     //fill in
     //you need to delete x characters to convert a string of length x to ""
-    for(let y = 1; y < len2; y++){
+    for(let y = 0; y < len2 + 1; y++){
         grid[y][0] = y;
     }
-    for(let x = 1; x < len1; x++){
+    for(let x = 0; x < len1 + 1; x++){
         grid[0][x] = x;
     }
     
@@ -86,32 +86,33 @@ function levDist2D(str1, str2){
         for(let x = 1; x < len1 + 1; x++){
             deleteCost = grid[y - 1][x] + 1;
 			insertCost = grid[y][x - 1] + 1;
-			changeCost = grid[y - 1][x - 1] + (str1[x] === str2[y]) ? 0 : 1;
+			changeCost = grid[y - 1][x - 1] + ((str1[x - 1] === str2[y - 1]) ? 0 : 1);
             grid[y][x] = Math.min(deleteCost, insertCost, changeCost);
         }
     }
     
-    grid.forEach((row)=>{
-        console.log(row.join(" "));
-    });
-    
-    console.log("    " + str1.split().join(" "));
+    console.log("    " + Array.from(str1).join(" "));
     for(let y = 0; y < len2 + 1; y++){
-        console.log("    " + grid[y].join(" "));
+        if(y !== 0){
+            
+        }
+        console.log(((y === 0) ? " " : str2[y - 1]) + " " + grid[y].join(" "));
     }
     
-    
+    //lower-right corner contains the number of operations needed to convert str1 to str2
     return grid[len2][len1];
 }
 
 function testLev(){
     let strings = ["apple", "banana", "orange", "blueberry", "grape"];
+    /*
     strings.forEach((fruit)=>{
         strings.forEach((otherFruit)=>{
-            levDist2D(fruit, otherFruit);
+            console.log(levDist2D(fruit, otherFruit));
             console.log(fruit + " lev dist " + otherFruit + " = " + levenshteinDistance(fruit, otherFruit));
         });
-    });
+    });*/
+    console.log(levDist2D("kitten", "sitting"));
 }
 
 export {
