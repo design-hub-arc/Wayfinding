@@ -169,67 +169,6 @@ export function closestMatch(string, options){
 			}
 		}
 	}
-    /*
-    console.log("Best based on my algorithm: ", best);
-    console.time("lev");
-    let levBest = options[0];
-    let bestCost = levenshteinDistance(options[0], string);
-    let currCost = 0;
-    options.forEach((opt)=>{
-        currCost = levenshteinDistance(opt, string);
-        console.log(currCost);
-        if(currCost < bestCost){
-            console.log(levBest);
-            bestCost = currCost;
-            levBest = opt;
-        }
-    });
-    console.log("Levenshtien best: ", levBest);
-    console.timeEnd("lev");*/
 	
 	return best;
-}
-
-
-//WIP, doesn't work
-function levenshteinDistance(str1, str2){
-	let vector1 = [];
-	let vector2 = [];
-    let m = str1.length;
-    let n = str2.length;
-	let temp;
-	let deleteCost;
-	let insertCost;
-	let changeCost;
-	
-    //https://en.wikipedia.org/wiki/Levenshtein_distance
-	for(let i = 0; i < n; i++){
-		vector1.push(i);
-	}
-    //zero pad to access indexes
-	for(let i = 0; i < m; i++){
-		vector2.push(0);
-	}
-	
-	for(let i = 0; i < m - 1; i++){
-		vector2[0] = i + 1;
-		
-		for(let j = 0; j < n - 1; j++){
-			deleteCost = vector1[j + 1] + 1;
-			insertCost = vector2[j + 1] + 1;
-			changeCost = (str1[i] === str2[j]) ? vector1[j] : vector1[j] + 1;
-			
-			vector2[j + 1] = Math.min(deleteCost, insertCost, changeCost);
-		}
-		//console.log(vector1);
-		//console.log(vector2);	
-		temp = vector1;
-		vector1 = vector2;
-		vector2 = temp;
-	}
-	
-	//console.log(vector1);
-	//console.log(vector2);
-	
-	return vector1[str2.length];
 }

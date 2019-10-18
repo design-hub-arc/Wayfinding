@@ -14,7 +14,7 @@ class TextBox{
     
 }
 
-//WIP, doesn't work
+//it works?
 function levenshteinDistance(str1, str2){
 	let vector1 = [];
 	let vector2 = [];
@@ -44,23 +44,71 @@ function levenshteinDistance(str1, str2){
 			
 			vector2[j + 1] = Math.min(deleteCost, insertCost, changeCost);
 		}
-		console.log(vector1);
-		console.log(vector2);	
+		//console.log(vector1);
+		//console.log(vector2);	
 		temp = vector1;
 		vector1 = vector2;
 		vector2 = temp;
 	}
 	
-	console.log(vector1);
-	console.log(vector2);
+	//console.log(vector1);
+	//console.log(vector2);
 	
 	return vector1[n];
+}
+
+function levDist2D(str1, str2){
+    let len1 = str1.length;
+    let len2 = str2.length;
+    let grid = [];
+    let deleteCost;
+	let insertCost;
+	let changeCost;
+    
+    for(let y = 0; y < len2 + 1; y++){
+        grid.push([]);
+        for(let x = 0; x < len1 + 1; x++){
+            grid[y].push(0);
+        }
+    }
+    
+    //fill in
+    //you need to delete x characters to convert a string of length x to ""
+    for(let y = 1; y < len2; y++){
+        grid[y][0] = y;
+    }
+    for(let x = 1; x < len1; x++){
+        grid[0][x] = x;
+    }
+    
+    //go through the rest
+    for(let y = 1; y < len2 + 1; y++){
+        for(let x = 1; x < len1 + 1; x++){
+            deleteCost = grid[y - 1][x] + 1;
+			insertCost = grid[y][x - 1] + 1;
+			changeCost = grid[y - 1][x - 1] + (str1[x] === str2[y]) ? 0 : 1;
+            grid[y][x] = Math.min(deleteCost, insertCost, changeCost);
+        }
+    }
+    
+    grid.forEach((row)=>{
+        console.log(row.join(" "));
+    });
+    
+    console.log("    " + str1.split().join(" "));
+    for(let y = 0; y < len2 + 1; y++){
+        console.log("    " + grid[y].join(" "));
+    }
+    
+    
+    return grid[len2][len1];
 }
 
 function testLev(){
     let strings = ["apple", "banana", "orange", "blueberry", "grape"];
     strings.forEach((fruit)=>{
         strings.forEach((otherFruit)=>{
+            levDist2D(fruit, otherFruit);
             console.log(fruit + " lev dist " + otherFruit + " = " + levenshteinDistance(fruit, otherFruit));
         });
     });
