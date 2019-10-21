@@ -14,56 +14,20 @@ class TextBox{
     
 }
 
-//it works?
-function levenshteinDistance(str1, str2){
-	let vector1 = [];
-	let vector2 = [];
-    let m = str1.length;
-    let n = str2.length;
-	let temp;
-	let deleteCost;
-	let insertCost;
-	let changeCost;
-	
-    //https://en.wikipedia.org/wiki/Levenshtein_distance
-	for(let i = 0; i < n + 1; i++){
-		vector1.push(i);
-	}
-    //zero pad to access indexes
-	for(let i = 0; i < n + 1; i++){
-		vector2.push(0);
-	}
-	
-	for(let i = 0; i < m; i++){
-		vector2[0] = i + 1;
-		
-		for(let j = 0; j < n; j++){
-			deleteCost = vector1[j + 1] + 1;
-			insertCost = vector2[j] + 1;
-			changeCost = (str1[i] === str2[j]) ? vector1[j] : vector1[j] + 1;
-			
-			vector2[j + 1] = Math.min(deleteCost, insertCost, changeCost);
-		}
-		//console.log(vector1);
-		//console.log(vector2);	
-		temp = vector1;
-		vector1 = vector2;
-		vector2 = temp;
-	}
-	
-	//console.log(vector1);
-	//console.log(vector2);
-	
-	return vector1[n];
-}
 
-function levDist2D(str1, str2){
+//https://en.wikipedia.org/wiki/Levenshtein_distance
+function levenshteinDistance(str1, str2, ignoreCase, debug=false){
     let len1 = str1.length;
     let len2 = str2.length;
     let grid = [];
     let deleteCost;
 	let insertCost;
 	let changeCost;
+    
+    if(ignoreCase){
+        str1 = str1.toUpperCase();
+        str2 = str2.toUpperCase();
+    }
     
     for(let y = 0; y < len2 + 1; y++){
         grid.push([]);
@@ -72,7 +36,7 @@ function levDist2D(str1, str2){
         }
     }
     
-    //fill in
+    //fill in the first row and column
     //you need to delete x characters to convert a string of length x to ""
     for(let y = 0; y < len2 + 1; y++){
         grid[y][0] = y;
@@ -91,12 +55,14 @@ function levDist2D(str1, str2){
         }
     }
     
-    console.log("    " + Array.from(str1).join(" "));
-    for(let y = 0; y < len2 + 1; y++){
-        if(y !== 0){
-            
+    if(debug){
+        console.log("    " + Array.from(str1).join(" "));
+        for(let y = 0; y < len2 + 1; y++){
+            if(y !== 0){
+
+            }
+            console.log(((y === 0) ? " " : str2[y - 1]) + " " + grid[y].join(" "));
         }
-        console.log(((y === 0) ? " " : str2[y - 1]) + " " + grid[y].join(" "));
     }
     
     //lower-right corner contains the number of operations needed to convert str1 to str2
@@ -105,14 +71,14 @@ function levDist2D(str1, str2){
 
 function testLev(){
     let strings = ["apple", "banana", "orange", "blueberry", "grape"];
-    /*
+    
     strings.forEach((fruit)=>{
         strings.forEach((otherFruit)=>{
-            console.log(levDist2D(fruit, otherFruit));
-            console.log(fruit + " lev dist " + otherFruit + " = " + levenshteinDistance(fruit, otherFruit));
+            console.log(fruit + " lev dist " + otherFruit + " = " + levenshteinDistance(fruit, otherFruit, false, true));
         });
-    });*/
-    console.log(levDist2D("kitten", "sitting"));
+    });
+    console.log(levenshteinDistance("kitten", "sitting", false, true));
+    console.log(levenshteinDistance("Saturday", "Sunday", false, true));
 }
 
 export {
