@@ -1,6 +1,6 @@
 import {Node} from '../nodes/arcNode.js';
 import {formatResponse} from '../dataFormatting/csv.js';
-import {closestMatch} from "../htmlInterface/input.js";
+import {closestMatch} from "../htmlInterface/elementInterfaces.js";
 
 /*
 NodeDB is used by the Main class to store the data used by the program.
@@ -238,7 +238,7 @@ export class NodeDB{
 		
         //nope. Need to find the closest match
         if(ret === undefined){
-            ret = this.stuffToNodeId.get(closestMatch(string.toString().toUpperCase(), this.allLabels));
+            ret = this.stuffToNodeId.get(closestMatch(string.toString().toUpperCase(), this.allLabels, true));
         }
 		if(ret === undefined){
 			console.log("Couldn't find node identified by " + string);

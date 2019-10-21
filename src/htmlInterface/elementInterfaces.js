@@ -4,11 +4,17 @@
  * Upon changing the index.html file, you will likely need to change this one.
  */
 
+
+
 /*
  * The TextBox class is an input box, followed by a display element.
- * The TextBox has a series of options, which are the only values it can return.
- * When the user types in the input box,
- * the display element will update to display the option it contains which most closely matches the input.
+ * It functions like an option dropdown in that it can only have valid values selected,
+ * but instead of showing all the user's options at once,
+ * if shows the option from its option list which most closely matches the user's input.
+ * 
+ * after creating a TextBox, you will need to populate its option by calling...
+ * textBox.addOptions(anArray);
+ * calling the getResult method will return the option which is closest to the user input.
  */
 class TextBox{
     /*
@@ -33,6 +39,7 @@ class TextBox{
         this.options = ["Your result will appear here!"];
         this.resultElement.innerHTML = this.options[0];
         this.box.oninput = this.updateResult.bind(this);
+        this.closest = null;
     }
     
     /*
@@ -54,13 +61,13 @@ class TextBox{
 	
 	updateResult(){
 		// makes the result search for the closest match in options to what the user's entered
-		
-        this.resultElement.innerHTML = closestMatch(this.box.value, this.options);
+		this.closest = closestMatch(this.box.value, this.options, true);
+        this.resultElement.innerHTML = this.closest;
 	}
 	isValid(){
 		//legal input was entered
 		//want to make sure the closest match is both in the options, and not the default option
-		return (this.options.indexOf(this.resultElement.innerText.toUpperCase()) > 0);
+		return this.closest !== null && this.options.indexOf(this.closest.toUpperCase()) > 0;
 	}
 	setInput(str){
 		//@param str : a string, what to put in the input box
@@ -72,7 +79,7 @@ class TextBox{
 		/*
 		@return : a string, the closest match to what the user inputted
 		*/
-		return this.resultElement.innerText;
+		return this.closest;
 	}
 };
 
@@ -131,7 +138,7 @@ function levenshteinDistance(str1, str2, ignoreCase, debug=false){
     return grid[len2][len1];
 }
 
-function closestMatch2(str, possibleMatches, ignoreCase, debug=false){
+function closestMatch(str, possibleMatches, ignoreCase, debug=false){
     if(!Array.isArray(possibleMatches)){
         //only one possible match? That's the best option.
         return possibleMatches;
@@ -143,17 +150,17 @@ function closestMatch2(str, possibleMatches, ignoreCase, debug=false){
     let bestMatch = null;
     let bestDist = Number.MAX_VALUE;
     let currDist;
-    possibleMatches.forEach((otherStr)=>{
-        currDist = levenshteinDistance(str, otherStr, ignoreCase, debug);
-        if(currDist === 0){
-            //exact match
-            return otherStr;
-        }
+    let len = possibleMatches.length;
+    
+    //                        break upon finding exact match
+    for(let i = 0; i < len && bestDist !== 0; i++){
+        currDist = levenshteinDistance(str, possibleMatches[i], ignoreCase, debug);
         if(currDist < bestDist){
-            bestMatch = otherStr;
+            bestMatch = possibleMatches[i];
             bestDist = currDist;
         }
-    });
+    }
+    
     return bestMatch;
 }
 
@@ -174,6 +181,6 @@ function testLev(){
 export {
     TextBox,
     levenshteinDistance,
-    closestMatch2,
+    closestMatch,
     testLev
 }

@@ -6,7 +6,7 @@ import {
 } from "../main.js";
 import {
 	TextBox
-} from "../htmlInterface/input.js";
+} from "../htmlInterface/elementInterfaces.js";
 import {
 	InfoElement
 } from "../htmlInterface/infoElement.js";
