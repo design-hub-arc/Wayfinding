@@ -7,7 +7,8 @@ It also takes a lot of code out of the main HTML file.
 import { Path } from         "./nodes/path.js";
 import { QrCodeParams } from "./htmlInterface/qrCodes.js";
 import { NodeDB } from       "./dataFormatting/nodeDB.js";
-import {testLev} from        "./htmlInterface/elementInterfaces.js";
+import {testLev, closestMatch2} from        "./htmlInterface/elementInterfaces.js";
+import {closestMatch} from "./htmlInterface/input.js";
 
 export class Main{
     constructor(){
@@ -128,6 +129,18 @@ export class Main{
 		addTool("get current path URL", ()=>document.getElementById("get current path URL").innerHTML = self.getPath().getURL());
 		addTool("Save as SVG", ()=>self.saveAsSvg());
         addTool("Test levenshtine", ()=>testLev());
+        addTool("Compare closest", ()=>{
+            let oldBest;
+            let newBest;
+            let strs = this.getNodeDB().getAllNames();
+            strs.forEach((str)=>{
+                oldBest = closestMatch(str, strs);
+                newBest = closestMatch2(str, strs, true, false);
+                if(oldBest !== newBest){
+                    console.log("Mismatch: " + str + " " + oldBest + " " + newBest);
+                }
+            });
+        });
 	}
 	
 	saveAsSvg(){
