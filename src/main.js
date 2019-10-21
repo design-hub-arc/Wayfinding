@@ -71,7 +71,7 @@ export class Main{
 	setPath(path){
 		if(path.valid){
 			this.currentPath = path;
-			this.infoElement.update(this);
+			this.infoElement.update(path);
 			
 			try{
 				path.draw(this.canvas);

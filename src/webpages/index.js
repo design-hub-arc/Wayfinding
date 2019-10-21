@@ -5,11 +5,9 @@ import {
 	Main
 } from "../main.js";
 import {
-	TextBox
+	TextBox,
+    UrlList
 } from "../htmlInterface/elementInterfaces.js";
-import {
-	InfoElement
-} from "../htmlInterface/infoElement.js";
 import {
 	importDataInto
 } from "../getRequests/importData.js";
@@ -21,7 +19,7 @@ export function init(){
 	
 	let start = new TextBox("start box", "start hint");
 	let end = new TextBox("end box", "end hint");
-	let info = new InfoElement("moreInfo");
+	let info = new UrlList("moreInfo");
 	
 	//http://svgjs.com/
 	let svgDrawer = SVG('wrapper').size(1000, 1000);//.panZoom();

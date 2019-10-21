@@ -63,9 +63,7 @@ export class Path{
 			this.idPath = [this.startId];
 			this.pathLength = 0;
 			return;
-		}
-		
-		
+        }
 		
 		let nodeDB = this.dataSource.getNodeDB();
 		let allNodes = nodeDB.getAll();

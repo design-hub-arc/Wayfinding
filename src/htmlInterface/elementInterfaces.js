@@ -5,6 +5,46 @@
  */
 
 
+/*
+ * In Artfinding, some nodes have URLs associated with them.
+ * When linked with a Main object, this class will update a list of URLs
+ * to show the URLs of the last node in a path.
+ */
+class UrlList{
+    constructor(elementId){
+        if(elementId.startsWith("#")){
+            elementId = elementId.substring(1);
+        }
+        this.element = document.getElementById(elementId);
+        if(this.element === null){
+            throw new Error("Could not find element with id " + elementId);
+        }
+    }
+    
+    update(path){
+        //remove all previous links
+        while(this.element.hasChildNodes()){
+            this.element.removeChild(this.element.childNodes[0]);
+        }
+        let node = path.nodePath[path.nodePath.length - 1];
+        let ele;
+        let a;
+        //add a list item for each URL on that node
+        node.getLabels().forEach((label)=>{
+            label = label.toLowerCase();
+            if(label.includes("http")){
+                ele = document.createElement("li");
+                a = document.createElement("a");
+                a.innerText = label;
+                a.setAttribute("href", label);
+                a.setAttribute("target", "_blank");
+				ele.appendChild(a);
+				this.element.appendChild(ele);
+            }
+        });
+    }
+}
+
 
 /*
  * The TextBox class is an input box, followed by a display element.
@@ -82,7 +122,6 @@ class TextBox{
 		return this.closest;
 	}
 };
-
 
 //https://en.wikipedia.org/wiki/Levenshtein_distance
 function levenshteinDistance(str1, str2, ignoreCase, debug=false){
@@ -164,8 +203,6 @@ function closestMatch(str, possibleMatches, ignoreCase, debug=false){
     return bestMatch;
 }
 
-
-
 function testLev(){
     let strings = ["apple", "banana", "orange", "blueberry", "grape"];
     
@@ -179,6 +216,7 @@ function testLev(){
 }
 
 export {
+    UrlList,
     TextBox,
     levenshteinDistance,
     closestMatch,
