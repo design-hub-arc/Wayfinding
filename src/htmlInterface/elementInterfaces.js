@@ -118,6 +118,29 @@ class Canvas{
 		let percDown = (coord - this.sourceMinY) / this.mapHeight;
 		return percDown * this.destHeight;
 	}
+    download(name){
+        //https://stackoverflow.com/questions/13405129/javascript-create-and-save-file?noredirect=1&lq=1
+        
+        //need to resize the SVG to contain the entire image
+        let oldViewBox = this.draw.viewbox();
+        this.draw.viewbox(0, 0, this.destWidth, this.destHeight);
+        let result = this.draw.svg();
+        this.draw.viewbox(oldViewBox);
+        
+        let file = new Blob([result], {type: "image/svg+xml"});
+        let a = document.createElement("a");
+        let url = URL.createObjectURL(file);
+        a.href = url;
+        a.download = name;
+        document.body.append(a);
+        console.log("downloading \n" + result);
+
+        a.click();
+        setTimeout(async()=>{
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }, 0);
+    }
 };
 
 
