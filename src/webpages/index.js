@@ -1,11 +1,6 @@
 import {
-	Main
-} from "../main.js";
-import {
-    Canvas,
-	TextBox,
-    UrlList
-} from "../htmlInterface/elementInterfaces.js";
+	App
+} from "../app.js";
 import {
 	importDataInto
 } from "../getRequests/importData.js";
@@ -13,24 +8,12 @@ import {
 export function init(){
 	console.time("Time to load (wayfinding)");
 	
-	let master = new Main();
-	
-	let start = new TextBox("start box", "start hint");
-	let end = new TextBox("end box", "end hint");
-	let info = new UrlList("moreInfo");
-	
-	//http://svgjs.com/
-	let svgDrawer = SVG('wrapper')
-        .size("100%", "100%")
-        .panZoom({zoomMin: 0.5, zoomMax: 5});
-	let masterCanvas = new Canvas();
-	masterCanvas.linkToSVG(svgDrawer);
-	master.setCanvas(masterCanvas);
-	
-	master.setInput(start, end);
-	master.setInfoElement(info);
-	
-	master.setPathButton("button");
+	let master = new App();
+    master.createCanvas("wrapper");
+	master.createStartInputBox("start box", "start hint");
+    master.createEndInputBox("end box", "end hint");
+    master.setPathButton("button");
+	master.createUrlList("moreInfo");
 	
 	importDataInto(master).then((responses)=>{
 		console.timeEnd("Time to load (wayfinding)");

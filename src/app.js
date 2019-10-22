@@ -1,5 +1,5 @@
 /*
-The Main class is used to store data, preventing the need for global variables.
+The App class is used to store data, preventing the need for global variables.
 It also serves to link all of the GUI elements together
 It also takes a lot of code out of the main HTML file.
 */
@@ -7,71 +7,115 @@ It also takes a lot of code out of the main HTML file.
 import { Path } from         "./nodes/path.js";
 import { QrCodeParams } from "./htmlInterface/qrCodes.js";
 import { NodeDB } from       "./dataFormatting/nodeDB.js";
-import {testLev} from        "./htmlInterface/elementInterfaces.js";
+import { testLev } from        "./htmlInterface/elementInterfaces.js";
+import { 
+    Canvas,
+    TextBox,
+    UrlList
+} from "./htmlInterface/elementInterfaces.js";
 
-export class Main{
+export class App{
     constructor(){
         //html elements
-        this.canvas = undefined;
-        this.start = undefined;
-        this.end = undefined;
-        this.pathButton = undefined;
-		this.infoElement = undefined;
+        this.canvas = null;
+        this.start = null;
+        this.end = null;
+        this.pathButton = null;
+		this.urlList = null;
 		
         this.currentPath = undefined;
         this.nodeDatabase = new NodeDB();
 		
 		this.mode = "WAYFINDING";
     }
-	setCanvas(canvas){
-		// canvas is my custom Canvas class, NOT HTML canvas
-		this.canvas = canvas;
+    
+    /*
+     * HTML element methods
+     */
+    
+    /*
+     * Adds an SVG element to the
+     * element with the given id,
+     * then creates a Canvas on that element,
+     * allowing the class to render paths.
+     */
+	createCanvas(elementId){
+        let svgElement = SVG(elementId).panZoom({zoomMin: 0.5, zoomMax: 5});
+            //.size("100%", "100%")
+		this.canvas = new Canvas();
+        this.canvas.linkToSVG(svgElement);
 	}
 	getCanvas(){
 		return this.canvas;
 	}
 	
-	setInput(start, end){
-		/*
-		start and end are TextBoxes.
-		Populates said TextBoxes with the contents of this' fake database when notifyImportDone is called
-		*/
-		this.start = start;
-		this.end = end;
+    
+    /*
+     * Creates a TextBox from the given elements.
+     * The app uses these elements to read and display input. 
+     * Populates said TextBoxes with the contents of this' fake database when notifyImportDone is called.
+     */
+	createStartInputBox(inputBoxId, resultDisplayId){
+		this.start = new TextBox(inputBoxId, resultDisplayId);
 	}
-	
+    
+    /*
+     * Creates a TextBox from the given elements.
+     * The app uses these elements to read and display input. 
+     * Populates said TextBoxes with the contents of this' fake database when notifyImportDone is called.
+     */
+	createEndInputBox(inputBoxId, resultDisplayId){
+		this.end = new TextBox(inputBoxId, resultDisplayId);
+	}
+    
+    
 	/*
-	infoElement is an InfoElement, not element ID
-	*/
-	setInfoElement(infoElement){
-		this.infoElement = infoElement;
-	}
-	
-	setPathButton(id){
-		/*
-		id is the id of any HTML element
-		if it doesn't exist, will create it for you
-		*/
+    Id is the id of any HTML element.
+    When the given element is clicked,
+    Updates the path based on what is entered in the input boxes
+    */
+    setPathButton(id){
 		this.pathButton = document.getElementById(id);
 		if(this.pathButton === null){
 			throw new Error(`No element with an ID of ${id} exists.`);
 		}
 		
-		let main = this;
+		let app = this;
 		this.pathButton.onclick = ()=>{
-			if(main.start.isValid() && main.end.isValid()){
+			if(app.start.isValid() && app.end.isValid()){
 				//updatepath does the finding
-				main.updatePath();
+				app.updatePath();
 			} else {
-				console.log("Not valid: " + main.start.getResult() + " " + main.end.getResult());
+				console.log("Not valid: " + app.start.getResult() + " " + app.end.getResult());
 			}
 		};
 	}
+    
+    
+	/*
+     * Creates a UrlList,
+     * which will update to show all
+     * URLs associated with a path
+     * when it updates
+	*/
+	createUrlList(elementId){
+        this.urlList = new UrlList(elementId);
+	}
 	
+	
+    
+    /*
+     * Path related methods.
+     * Working here.
+     * MAKE THIS LESS CONVOLUTED!!!
+     */
+    
+    
+    
 	setPath(path){
 		if(path.valid){
 			this.currentPath = path;
-			this.infoElement.update(path);
+			this.urlList.update(path);
 			
 			try{
 				path.draw(this.canvas);
