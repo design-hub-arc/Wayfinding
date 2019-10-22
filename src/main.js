@@ -75,6 +75,17 @@ export class Main{
 			
 			try{
 				path.draw(this.canvas);
+                
+                //shift the canvas to center on the new path
+                //not working, as ...draw.cx() is returning NaN
+                /*
+                let bounds = path.calculateBounds();
+                let cx = this.canvas.x((bounds.minX + bounds.maxX) / 2);
+                let cy = this.canvas.y((bounds.minY + bounds.maxY) / 2);
+                console.log(cx, cy);
+                console.log(this.canvas.draw.cx(), this.canvas.draw.cy());
+                this.canvas.draw.center(cx, cy);
+                */
 			} catch(e){
 				console.log("Main's canvas is not defined yet");
 				console.log(e.stack);

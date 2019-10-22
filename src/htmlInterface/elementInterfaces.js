@@ -17,7 +17,7 @@ Canvas provides a way to interface with the SVG element used by the program
 
 See http://svgjs.com for more information on the SVG elements used by the program
 */
-export class Canvas{
+class Canvas{
 	constructor(){
         this.draw = null;           // the svg image this corresponds to
         this.image = null;          // the image element this gets its size from
@@ -333,6 +333,7 @@ function testLev(){
 }
 
 export {
+    Canvas,
     UrlList,
     TextBox,
     levenshteinDistance,

@@ -1,10 +1,8 @@
 import {
-	Canvas
-} from "../htmlInterface/scaledCanvas.js";
-import {
 	Main
 } from "../main.js";
 import {
+    Canvas,
 	TextBox,
     UrlList
 } from "../htmlInterface/elementInterfaces.js";
@@ -26,7 +24,7 @@ export function init(){
         .size("100%", "100%")
         .panZoom({zoomMin: 0.5, zoomMax: 5});
 	let masterCanvas = new Canvas();
-	masterCanvas.link(svgDrawer);
+	masterCanvas.linkToSVG(svgDrawer);
 	master.setCanvas(masterCanvas);
 	
 	master.setInput(start, end);

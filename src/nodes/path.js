@@ -150,6 +150,43 @@ export class Path{
 			}
 		}
 	}
+    /*
+     * Used to find the smallest and largest
+     * X and Y coordinates of any node in this path,
+     * effectively creating a rectangle around the path.
+     * 
+     * returns an object with the following properties:
+     * -minX: the leftmost x coordinate of the rectangle
+     * -maxX: the rightmost x coordinate of the rectangle
+     * -minY: the topmost y coordinate of the rectangle
+     * -maxY: the bottommost y coordinate of the rectangle
+     */
+    calculateBounds(){
+        let minX = Number.MAX_VALUE;
+        let maxX = Number.MIN_VALUE;
+        let minY = Number.MIN_VALUE;
+        let maxY = Number.MAX_VALUE;
+        this.nodePath.forEach((node)=>{
+            if(node.x < minX){
+                minX = node.x;
+            }
+            if(node.x > maxX){
+                maxX = node.x;
+            }
+            if(node.y < minY){
+                minY = node.y;
+            }
+            if(node.y > maxY){
+                maxY = node.y;
+            }
+        });
+        return {
+            "minX" : minX,
+            "minY" : minY,
+            "maxX" : maxX,
+            "maxY" : maxY
+        };
+    }
 	getURL() {
 		let origURL = window.location.href;
 		let split = origURL.split("?");
