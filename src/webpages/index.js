@@ -22,7 +22,9 @@ export function init(){
 	let info = new UrlList("moreInfo");
 	
 	//http://svgjs.com/
-	let svgDrawer = SVG('wrapper').size(1000, 1000);//.panZoom();
+	let svgDrawer = SVG('wrapper')
+        .size("100%", "100%")
+        .panZoom({zoomMin: 0.5, zoomMax: 5});
 	let masterCanvas = new Canvas();
 	masterCanvas.link(svgDrawer);
 	master.setCanvas(masterCanvas);

@@ -25,7 +25,14 @@ body {
 	position: absolute;
 }
 #wrapper{
+    height: 80%;
+    width: 100%;
 	position: relative;
+}
+#search{
+    height: 20%;
+    width: 100%;
+    position: relative;
 }
 #drawAll{
 	background-color: red;
