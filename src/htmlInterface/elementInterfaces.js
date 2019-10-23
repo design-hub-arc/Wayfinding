@@ -13,32 +13,27 @@ Since the node manager and SVG canvas use different coordinate scales (node mana
 so we need to convert coordinates in the node manager to coordinates on the SVG canvas.
 This way, we can easily draw nodes on the canvas.
 
-Canvas provides a way to interface with the SVG element used by the program
+"nodespace" refers to the coordinate system and scale used by the node manager,
+while "SVGspace" is the system and scale of the SVG image in the webpage.
+
+Canvas provides a way to interface with the SVG image used by the program.
 
 See http://svgjs.com for more information on the SVG elements used by the program
 */
 class Canvas{
-	constructor(){
-        this.draw = null;           // the svg image this corresponds to
-        this.image = null;          // the image element this gets its size from
-        this.destWidth = 0;              // dimensions of the map image
+	constructor(svgElement){
+        this.draw = svgElement; // the svg image this corresponds to
+        this.image = null;      // the image element this gets its size from
+        this.destWidth = 0;     // dimensions of the map image
         this.destHeight = 0;
         
-        this.sourceMinX = 0;             // coordinates of the upper-leftmost and lower-rightmost nodes
+        this.sourceMinX = 0;    // coordinates of the upper-leftmost and lower-rightmost nodes
         this.sourceMinY = 0;
         this.sourceMaxX = 0;
         this.sourceMaxY = 0;
         
-        this.color = undefined;
+        this.color = null;
     }
-	linkToSVG(svgDrawer){
-		/*
-		Connects this to an SVG element
-		and image.
-		Might be a better way to do this.
-		*/
-		this.draw = svgDrawer;
-	}
 	
 	//needs to be async because draw.image makes a requests to get the image
     async setImage(src){
@@ -61,7 +56,8 @@ class Canvas{
 		});
         
     }
-	setColor(color){
+	
+    setColor(color){
 		this.color = color;
 	}
 	clear(){
@@ -72,6 +68,16 @@ class Canvas{
 			}
 		}
 	}
+    
+    /*
+     * Drawing methods.
+     * For all of these methods,
+     * the parameters are values in nodespace.
+     * These methods automatically scale the points
+     * to SVGspace.
+     */
+    
+    
 	rect(x, y, w, h){
 		return this.draw.rect(w, h)
 			.attr({fill: this.color})
@@ -91,36 +97,39 @@ class Canvas{
 			this.y(y2)
 		).stroke({color: this.color, width: 3});
 	}
+    
+    // parameters are the corners of the map image used
 	setCorners(x1, y1, x2, y2){
-		// parameters are the corners of the map image used
 		this.sourceMinX = x1;
 		this.sourceMinY = y1;
 		this.sourceMaxX = x2;
 		this.sourceMaxY = y2;
 		this.calcSize();
 	}
+    
+    /*
+    Recalculates the size of the SVG image,
+    so that way nodes don't appear skewed if the SVG changes size.
+
+    Note that this doesn't change the size of the element,
+    notifies the Canvas of the new size.
+    */
 	resize(){
-		/*
-		Recalculates the size of the SVG image,
-		so that way nodes don't appear skewed if the SVG changes size.
-		
-		Note that this doesn't change the size of the element,
-		notifies the Canvas of the new size.
-		*/
-        
 		this.destWidth = this.image.node.width.baseVal.value;
 		this.destHeight = this.image.node.height.baseVal.value;
 	}
-	calcSize(){
-		/*
-		Calculates the width and height of the source coordinates
-		*/
+    
+    /*
+    Calculates the width and height of the source coordinates
+    */
+	calcSize(){	
 		this.mapWidth = this.sourceMaxX - this.sourceMinX;
 		this.mapHeight = this.sourceMaxY - this.sourceMinY;
 	}
+    
+    // convert a coordinate on the map image
+	// to a point on the SVG canvas
 	x(coord){
-		// convert a coordinate on the map image
-		// to a point on the SVG canvas
 		let percRight = (coord - this.sourceMinX) / this.mapWidth;
 		return percRight * this.destWidth;
 	}
@@ -249,26 +258,29 @@ class TextBox{
 		});
 	}
 	
+    // makes the result search for the closest match in options to what the user's entered
 	updateResult(){
-		// makes the result search for the closest match in options to what the user's entered
 		this.closest = closestMatch(this.box.value, this.options, true);
         this.resultElement.innerHTML = this.closest;
 	}
+    
+	//legal input was entered
+	//want to make sure the closest match is both in the options, and not the default option
 	isValid(){
-		//legal input was entered
-		//want to make sure the closest match is both in the options, and not the default option
 		return this.closest !== null && this.options.indexOf(this.closest.toUpperCase()) > 0;
 	}
+    
+    //@param str : a string, what to put in the input box
+	//basically makes the program act as the user, typing str in the box
 	setInput(str){
-		//@param str : a string, what to put in the input box
-		//basically makes the program act as the user, typing str in the box
 		this.box.value = str;
 		this.box.oninput();
 	}
-	getResult(){
-		/*
-		@return : a string, the closest match to what the user inputted
-		*/
+    
+    /*
+    @return : a string, the closest match to what the user inputted
+    */
+	getResult(){	
 		return this.closest;
 	}
 };

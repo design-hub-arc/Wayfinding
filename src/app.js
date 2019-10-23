@@ -24,7 +24,7 @@ export class App{
 		this.urlList = null;
         this.pathUrlElementId = null;
 		
-        this.currentPath = undefined;
+        this.currentPath = null;
         this.nodeDatabase = new NodeDB();
 		
 		this.mode = "WAYFINDING";
@@ -42,8 +42,7 @@ export class App{
      */
 	createCanvas(elementId){
         let svgElement = SVG(elementId).panZoom({zoomMin: 0.5, zoomMax: 5});
-		this.canvas = new Canvas();
-        this.canvas.linkToSVG(svgElement);
+		this.canvas = new Canvas(svgElement);
 	}
 	getCanvas(){
 		return this.canvas;
@@ -80,14 +79,8 @@ export class App{
 			throw new Error(`No element with an ID of ${id} exists.`);
 		}
 		
-		let app = this;
 		this.pathButton.onclick = ()=>{
-			if(app.start.isValid() && app.end.isValid()){
-				//updatepath does the finding
-				app.updatePath();
-			} else {
-				console.log("Not valid: " + app.start.getResult() + " " + app.end.getResult());
-			}
+			this.updatePath();
 		};
 	}
     
@@ -148,95 +141,70 @@ export class App{
             throw new Error("Couldn't find element with ID " + elementId);
         }
         e.onclick = ()=>{
-            this.saveAsSvg();
+            this.canvas.download(this.currentPath.getURL() + ".svg");
         };
     }
 	
     
     /*
      * Path related methods.
-     * Working here.
-     * MAKE THIS LESS CONVOLUTED!!!
      */
     
 	setPath(path){
-		if(path.valid){
-			this.currentPath = path;
-			this.urlList.update(path);
-			
-			try{
-				path.draw(this.canvas);
-                
-                //shift the canvas to center on the new path
-                //not working, as ...draw.cx() is returning NaN
-                /*
-                let bounds = path.calculateBounds();
-                let cx = this.canvas.x((bounds.minX + bounds.maxX) / 2);
-                let cy = this.canvas.y((bounds.minY + bounds.maxY) / 2);
-                console.log(cx, cy);
-                console.log(this.canvas.draw.cx(), this.canvas.draw.cy());
-                this.canvas.draw.center(cx, cy);
-                */
-                if(this.pathElementId !== null){
-                    document.getElementById(this.pathUrlElementId).innerText = path.getURL();
-                }
-			} catch(e){
-				console.log("Main's canvas is not defined yet");
-				console.log(e.stack);
-			}
-		} else {
-			console.log("Not valid: " + path);
-		}
+        if(!path.valid){
+            throw new Error("Invalid path: " + path);
+        }
+        this.currentPath = path;
+        this.urlList.update(path);
+        if(this.pathElementId !== null){
+            document.getElementById(this.pathUrlElementId).innerText = path.getURL();
+        }
+
+        path.draw(this.canvas);
+
+        //shift the canvas to center on the new path
+        //not working, as ...draw.cx() is returning NaN
+        /*
+        let bounds = path.calculateBounds();
+        let cx = this.canvas.x((bounds.minX + bounds.maxX) / 2);
+        let cy = this.canvas.y((bounds.minY + bounds.maxY) / 2);
+        console.log(cx, cy);
+        console.log(this.canvas.draw.cx(), this.canvas.draw.cy());
+        this.canvas.draw.center(cx, cy);
+        */
 	}
+    
+    /*
+     * Updates the path to reflex the input of this' start and end input boxes
+     */
+	updatePath(){
+        if(!this.start.isValid()){
+            throw new Error("Invalid: " + this.start.getResult());
+        }
+        if(!this.end.isValid()){
+            throw new Error("Invalid: " + this.end.getResult());
+        }
+        let start = this.getNodeDB().getIdByString(this.start.getResult());
+        let end = this.getNodeDB().getIdByString(this.end.getResult());
+        let newPath = new Path(start, end, this);
+        if(newPath.valid){
+            this.setPath(newPath);
+        } else {
+            throw new Error("Invalid path: ", newPath);
+        }
+	}
+    
 	getPath(){
 		return this.currentPath;
 	}
 	
-	updatePath(){
-		try{
-			let start = this.getNodeDB().getIdByString(this.start.getResult());
-			let end = this.getNodeDB().getIdByString(this.end.getResult());
-			
-			//single equal will catch both null and undefined
-			if(start != null && end != null){ //otherwise some class numbers cause problems
-				let newPath = new Path(start, end, this);
-				if(newPath.valid){
-					this.setPath(newPath);
-				} else {
-					throw new Error("Invalid path: ", newPath);
-				}
-			} else {
-				throw new Error("Invalid start and end points: " + this.start.getResult() + " " + this.end.getResult());
-			}
-		} catch(e){
-			console.error(e.stack);
-		}
+	getNodeDB(){
+		return this.nodeDatabase;
 	}
 	
-	addDevTools(){
-		/*
-		Adds divs to to webpage which will allow
-		us to test various features
-		*/
-		function addTool(text, onclick){
-			let element = document.getElementById(text);
-			if(element === null){
-				element = document.createElement("div");
-				element.setAttribute("id", text);
-				document.body.appendChild(element);
-			}
-			element.onclick = onclick;
-			element.innerHTML = text;
-		}
-		let self = this;
-		addTool("Test all paths", ()=>self.testAllPaths());
-		addTool("Test levenshtine", ()=>testLev());
-	}
-	
-	saveAsSvg(){
-        this.canvas.download(this.currentPath.getURL() + ".svg");
-	}
-	
+    //working here #######################################
+    
+    //move some of the stuff from importDataInto(master) to this
 	notifyImportDone(){
 		/*
 		Called after the initial import.
@@ -300,6 +268,26 @@ export class App{
 		}
 	}
 	
+    addDevTools(){
+		/*
+		Adds divs to to webpage which will allow
+		us to test various features
+		*/
+		function addTool(text, onclick){
+			let element = document.getElementById(text);
+			if(element === null){
+				element = document.createElement("div");
+				element.setAttribute("id", text);
+				document.body.appendChild(element);
+			}
+			element.onclick = onclick;
+			element.innerHTML = text;
+		}
+		let self = this;
+		addTool("Test all paths", ()=>self.testAllPaths());
+		addTool("Test levenshtine", ()=>testLev());
+	}
+    
 	testAllPaths(){
 		//developer tool. Detects any paths between any two nodes that cannot exist
 		
@@ -333,12 +321,5 @@ export class App{
 			}
 		}
 		alert("Done.");
-	}
-	
-	setNodeDB(database){
-		this.nodeDatabase = database;
-	}
-	getNodeDB(){
-		return this.nodeDatabase;
 	}
 };
