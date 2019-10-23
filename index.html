@@ -41,18 +41,17 @@
 		
 	</head>
     <body>
-		<!--<div id="imageTitle" onclick="nextImage()"> Next step </div>
-		<img id="image" alt="the next image in your path will appear here!"/>-->
-		
+        <div id="tools">
+            <div>
+                <p>Current Path URL</p>
+                <p id="currUrl"></p>
+            </div>
+            <button id="downloadSvg">Download this image</button>
+        </div>
+        
         <div id="wrapper"></div>
         
-        <!--
-		<div id="drawAll" onClick="master.getNodeDB().drawAll(master.getCanvas())">Draw All Nodes</div>
-		<div id="testAll" onClick="master.testAllPaths()">Test All Paths</div>
-		<div id="nodeDivs" onClick="master.getNodeDB().generateDivs(master)">Generate Node Connections</div>
-		-->
-        
-		<table id="search" style="background-color: #D34C0F">
+		<table id="search">
 			<tr>
 				<td>Set Path</td>
 				<td>Start</td>

@@ -22,6 +22,7 @@ export class App{
         this.end = null;
         this.pathButton = null;
 		this.urlList = null;
+        this.pathUrlElementId = null;
 		
         this.currentPath = undefined;
         this.nodeDatabase = new NodeDB();
@@ -101,7 +102,33 @@ export class App{
 	createUrlList(elementId){
         this.urlList = new UrlList(elementId);
 	}
-	
+    
+    /*
+     * Sets which element will display the URL for the current path
+     */
+    setUrlDisplay(elementId){
+        let e = document.getElementById(elementId);
+        if(e === null){
+            throw new Error("Couldn't find element with ID " + elementId);
+        }
+        this.pathUrlElementId = elementId;
+    }
+    
+    /*
+     * After calling this method,
+     * when the element with the given ID is clicked,
+     * downloads the current map as an SVG
+     */
+	setDownloadButton(elementId){
+        let e = document.getElementById(elementId);
+        if(e === null){
+            throw new Error("Couldn't find element with ID " + elementId);
+        }
+        e.onclick = ()=>{
+            console.log(this);
+            this.saveAsSvg();
+        };
+    }
 	
     
     /*
@@ -130,6 +157,9 @@ export class App{
                 console.log(this.canvas.draw.cx(), this.canvas.draw.cy());
                 this.canvas.draw.center(cx, cy);
                 */
+                if(this.pathElementId !== null){
+                    document.getElementById(this.pathUrlElementId).innerText = path.getURL();
+                }
 			} catch(e){
 				console.log("Main's canvas is not defined yet");
 				console.log(e.stack);

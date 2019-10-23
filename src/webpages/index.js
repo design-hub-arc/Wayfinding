@@ -14,6 +14,8 @@ export function init(){
     master.createEndInputBox("end box", "end hint");
     master.setPathButton("button");
 	master.createUrlList("moreInfo");
+    master.setUrlDisplay("currUrl");
+    master.setDownloadButton("downloadSvg");
 	
 	importDataInto(master).then((responses)=>{
 		console.timeEnd("Time to load (wayfinding)");
