@@ -1,24 +1,9 @@
-html{
-	height : 100%;
-}
-
-body {
-	width: 100%;
-	height: 100%;
-	position: relative;
-}
 #tools{
-    display: flex;
-    height: 10%;
+    background-color: lightblue;
 }
 #wrapper{
-    height: 70%;
-    width: 100%;
-	position: relative;
+    min-height: 500px;
 }
 #search{
-    height: 20%;
-    width: 100%;
-    position: relative;
     background-color: #D34C0F;
 }

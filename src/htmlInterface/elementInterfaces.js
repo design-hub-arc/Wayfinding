@@ -45,6 +45,16 @@ class Canvas{
 		return new Promise((resolve, reject)=>{
             this.image = this.draw.image(src);
 			this.image.loaded(()=>{
+                //this.draw.size("100%", "100%");
+                /*
+                 * For some reason svg.js is having an 
+                 * issue where it doesn't render the 
+                 * entire image until the user clicks
+                 * and moves the image. Setting the
+                 * viewbox to itself forces it to reload,
+                 * aleviating the issue.
+                 */
+                this.draw.viewbox(this.draw.viewbox());
 				this.resize();
 				resolve();
 			});

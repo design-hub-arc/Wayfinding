@@ -42,7 +42,6 @@ export class App{
      */
 	createCanvas(elementId){
         let svgElement = SVG(elementId).panZoom({zoomMin: 0.5, zoomMax: 5});
-            //.size("100%", "100%")
 		this.canvas = new Canvas();
         this.canvas.linkToSVG(svgElement);
 	}
