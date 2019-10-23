@@ -115,6 +115,30 @@ export class App{
     }
     
     /*
+     * When the element with the given ID is clicked,
+     * copies the path URL to the clipboard
+     */
+    setUrlCopyButton(elementId){
+        let e = document.getElementById(elementId);
+        if(e === null){
+            throw new Error("Couldn't find element with ID " + elementId);
+        }
+        e.onclick = ()=>{
+            //https://css-tricks.com/native-browser-copy-clipboard/
+            let range = document.createRange();
+            range.selectNode(document.getElementById(this.pathUrlElementId));
+            window.getSelection().addRange(range);
+            try{
+                document.execCommand("copy");
+            }catch(ex){
+                console.error(ex);
+            }
+            window.getSelection().removeAllRanges();
+            alert("Copied link");
+        };
+    }
+    
+    /*
      * After calling this method,
      * when the element with the given ID is clicked,
      * downloads the current map as an SVG
@@ -125,7 +149,6 @@ export class App{
             throw new Error("Couldn't find element with ID " + elementId);
         }
         e.onclick = ()=>{
-            console.log(this);
             this.saveAsSvg();
         };
     }
@@ -136,8 +159,6 @@ export class App{
      * Working here.
      * MAKE THIS LESS CONVOLUTED!!!
      */
-    
-    
     
 	setPath(path){
 		if(path.valid){
@@ -210,9 +231,7 @@ export class App{
 		}
 		let self = this;
 		addTool("Test all paths", ()=>self.testAllPaths());
-		addTool("get current path URL", ()=>document.getElementById("get current path URL").innerHTML = self.getPath().getURL());
-		addTool("Save as SVG", ()=>self.saveAsSvg());
-        addTool("Test levenshtine", ()=>testLev());
+		addTool("Test levenshtine", ()=>testLev());
 	}
 	
 	saveAsSvg(){

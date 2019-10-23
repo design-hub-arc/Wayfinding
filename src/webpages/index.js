@@ -15,6 +15,7 @@ export function init(){
     master.setPathButton("button");
 	master.createUrlList("moreInfo");
     master.setUrlDisplay("currUrl");
+    master.setUrlCopyButton("copyUrl");
     master.setDownloadButton("downloadSvg");
 	
 	importDataInto(master).then((responses)=>{
