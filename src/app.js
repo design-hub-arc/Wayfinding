@@ -168,21 +168,25 @@ export class App{
         console.log(origBox);
         console.log(bounds);
         
-        console.log(this.canvas.draw.panZoom());
+        console.log(this.canvas.draw);
         let zx = (bounds.maxX - bounds.minX) / this.canvas.destWidth;
         let zy = (bounds.maxY - bounds.minY) / this.canvas.destHeight;
         console.log(zx, zy);
         //the center of the bounds
-        //let cx = (bounds.minX + bounds.maxX) / 2;
-        //let cy = (bounds.minY + bounds.maxY) / 2;
+        let cx = (bounds.minX + bounds.maxX) / 2;
+        let cy = (bounds.minY + bounds.maxY) / 2;
+        
+        
+        
+        let zoom = Math.max(zx, zy, 0.5);
+        this.canvas.draw.zoom(zoom, {x: cx, y: cy});
         let newBox = {
-            x: this.canvas.x(bounds.minX),
-            y: this.canvas.y(bounds.minY),
-            width: this.canvas.x(bounds.maxX - bounds.minX),
-            height: this.canvas.y(bounds.maxY - bounds.minY)
+            x: this.canvas.x(bounds.minX - cx),
+            y: this.canvas.y(bounds.minY - cy),
+            width: this.canvas.draw.viewbox().width,
+            height: this.canvas.draw.viewbox().height
         };
         console.log(newBox);
-        
         this.canvas.draw.viewbox(newBox);
 	}
     
