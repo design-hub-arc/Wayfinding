@@ -161,34 +161,37 @@ export class App{
         }
 
         path.draw(this.canvas);
-
+        // ###############################
         // center the view on the new path
+        // ###############################
         let bounds = path.calculateBounds();
-        let origBox = this.canvas.draw.viewbox();
-        console.log(origBox);
-        console.log(bounds);
+        //set the new zoom
+        let bw = (bounds.maxX - bounds.minX);
+        let bh = (bounds.maxY - bounds.minY);
+        let zx = (bw === 0) ? 0 : this.canvas.destWidth / bw;
+        let zy = (bh === 0) ? 0 : this.canvas.destHeight / bh;
+        let zoom = Math.min(zx, zy, 0.5);
+        this.canvas.draw.zoom(zoom);
         
-        console.log(this.canvas.draw);
-        let zx = (bounds.maxX - bounds.minX) / this.canvas.destWidth;
-        let zy = (bounds.maxY - bounds.minY) / this.canvas.destHeight;
-        console.log(zx, zy);
+        //AFTER zooming in, get the size of the viewbox
+        let w = this.canvas.draw.viewbox().width;
+        let h = this.canvas.draw.viewbox().height;
         //the center of the bounds
         let cx = (bounds.minX + bounds.maxX) / 2;
         let cy = (bounds.minY + bounds.maxY) / 2;
-        
-        
-        
-        let zoom = Math.max(zx, zy, 0.5);
-        this.canvas.draw.zoom(zoom, {x: cx, y: cy});
         let newBox = {
-            x: this.canvas.x(bounds.minX - cx),
-            y: this.canvas.y(bounds.minY - cy),
-            width: this.canvas.draw.viewbox().width,
-            height: this.canvas.draw.viewbox().height
+            x: this.canvas.x(cx) - w / 2,
+            y: this.canvas.y(cy) - h / 2,
+            width: w,
+            height: h
         };
-        console.log(newBox);
         this.canvas.draw.viewbox(newBox);
-	}
+        /*
+        console.log("Setting viewbox to ", newBox);
+        console.log("Bounds are ", bounds);
+        console.log(`Zoom is the max of ${zx}, ${zy}, 0.5`);
+        */
+    }
     
     /*
      * Updates the path to reflect the input of this' start and end input boxes
