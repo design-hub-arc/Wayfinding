@@ -164,8 +164,8 @@ export class Path{
     calculateBounds(){
         let minX = Number.MAX_VALUE;
         let maxX = Number.MIN_VALUE;
-        let minY = Number.MIN_VALUE;
-        let maxY = Number.MAX_VALUE;
+        let minY = Number.MAX_VALUE;
+        let maxY = Number.MIN_VALUE;
         this.nodePath.forEach((node)=>{
             if(node.x < minX){
                 minX = node.x;

@@ -7,11 +7,11 @@ It also takes a lot of code out of the main HTML file.
 import { Path } from         "./nodes/path.js";
 import { QrCodeParams } from "./htmlInterface/qrCodes.js";
 import { NodeDB } from       "./dataFormatting/nodeDB.js";
-import { testLev } from        "./htmlInterface/elementInterfaces.js";
 import { 
     Canvas,
     TextBox,
-    UrlList
+    UrlList,
+    testLev
 } from "./htmlInterface/elementInterfaces.js";
 
 export class App{
@@ -162,20 +162,32 @@ export class App{
 
         path.draw(this.canvas);
 
-        //shift the canvas to center on the new path
-        //not working, as ...draw.cx() is returning NaN
-        /*
+        // center the view on the new path
         let bounds = path.calculateBounds();
-        let cx = this.canvas.x((bounds.minX + bounds.maxX) / 2);
-        let cy = this.canvas.y((bounds.minY + bounds.maxY) / 2);
-        console.log(cx, cy);
-        console.log(this.canvas.draw.cx(), this.canvas.draw.cy());
-        this.canvas.draw.center(cx, cy);
-        */
+        let origBox = this.canvas.draw.viewbox();
+        console.log(origBox);
+        console.log(bounds);
+        
+        console.log(this.canvas.draw.panZoom());
+        let zx = (bounds.maxX - bounds.minX) / this.canvas.destWidth;
+        let zy = (bounds.maxY - bounds.minY) / this.canvas.destHeight;
+        console.log(zx, zy);
+        //the center of the bounds
+        //let cx = (bounds.minX + bounds.maxX) / 2;
+        //let cy = (bounds.minY + bounds.maxY) / 2;
+        let newBox = {
+            x: this.canvas.x(bounds.minX),
+            y: this.canvas.y(bounds.minY),
+            width: this.canvas.x(bounds.maxX - bounds.minX),
+            height: this.canvas.y(bounds.maxY - bounds.minY)
+        };
+        console.log(newBox);
+        
+        this.canvas.draw.viewbox(newBox);
 	}
     
     /*
-     * Updates the path to reflex the input of this' start and end input boxes
+     * Updates the path to reflect the input of this' start and end input boxes
      */
 	updatePath(){
         if(!this.start.isValid()){
@@ -205,7 +217,7 @@ export class App{
     //working here #######################################
     
     //move some of the stuff from importDataInto(master) to this
-	notifyImportDone(){
+	async notifyImportDone(responses){
 		/*
 		Called after the initial import.
 		Updates this' various components with the newly imported data.
@@ -214,10 +226,18 @@ export class App{
 		2. Populates the TextBoxes
 		3. Sets the default path
 		*/
-		
+        const params = new QrCodeParams();
+        this.mode = params.wayfindingMode;
+        
+        console.time("set image");
+		await this.canvas.setImage(responses.get("map image"));
+        console.timeEnd("set image");
+        this.nodeDatabase.parseNodeData(responses.get("Node coordinates"));
+        this.nodeDatabase.parseConnData(responses.get("Node connections"));
+        this.nodeDatabase.parseNameToId(responses.get("labels"));
 		const upperLeft = this.nodeDatabase.getNode(-1);
 		const lowerRight = this.nodeDatabase.getNode(-2);
-		const params = new QrCodeParams();
+		
         let startId;
         let endId;
         

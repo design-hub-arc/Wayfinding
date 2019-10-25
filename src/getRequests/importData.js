@@ -224,8 +224,6 @@ Imports all the data needed by the program into master
 */
 export async function importDataInto(master){
     console.time("begin importing data");
-	
-    master.mode = new QrCodeParams().wayfindingMode;
     
     console.time("get latest manifest");
     let id = await getLatestManifest();
@@ -236,18 +234,9 @@ export async function importDataInto(master){
     let responses = await importManifest(id);
     console.timeEnd("import manifest");
     
-    let nodeDB = master.getNodeDB();
-    nodeDB.parseNodeData(responses.get("Node coordinates"));
-    nodeDB.parseConnData(responses.get("Node connections"));
-    nodeDB.parseNameToId(responses.get("labels"));
-
-    console.time("set image");
-    //setimage causing most of the lag
-    await master.getCanvas().setImage(responses.get("map image"));
-    console.timeEnd("set image");
-
+    await master.notifyImportDone(responses);
     console.timeEnd("begin importing data");
-    master.notifyImportDone();
+    
     return responses;
 }
 

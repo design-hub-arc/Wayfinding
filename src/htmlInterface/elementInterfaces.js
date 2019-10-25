@@ -40,7 +40,6 @@ class Canvas{
 		return new Promise((resolve, reject)=>{
             this.image = this.draw.image(src);
 			this.image.loaded(()=>{
-                //this.draw.size("100%", "100%");
                 /*
                  * For some reason svg.js is having an 
                  * issue where it doesn't render the 
