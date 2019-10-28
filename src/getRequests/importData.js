@@ -141,9 +141,6 @@ async function importManifest(manifestFileId){
 
 
 /*
-
-This thing is pretty ugly, so I'll try to simplify it later
-
 Returns the id of the most recently added manifest that works.
 
 What it does:
@@ -152,25 +149,22 @@ What it does:
 3. Stores all the URLs in the column headed by that version
 4. Starting at the end of URL list, goes backwards until it finds a version that works
 5. If no valid manifests exist for the current version, check for the most recent wayfinding manifest.
-6. If no valid manifests exist for wayfinding, something went VERY wrong.
+6. If no valid manifests exist for wayfinding, something went VERY wrong, and throws an Error.
 */
 async function getLatestManifest(){
 	//get the file id, not the URL
 	let versionLogId = (VERSION_LOG_URL.indexOf("id=") === -1) ? VERSION_LOG_URL : VERSION_LOG_URL.split("id=")[1];
 	
-    let responseText = await driveGet(versionLogId);
     //get the contents of the version log
-    let rows = responseText.split(NEWLINE);
-    rows = rows.map((row)=>{
-        return row.split(",");
-    });
-
+    let response = await driveGet(versionLogId);
+    let rows = response.split(NEWLINE).map((row)=>row.split(","));
     //since QR code parameters converts to upper case, we need the headers to be uppercase as well
     rows[0] = rows[0].map((header)=>header.toUpperCase());
 
     //check the wayfinding mode
     //mode is an int, the index of the column it is contained in the version log
-    let mode = rows[0].indexOf(new QrCodeParams().wayfindingMode);
+    let wayfindingMode = new QrCodeParams().wayfindingMode;
+    let mode = rows[0].indexOf(wayfindingMode);
     if(mode === -1){
         /*
         The mode is not present in the version log,
@@ -179,48 +173,11 @@ async function getLatestManifest(){
         mode = 0;
     }
 
-    //keep goind until you hit a version that works
     let url;
     let id;
-
-    //this is aweful. Kill it with fire.
-    /*
-    async function recursiveCheck(row, col){
-        
-        Remember suffering through recursuion back in CISP 300?
-        Yes, it does have valid uses.
-
-        We need to check if an id in the version log works.
-        This needs to be done using drive.files.get, which is asynchronus.
-        Async + iteration = BAD.
-        Instead, make each check call the next check as needed.
-        
-        if(row === 0 && col === 0){
-            console.error("No valid manifests exist. Something went very wrong.");
-        } else if(row === 0){
-            //couldn't find a valid URL in the current column
-            console.log("No valid manifests were found for " + rows[row][col] + ". Switching to default wayfinding.");
-            return await recursiveCheck(rows.length - 1, 0);
-        } else if(rows[row][col] === ""){
-            //skip blank
-            return await recursiveCheck(row - 1, col);
-        } else {
-            //not blank, not header: we're ready to check.
-            url = rows[row][col];
-            id = (url.indexOf("id=") === -1) ? url : url.split("id=")[1];
-            console.log("Checking " + id);
-            if(await checkExists(id)){
-                console.log("Yup, that works!");
-                return id;
-            } else {
-                console.log("Nope. Check the next one.");
-                return await recursiveCheck(row - 1, col);
-            }
-        }
-    }*/
     
     console.log("Finding the latest manifest...");
-    console.log(rows);
+    //rows.forEach((row)=>console.log(row.join(", ")));
     
     /*
     Since the most recent manifest for each version
@@ -230,23 +187,41 @@ async function getLatestManifest(){
     so we have to start at the bottom, and work our way up until
     we hit the header.
      */
-    for(let i = rows.length - 1; i > 0; i--){
-        //skip blank cells.
-        if(rows[i][mode] !== ""){
-            url = rows[i][mode];
+    let currRow = rows.length - 1;
+    let currCol = mode;
+    let ret = null;
+    while(ret === null){
+        if(rows[currRow][currCol] === ""){
+            //skip blank cells
+            currRow--;
+        } else {
+            url = rows[currRow][currCol];
             id = (url.indexOf("id=") === -1) ? url : url.split("id=")[1];
             console.log("Checking if " + id + " exists");
             if(await checkExists(id)){
                 console.log("yes, the file " + id + " exists.");
-                return id;
+                ret = id;
             } else {
                 console.log("no, the file " + id + " does not exist");
+                currRow--;
             }
         }
+        /*
+        If we make it to the header, that means
+        there are no valid exports for the given mode.
+        If we aren't checking for Wayfinding exports,
+        switch to checking that column, and start back 
+        at the bottom.
+        */
+        if(currRow === 0 && currCol !== 0){
+            console.log("No valid manifests exist for the given mode. Defaulting to Wayfinding");
+            currCol = 0; //check for Wayfinding exports...
+            currRow = rows.length - 1; //...go back to the bottom.
+        }else if(currRow === 0 && currCol === 0){
+            throw new Error("Something is wrong with the manifest: no valid exports exist.");
+        }
     }
-    //still need to make this default to wayfinding if the file isn't found
-    
-    //return await recursiveCheck(rows.length - 1, mode);
+    return ret;
 }
 
 /*
