@@ -234,3 +234,225 @@ export class Path{
 		return (this.images.length !== 0) ? this.images[this.imgInd] : " "; // if this path has no images, return a blank string
 	}
 };
+
+//use these for new Djdkstra's algorithm
+class StackFrame{
+    constructor(value){
+        this.value = value;
+        this.prev = null;
+    }
+}
+class Stack{
+    constructor(){
+        this.top = null;
+    }
+    push(value){
+        let newTop = new StackFrame(value);
+        newTop.prev = this.top;
+        this.top = newTop;
+    }
+    pop(){
+        if(this.top === null){
+            throw new Error("Nothing to pop");
+        }
+        let ret = this.top.value;
+        this.top = this.top.prev;
+        return ret;
+    }
+    isEmpty(){
+        return this.top === null;
+    }
+    print(){
+        let curr = this.top;
+        console.log("Top of the stack");
+        while(curr !== null){
+            console.log(curr.value);
+            curr = curr.prev;
+        }
+        console.log("Bottom of the stack");
+    }
+}
+
+class MinHeap{
+    constructor(comparisonFunction){
+        this.firstEmptyIdx = 0;
+        this.values = [];
+        this.comparator = comparisonFunction;
+    }
+    
+    siftUp(value){
+        if(this.firstEmptyIdx === this.values.length){
+            //need to make room for the new value
+            this.values.push(" ");
+        }
+        this.values[this.firstEmptyIdx] = value;
+        this.firstEmptyIdx++;
+        
+        //swap until the value is in its proper place
+        let idx = this.firstEmptyIdx - 1;
+        let parentIdx = Math.floor((idx - 1) / 2); //a heap is technically a binary tree.
+        let temp;
+        //                                                   child is less than parent, so swap
+        while(parentIdx >= 0 && idx !== 0 && this.comparator(this.values[idx], this.values[parentIdx])){
+            temp = this.values[idx];
+            this.values[idx] = this.values[parentIdx];
+            this.values[parentIdx] = temp;
+            idx = parentIdx;
+            parentIdx = Math.floor((idx - 1) / 2);
+        }
+    }
+    
+    isEmpty(){
+        return this.firstEmptyIdx === 0;
+    }
+    
+    print(){
+        if(this.isEmpty()){
+            return;
+        }
+        let row = 0;
+        let col = 0;
+        let rowWidth = 1;
+        let nextRow = "";
+        console.log("Heap:");
+        console.log("    Row 0:");
+        for(let i = 0; i < this.firstEmptyIdx; i++){
+            nextRow += this.values[i] + " | ";
+        }
+        /*
+         * 
+        if(isEmpty()){
+        return;
+    }
+
+    int row = 0;
+    int col = 0;
+    int rowWidth = 1;
+    cout << "HEAP: " << endl;
+    cout << "   Row 0: " << endl;
+    cout << "       ";
+    for(int i = 0; i < firstEmptyIdx; i++){
+        cout << arr[i] << " ";
+        col++;
+        if(col >= rowWidth && i < firstEmptyIdx - 1){
+            row++;
+            rowWidth *= 2;
+            col = 0;
+            cout << endl;
+            cout << "   Row " << row << ": " << endl;
+            cout << "       ";
+        }
+    }
+    cout << endl;
+         */
+    }
+}
+/*
+template <class T>
+bool Heap<T>::siftUp(T data){
+    bool canSiftUp = firstEmptyIdx < size;
+    if(canSiftUp){
+        arr[firstEmptyIdx] = data;
+        firstEmptyIdx++;
+
+        //swap until the element is in its proper place
+        int idx = firstEmptyIdx - 1; //since we just incremented it
+        int parentIdx = (idx - 1) / 2; //since the heap is technically a tree
+        T temp;
+        while(parentIdx >= 0 && idx != 0 && (
+            (isMinHeap && arr[parentIdx] > arr[idx])
+            || (!isMinHeap && arr[parentIdx] < arr[idx])
+        )){
+            temp = arr[idx];
+            arr[idx] = arr[parentIdx];
+            arr[parentIdx] = temp;
+            idx = parentIdx;
+            parentIdx = (idx - 1) / 2;
+        }
+
+    }
+    return canSiftUp;
+}
+
+template <class T>
+T Heap<T>::siftDown(){
+    T ret = 0;
+    //delete topmost element, reorder everything
+    if(firstEmptyIdx != 0){
+        ret = arr[0];
+        firstEmptyIdx--;
+        //last becomes first
+        arr[0] = arr[firstEmptyIdx];
+        //sort
+        //since a heap is technically a tree, we can access its children
+        int idx = 0;
+        int left = 2 * idx + 1;
+        int right = 2 * idx + 2;
+        T temp;
+
+        while(
+            ((left < firstEmptyIdx && ((isMinHeap && arr[idx] > arr[left]) || (!isMinHeap && arr[idx] < arr[left]))))
+            ||((right < firstEmptyIdx && ((isMinHeap && arr[idx] > arr[right]) || (!isMinHeap && arr[idx] < arr[right]))))
+        ){
+            if((isMinHeap && arr[left] > arr[right]) || (!isMinHeap && arr[left] < arr[right])){
+                temp = arr[right];
+                arr[right] = arr[idx];
+                arr[idx] = temp;
+                idx = right;
+            } else {
+                temp = arr[left];
+                arr[left] = arr[idx];
+                arr[idx] = temp;
+                idx = left;
+            }
+            left = idx * 2 + 1;
+            right = idx * 2 + 2;
+        }
+    }
+    return ret;
+}
+
+template <class T>
+void Heap<T>::print(){
+    if(isEmpty()){
+        return;
+    }
+
+    int row = 0;
+    int col = 0;
+    int rowWidth = 1;
+    cout << "HEAP: " << endl;
+    cout << "   Row 0: " << endl;
+    cout << "       ";
+    for(int i = 0; i < firstEmptyIdx; i++){
+        cout << arr[i] << " ";
+        col++;
+        if(col >= rowWidth && i < firstEmptyIdx - 1){
+            row++;
+            rowWidth *= 2;
+            col = 0;
+            cout << endl;
+            cout << "   Row " << row << ": " << endl;
+            cout << "       ";
+        }
+    }
+    cout << endl;
+}
+
+ */
+
+function testStack(){
+    let vals = ["apple", "orange", "lemon", "lime", "blueberry"];
+    let stack = new Stack();
+    vals.forEach((val)=>stack.push(val));
+    stack.print();
+    while(!stack.isEmpty()){
+        console.log("Popped " + stack.pop());
+        stack.print();
+    }
+}
+
+export {
+    Stack,
+    testStack
+};

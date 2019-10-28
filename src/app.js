@@ -4,7 +4,7 @@ It also serves to link all of the GUI elements together
 It also takes a lot of code out of the main HTML file.
 */
 
-import { Path } from         "./nodes/path.js";
+import { Path, testStack } from         "./nodes/path.js";
 import { QrCodeParams } from "./htmlInterface/qrCodes.js";
 import { NodeDB } from       "./dataFormatting/nodeDB.js";
 import { 
@@ -313,6 +313,7 @@ export class App{
 		let self = this;
 		addTool("Test all paths", ()=>self.testAllPaths());
 		addTool("Test levenshtine", ()=>testLev());
+        addTool("Test stack", ()=>testStack());
 	}
     
 	testAllPaths(){
