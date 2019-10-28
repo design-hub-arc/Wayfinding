@@ -375,6 +375,74 @@ class MinHeap{
     }
 }
 
+
+//untested
+function djskstrasAlgorithm(startId, endId, nodeDB){
+    //from and to are nodes
+    function travelInfo(from, to){
+        return {
+            from: from,
+            to: to,
+            dist: from.distanceBetween(to)
+        };
+    }
+    let travelLog = new Stack();
+    let travelHeap = new Heap();
+    let visited = new Map();
+    let curr = nodeDB.get(startId);
+    let t = travelInfo(curr, curr);
+    
+    travelLog.push(t);
+    visited.set(startId, true);
+    while(curr.id !== endId){
+        //get everything adjacent to curr
+        curr.adj.forEach((node)=>{
+            if(!visited.has(node.id)){
+                t = travelInfo(curr, node);
+                t.dist += travelHeap.top.value.dist; //this is accumulated distance
+                travelHeap.siftUp(t);
+            }
+        });
+        console.log("After sifting up");
+        travelHeap.print();
+        
+        do {
+            t = travelHeap.siftDown();
+        } while(!visited.has(t.to.id));
+        travelLog.push(t);
+        curr = t.to;
+        visited.set(curr.id, true);
+        
+        travelLog.print();
+    }
+    /*
+        
+
+        int totalDist = log->value->dist;
+        int currDist = totalDist; //accumulated distance to the current node
+        //used for backtracking
+
+        travelLog* reversed = 0;
+        while(log && curr != start){
+            t = pop(log);
+            if(t->to == curr && t->dist == currDist){
+                //need to add distance checking
+                push(reversed, t);
+                curr = t->from;
+                currDist -= get(m, t->from, t->to)->dist;
+            }
+        }
+        cout << "From " << start << " to " << end << ": " << endl;
+        while(reversed){
+            printTravelInfo(pop(reversed));
+        }
+        cout << "Total distance: " << totalDist << endl;
+
+        return 0;
+    }
+     */
+}
+
 function testStack(){
     let vals = ["apple", "orange", "lemon", "lime", "blueberry"];
     let stack = new Stack();
