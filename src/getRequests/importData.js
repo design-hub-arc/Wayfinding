@@ -16,7 +16,7 @@ import {formatResponse, CsvFile} from "../dataFormatting/csv.js";
 import {QrCodeParams}            from "../htmlInterface/qrCodes.js";
 
 
-export const newline = /\r?\n|\r/;
+const NEWLINE = /\r?\n|\r/;
 
 /*
 The version log is used to keep track of data exports from the Node Manager.
@@ -29,10 +29,10 @@ NOTHING.
 With that said, if this gets broken, everything stops working.
 Not good.
 */
-export const VERSION_LOG_URL = "https://drive.google.com/export=download?id=1Q99ku0cMctu3kTN9OerjFsM9Aj-nW6H5";
+const VERSION_LOG_URL = "https://drive.google.com/export=download?id=1Q99ku0cMctu3kTN9OerjFsM9Aj-nW6H5";
 
 //used for debugging
-export const logger = {
+const LOGGER = {
 	contents : [],
 	add(msg){
 		this.contents.push(msg);
@@ -73,9 +73,9 @@ async function driveGet(fileId){
             fileId: fileId,
             alt: "media" //this means download the file's contents, not its metadata
         });
-        logger.add("Response from " + fileId + ":");
-        logger.add(result);
-        logger.add(result.body);
+        LOGGER.add("Response from " + fileId + ":");
+        LOGGER.add(result);
+        LOGGER.add(result.body);
         ret = result.body;
     }
     return ret;
@@ -131,7 +131,9 @@ async function importManifest(manifestFileId){
         }
     }
     
-    await Promise.all(promises).then((r)=>console.log(r));
+    await Promise.all(promises).then((r)=>{
+        LOGGER.add(r);
+    });
     
     return keyToFileText;
 }
@@ -158,7 +160,7 @@ async function getLatestManifest(){
 	
     let responseText = await driveGet(versionLogId);
     //get the contents of the version log
-    let rows = responseText.split(newline);
+    let rows = responseText.split(NEWLINE);
     rows = rows.map((row)=>{
         return row.split(",");
     });
@@ -181,8 +183,10 @@ async function getLatestManifest(){
     let url;
     let id;
 
+    //this is aweful. Kill it with fire.
+    /*
     async function recursiveCheck(row, col){
-        /*
+        
         Remember suffering through recursuion back in CISP 300?
         Yes, it does have valid uses.
 
@@ -190,7 +194,7 @@ async function getLatestManifest(){
         This needs to be done using drive.files.get, which is asynchronus.
         Async + iteration = BAD.
         Instead, make each check call the next check as needed.
-        */
+        
         if(row === 0 && col === 0){
             console.error("No valid manifests exist. Something went very wrong.");
         } else if(row === 0){
@@ -213,16 +217,43 @@ async function getLatestManifest(){
                 return await recursiveCheck(row - 1, col);
             }
         }
+    }*/
+    
+    console.log("Finding the latest manifest...");
+    console.log(rows);
+    
+    /*
+    Since the most recent manifest for each version
+    is appended to the bottom of its column, the CSV
+    file works like an upside-down stack, starting from
+    the top, and growing downward. We want the latest manifest,
+    so we have to start at the bottom, and work our way up until
+    we hit the header.
+     */
+    for(let i = rows.length - 1; i > 0; i--){
+        //skip blank cells.
+        if(rows[i][mode] !== ""){
+            url = rows[i][mode];
+            id = (url.indexOf("id=") === -1) ? url : url.split("id=")[1];
+            console.log("Checking if " + id + " exists");
+            if(await checkExists(id)){
+                console.log("yes, the file " + id + " exists.");
+                return id;
+            } else {
+                console.log("no, the file " + id + " does not exist");
+            }
+        }
     }
-
-    return await recursiveCheck(rows.length - 1, mode);
+    //still need to make this default to wayfinding if the file isn't found
+    
+    //return await recursiveCheck(rows.length - 1, mode);
 }
 
 /*
 Imports all the data needed by the program into master
-@param master : the Main object used by the program.
+@param master : the App object used by the program.
 */
-export async function importDataInto(master){
+async function importDataInto(master){
     console.time("begin importing data");
     
     console.time("get latest manifest");
@@ -241,7 +272,8 @@ export async function importDataInto(master){
 }
 
 //maybe use this to replace all of the ugly importing?
-export class DataSet{
+/*
+class DataSet{
     constructor(){
         this.nodeCoordFile = null;
         this.nodeConnFile = null;
@@ -249,3 +281,10 @@ export class DataSet{
         this.imageUrl = null;
     }
 }
+*/
+export {
+    NEWLINE,
+    VERSION_LOG_URL,
+    LOGGER,
+    importDataInto
+};
