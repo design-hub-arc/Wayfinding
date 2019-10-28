@@ -313,12 +313,22 @@ class MinHeap{
         let row = 0;
         let col = 0;
         let rowWidth = 1;
-        let nextRow = "";
+        let nextRow = "        ";
         console.log("Heap:");
         console.log("    Row 0:");
         for(let i = 0; i < this.firstEmptyIdx; i++){
-            nextRow += this.values[i] + " | ";
+            nextRow += this.values[i] + " ";
+            col++;
+            if(col >= rowWidth && i < this.firstEmptyIdx - 1){
+                row++;
+                rowWidth *= 2;
+                col = 0;
+                console.log(nextRow);
+                nextRow = "        ";
+                console.log("    Row " + row + ":");
+            }
         }
+        console.log(nextRow);
         /*
          * 
         if(isEmpty()){
@@ -451,8 +461,17 @@ function testStack(){
         stack.print();
     }
 }
+function testMinHeap(){
+    let heap = new MinHeap((i, j)=>i < j);
+    for(let i = 0; i < 10; i++){
+        heap.siftUp(10 - i);
+        heap.print();
+    }
+}
 
 export {
     Stack,
-    testStack
+    MinHeap,
+    testStack,
+    testMinHeap
 };
