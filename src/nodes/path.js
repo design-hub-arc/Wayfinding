@@ -274,6 +274,14 @@ class Stack{
 }
 
 class MinHeap{
+    /*
+     * Comparison function is used to compare
+     * the values inserted into the Heap.
+     * Given inputs A and B,
+     * comparisonFunction(A, B) should return true
+     * if B is "greater than" A, and thus should sink
+     * lower into the heap.
+     */
     constructor(comparisonFunction){
         this.firstEmptyIdx = 0;
         this.values = [];
@@ -300,6 +308,41 @@ class MinHeap{
             idx = parentIdx;
             parentIdx = Math.floor((idx - 1) / 2);
         }
+    }
+    
+    siftDown(){
+        if(this.isEmpty()){
+            throw new Error("Nothing to sift down");
+        }
+        //return topmost item, delete it from heap, sift everything else back into position
+        let ret = this.values[0];
+        //last becomes first
+        this.values[0] = this.values[this.firstEmptyIdx - 1];
+        this.firstEmptyIdx--;
+        
+        let idx = 0;
+        let left = 1;
+        let right = 2;
+        let temp;
+        while(
+            ((left < this.firstEmptyIdx && this.comparator(this.values[left], this.values[idx]))) ||
+            ((right < this.firstEmptyIdx && this.comparator(this.values[right], this.values[idx])))
+        ){
+            if(this.comparator(this.values[left], this.values[right])){
+                temp = this.values[left];
+                this.values[left] = this.values[idx];
+                this.values[idx] = temp;
+                idx = left;
+            } else {
+                temp = this.values[right];
+                this.values[right] = this.values[idx];
+                this.values[idx] = temp;
+                idx = right;
+            }
+            left = idx * 2 + 1;
+            right = idx * 2 + 2;
+        }
+        return ret;
     }
     
     isEmpty(){
@@ -329,127 +372,8 @@ class MinHeap{
             }
         }
         console.log(nextRow);
-        /*
-         * 
-        if(isEmpty()){
-        return;
-    }
-
-    int row = 0;
-    int col = 0;
-    int rowWidth = 1;
-    cout << "HEAP: " << endl;
-    cout << "   Row 0: " << endl;
-    cout << "       ";
-    for(int i = 0; i < firstEmptyIdx; i++){
-        cout << arr[i] << " ";
-        col++;
-        if(col >= rowWidth && i < firstEmptyIdx - 1){
-            row++;
-            rowWidth *= 2;
-            col = 0;
-            cout << endl;
-            cout << "   Row " << row << ": " << endl;
-            cout << "       ";
-        }
-    }
-    cout << endl;
-         */
     }
 }
-/*
-template <class T>
-bool Heap<T>::siftUp(T data){
-    bool canSiftUp = firstEmptyIdx < size;
-    if(canSiftUp){
-        arr[firstEmptyIdx] = data;
-        firstEmptyIdx++;
-
-        //swap until the element is in its proper place
-        int idx = firstEmptyIdx - 1; //since we just incremented it
-        int parentIdx = (idx - 1) / 2; //since the heap is technically a tree
-        T temp;
-        while(parentIdx >= 0 && idx != 0 && (
-            (isMinHeap && arr[parentIdx] > arr[idx])
-            || (!isMinHeap && arr[parentIdx] < arr[idx])
-        )){
-            temp = arr[idx];
-            arr[idx] = arr[parentIdx];
-            arr[parentIdx] = temp;
-            idx = parentIdx;
-            parentIdx = (idx - 1) / 2;
-        }
-
-    }
-    return canSiftUp;
-}
-
-template <class T>
-T Heap<T>::siftDown(){
-    T ret = 0;
-    //delete topmost element, reorder everything
-    if(firstEmptyIdx != 0){
-        ret = arr[0];
-        firstEmptyIdx--;
-        //last becomes first
-        arr[0] = arr[firstEmptyIdx];
-        //sort
-        //since a heap is technically a tree, we can access its children
-        int idx = 0;
-        int left = 2 * idx + 1;
-        int right = 2 * idx + 2;
-        T temp;
-
-        while(
-            ((left < firstEmptyIdx && ((isMinHeap && arr[idx] > arr[left]) || (!isMinHeap && arr[idx] < arr[left]))))
-            ||((right < firstEmptyIdx && ((isMinHeap && arr[idx] > arr[right]) || (!isMinHeap && arr[idx] < arr[right]))))
-        ){
-            if((isMinHeap && arr[left] > arr[right]) || (!isMinHeap && arr[left] < arr[right])){
-                temp = arr[right];
-                arr[right] = arr[idx];
-                arr[idx] = temp;
-                idx = right;
-            } else {
-                temp = arr[left];
-                arr[left] = arr[idx];
-                arr[idx] = temp;
-                idx = left;
-            }
-            left = idx * 2 + 1;
-            right = idx * 2 + 2;
-        }
-    }
-    return ret;
-}
-
-template <class T>
-void Heap<T>::print(){
-    if(isEmpty()){
-        return;
-    }
-
-    int row = 0;
-    int col = 0;
-    int rowWidth = 1;
-    cout << "HEAP: " << endl;
-    cout << "   Row 0: " << endl;
-    cout << "       ";
-    for(int i = 0; i < firstEmptyIdx; i++){
-        cout << arr[i] << " ";
-        col++;
-        if(col >= rowWidth && i < firstEmptyIdx - 1){
-            row++;
-            rowWidth *= 2;
-            col = 0;
-            cout << endl;
-            cout << "   Row " << row << ": " << endl;
-            cout << "       ";
-        }
-    }
-    cout << endl;
-}
-
- */
 
 function testStack(){
     let vals = ["apple", "orange", "lemon", "lime", "blueberry"];
@@ -465,6 +389,10 @@ function testMinHeap(){
     let heap = new MinHeap((i, j)=>i < j);
     for(let i = 0; i < 10; i++){
         heap.siftUp(10 - i);
+        heap.print();
+    }
+    while(!heap.isEmpty()){
+        console.log("Sifted down " + heap.siftDown());
         heap.print();
     }
 }
