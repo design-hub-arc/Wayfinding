@@ -139,12 +139,17 @@ export class Path{
         
         
         let newPath = djskstrasAlgorithm(this.startId, this.endId, nodeDB);
-        
-        for(let i = 0; i < this.idPath.length; i++){
-            if(newPath[i].id !== this.idPath[i]){
-                console.log("Bad path");
-                console.log(this.idPath);
-                console.log(newPath);
+        if(this.idPath.length !== newPath.length){
+            console.log("Bad path");
+            console.log(this.idPath);
+            console.log(newPath.map((node)=>node.id));
+        } else {
+            for(let i = 0; i < this.idPath.length; i++){
+                if(newPath[i].id !== this.idPath[i]){
+                    console.log("Bad path");
+                    console.log(this.idPath);
+                    console.log(newPath.map((node)=>node.id));
+                }
             }
         }
 	}
@@ -444,9 +449,9 @@ function djskstrasAlgorithm(startId, endId, nodeDB){
     }
 
     //reversed.print();
-    let ret = [];
+    let ret = [nodeDB.getNode(startId)];
     while(!reversed.isEmpty()){
-        ret.push(reversed.pop);
+        ret.push(reversed.pop().to);
     }
     return ret;
 }
