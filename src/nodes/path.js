@@ -136,6 +136,10 @@ export class Path{
 		if((this.startId < 0) || (this.endId < 0)){
 			this.invalidate();
 		}
+        
+        
+        djskstrasAlgorithm(this.startId, this.endId, nodeDB);
+        console.log(this.idPath);
 	}
 	invalidate(){
 		if(this.valid){
@@ -383,13 +387,13 @@ function djskstrasAlgorithm(startId, endId, nodeDB){
         return {
             from: from,
             to: to,
-            dist: from.distanceBetween(to)
+            dist: from.distanceFrom(to)
         };
     }
     let travelLog = new Stack();
-    let travelHeap = new Heap();
+    let travelHeap = new MinHeap((ti1, ti2)=>ti1.dist < ti2.dist);
     let visited = new Map();
-    let curr = nodeDB.get(startId);
+    let curr = nodeDB.getNode(startId);
     let t = travelInfo(curr, curr);
     
     travelLog.push(t);
@@ -399,22 +403,41 @@ function djskstrasAlgorithm(startId, endId, nodeDB){
         curr.adj.forEach((node)=>{
             if(!visited.has(node.id)){
                 t = travelInfo(curr, node);
-                t.dist += travelHeap.top.value.dist; //this is accumulated distance
+                t.dist += travelLog.top.value.dist; //this is accumulated distance
                 travelHeap.siftUp(t);
             }
         });
+        console.log(t);
         console.log("After sifting up");
         travelHeap.print();
+        travelLog.print();
+        console.log(visited);
         
         do {
             t = travelHeap.siftDown();
-        } while(!visited.has(t.to.id));
+            console.log(t);
+        } while(visited.has(t.to.id));
         travelLog.push(t);
         curr = t.to;
         visited.set(curr.id, true);
         
         travelLog.print();
+        
+        
     }
+    //backtrack
+    let totalDist = travelLog.top.value.dist;
+    let reversed = new Stack();
+    while(!travelLog.isEmpty() && curr.id !== startId){
+        t = travelLog.pop();
+        if(t.to === curr && Math.abs(t.dist - totalDist) < 0.001){
+            reversed.push(t);
+            curr = t.from;
+            totalDist -= t.from.distanceFrom(t.to);
+        }
+    }
+
+    reversed.print();
     /*
         
 
