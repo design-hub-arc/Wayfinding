@@ -139,6 +139,15 @@ export class Path{
         
         
         let newPath = djskstrasAlgorithm(this.startId, this.endId, nodeDB);
+        let newDist = 0;
+        for(let i = 0; i < newPath.length - 1; i++){
+            newDist += newPath[i].distanceFrom(newPath[i + 1]);
+        }
+        
+        if(newDist <= this.pathLength){
+            console.log("new path is shorter");
+            return;
+        }
         if(this.idPath.length !== newPath.length){
             console.log("Bad path");
             console.log(this.idPath);
@@ -392,7 +401,7 @@ class MinHeap{
 }
 
 
-//untested
+
 function djskstrasAlgorithm(startId, endId, nodeDB){
     //from and to are nodes
     function travelInfo(from, to){
