@@ -335,7 +335,7 @@ export class App{
 				if(id1 != null && id2 != null){
 					let path = new Path(id1, id2, source);
 					if(!path.valid){
-						throw new Error("Invalid Path: " + path.idPath);
+						throw new Error("Invalid Path: " + path);
 					}
 				}
 			} catch(e){

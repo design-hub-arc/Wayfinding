@@ -11,14 +11,13 @@ read this for a better explaination: https://en.wikipedia.org/wiki/Dijkstra%27s_
 */
 
 //use this in conjunction with Node
-export class Path{
+class Path{
     constructor(startId, endId, dataSource) {
         /*
         start and endId are node IDs
-        dataSource is a Main object
+        dataSource is an App object
         
-        idPath is an array of numbers, the ids of the nodes the path goes through
-        nodePath is the corresponding nodes
+        nodePath is an array of nodes which serve as the vertexis of this path.
         pathLength is the total length of the distance between all the nodes used in the path
             it doesn't matter what scale it's in, as it is just used to compare in bestPath
         images is an array of strings, the URLs of the path's images
@@ -33,22 +32,12 @@ export class Path{
 
         this.valid = true;
 
-        this.idPath = [];
         this.nodePath = [];
         this.pathLength = 0;
         this.loadPath();
-
-        this.decodeIds();
         this.images = this.getImages();
         this.imgInd = -1; // increments before getting image
     }
-	decodeIds() {
-		// generates nodePath
-		this.nodePath = [];
-		for (let i = 0; i < this.idPath.length; i++) {
-			this.nodePath[i] = this.dataSource.getNodeDB().getNode(this.idPath[i]);
-		}
-	}
 	loadPath() {
 		/*
 		this is the big one.
@@ -56,21 +45,30 @@ export class Path{
 		Dijkstra's algorithm.
 		https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
 		Thanks Kevin
-		sets this.idPath to shortest path when complete
+		sets this.pathPath to shortest path when complete
 		*/
+        let debug = false;
+        
+        if((this.startId < 0) || (this.endId < 0)){
+			this.invalidate();
+		}
         if(this.startId === this.endId){
-			this.idPath = [this.startId];
+			this.nodePath = [this.dataSource.getNodeDB().getNode(this.startId)];
 			this.pathLength = 0;
 			return;
         }
 		
+        // start by setting everything up
 		let nodeDB = this.dataSource.getNodeDB();
         //from and to are nodes
         function travelInfo(from, to){
             return {
                 from: from,
                 to: to,
-                dist: from.distanceFrom(to)
+                dist: from.distanceFrom(to),
+                toString: function(){
+                    return `From ${from.id} to ${to.id}: ${this.dist}`;
+                }
             };
         }
         let travelLog = new Stack();
@@ -79,6 +77,7 @@ export class Path{
         let curr = nodeDB.getNode(this.startId);
         let t = travelInfo(curr, curr);
 
+        //find the path
         travelLog.push(t);
         visited.set(this.startId, true);
         while(curr.id !== this.endId){
@@ -90,52 +89,52 @@ export class Path{
                     travelHeap.siftUp(t);
                 }
             });
-            /*
-            console.log(t);
-            console.log("After sifting up");
-            travelHeap.print();
-            travelLog.print();
-            console.log(visited);
-            */
+            
+            if(debug){
+                console.log("After sifting up nodes adjacent to");
+                console.log(curr);
+                travelHeap.print();
+            }
+            
             do {
                 t = travelHeap.siftDown();
-                //console.log(t);
+                if(debug){
+                    console.log(`Sifted down [${t.from.id} to ${t.to.id}: ${t.dist}]`);
+                    console.log(t.to.id + " " + (visited.has(t.to.id)) ? "has" : "has not" + " already been visited.");
+                }
             } while(visited.has(t.to.id));
             travelLog.push(t);
             curr = t.to;
             visited.set(curr.id, true);
-
-            //travelLog.print();
+            if(debug){
+                console.log("Go to");
+                console.log(curr);
+                travelLog.print();
+                console.log(visited);
+            }
         }
-        //backtrack
-        let totalDist = travelLog.top.value.dist;
+        
+        //backtrack to construct the path
+        this.pathLength = travelLog.top.value.dist;
+        
+        //  accumulated distance
+        let accumDist = this.pathLength;
         let reversed = new Stack();
         while(!travelLog.isEmpty() && curr.id !== this.startId){
             t = travelLog.pop();
-            if(t.to === curr && Math.abs(t.dist - totalDist) < 0.001){
+            if(t.to === curr && Math.abs(t.dist - accumDist) < 0.001){
                 reversed.push(t);
                 curr = t.from;
-                totalDist -= t.from.distanceFrom(t.to);
+                accumDist -= t.from.distanceFrom(t.to);
             }
         }
 
-        //reversed.print();
-        let path = [nodeDB.getNode(this.startId)];
+        this.nodePath = [nodeDB.getNode(this.startId)];
         while(!reversed.isEmpty()){
-            path.push(reversed.pop().to);
+            this.nodePath.push(reversed.pop().to);
         }
         
-        let newDist = 0;
-        for(let i = 0; i < path.length - 1; i++){
-            newDist += path[i].distanceFrom(path[i + 1]);
-        }
-        this.idPath = path.map((node)=>node.id);
-        this.pathLength = newDist;
-        
-        if(this.startId !== this.idPath[0] || this.endId !== this.idPath[this.idPath.length - 1]){
-			this.invalidate();
-		}
-		if((this.startId < 0) || (this.endId < 0)){
+        if(this.startId !== this.nodePath[0].id || this.endId !== this.nodePath[this.nodePath.length - 1].id){
 			this.invalidate();
 		}
 	}
@@ -192,7 +191,7 @@ export class Path{
 	getURL() {
 		let origURL = window.location.href;
 		let split = origURL.split("?");
-		return split[0] + "?startID=" + this.idPath[0] + "&endID=" + this.idPath[this.idPath.length - 1] + "&mode=" + this.mode;
+		return split[0] + "?startID=" + this.nodePath[0].id + "&endID=" + this.nodePath[this.nodePath.length - 1].id + "&mode=" + this.mode;
 	}
 
 	draw(canvas) {
@@ -211,7 +210,7 @@ export class Path{
 		// returns an array of strings, each element is the url of a path image
 		let ret = [];
 		let ind = 0;
-		while (ind + 1 < this.idPath.length) {
+		while (ind + 1 < this.nodePath.length) {
 			ind++; // skips 0 so we can compare two nodes
 			let n1 = this.nodePath[ind - 1];
 			let n2 = this.nodePath[ind];
@@ -264,14 +263,18 @@ class Stack{
     isEmpty(){
         return this.top === null;
     }
-    print(){
+    toString(){
+        let ret = "Top of the stack\n";
         let curr = this.top;
-        console.log("Top of the stack");
         while(curr !== null){
-            console.log(curr.value);
+            ret += (curr.value).toString() + "\n";
             curr = curr.prev;
         }
-        console.log("Bottom of the stack");
+        ret += "Bottom of the stack";
+        return ret;
+    }
+    print(){
+        console.log(this.toString());
     }
 }
 
@@ -350,8 +353,34 @@ class MinHeap{
     isEmpty(){
         return this.firstEmptyIdx === 0;
     }
-    
+    toString(){
+        if(this.isEmpty()){
+            return "Heap is empty";
+        }
+        let ret = "Heap:\n";
+        let row = 0;
+        let col = 0;
+        let rowWidth = 1;
+        ret += "    Row 0:\n";
+        let nextRow = "        ";
+        for(let i = 0; i < this.firstEmptyIdx; i++){
+            nextRow += this.values[i].toString() + " | ";
+            col++;
+            if(col >= rowWidth && i < this.firstEmptyIdx - 1){
+                row++;
+                rowWidth *= 2;
+                col = 0;
+                ret += (nextRow) + "\n";
+                nextRow = "        ";
+                ret += ("    Row " + row + ":\n");
+            }
+        }
+        ret += nextRow;
+        return ret;
+    }
     print(){
+        console.log(this.toString());
+        return;
         if(this.isEmpty()){
             return;
         }
@@ -400,6 +429,7 @@ function testMinHeap(){
 }
 
 export {
+    Path,
     Stack,
     MinHeap,
     testStack,
