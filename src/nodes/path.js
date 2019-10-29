@@ -138,8 +138,15 @@ export class Path{
 		}
         
         
-        djskstrasAlgorithm(this.startId, this.endId, nodeDB);
-        console.log(this.idPath);
+        let newPath = djskstrasAlgorithm(this.startId, this.endId, nodeDB);
+        
+        for(let i = 0; i < this.idPath.length; i++){
+            if(newPath[i].id !== this.idPath[i]){
+                console.log("Bad path");
+                console.log(this.idPath);
+                console.log(newPath);
+            }
+        }
 	}
 	invalidate(){
 		if(this.valid){
@@ -407,23 +414,22 @@ function djskstrasAlgorithm(startId, endId, nodeDB){
                 travelHeap.siftUp(t);
             }
         });
+        /*
         console.log(t);
         console.log("After sifting up");
         travelHeap.print();
         travelLog.print();
         console.log(visited);
-        
+        */
         do {
             t = travelHeap.siftDown();
-            console.log(t);
+            //console.log(t);
         } while(visited.has(t.to.id));
         travelLog.push(t);
         curr = t.to;
         visited.set(curr.id, true);
         
-        travelLog.print();
-        
-        
+        //travelLog.print();
     }
     //backtrack
     let totalDist = travelLog.top.value.dist;
@@ -437,33 +443,12 @@ function djskstrasAlgorithm(startId, endId, nodeDB){
         }
     }
 
-    reversed.print();
-    /*
-        
-
-        int totalDist = log->value->dist;
-        int currDist = totalDist; //accumulated distance to the current node
-        //used for backtracking
-
-        travelLog* reversed = 0;
-        while(log && curr != start){
-            t = pop(log);
-            if(t->to == curr && t->dist == currDist){
-                //need to add distance checking
-                push(reversed, t);
-                curr = t->from;
-                currDist -= get(m, t->from, t->to)->dist;
-            }
-        }
-        cout << "From " << start << " to " << end << ": " << endl;
-        while(reversed){
-            printTravelInfo(pop(reversed));
-        }
-        cout << "Total distance: " << totalDist << endl;
-
-        return 0;
+    //reversed.print();
+    let ret = [];
+    while(!reversed.isEmpty()){
+        ret.push(reversed.pop);
     }
-     */
+    return ret;
 }
 
 function testStack(){
