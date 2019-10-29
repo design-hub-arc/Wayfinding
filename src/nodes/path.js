@@ -58,109 +58,86 @@ export class Path{
 		Thanks Kevin
 		sets this.idPath to shortest path when complete
 		*/
-		
-		if(this.startId === this.endId){
+        if(this.startId === this.endId){
 			this.idPath = [this.startId];
 			this.pathLength = 0;
 			return;
         }
 		
 		let nodeDB = this.dataSource.getNodeDB();
-		let allNodes = nodeDB.getAll();
-		
-		// start by declaring letiables
-		let unvisited = []; // unchecked nodes. Store as Node.
-		let dists = {}; // distances from start. Store as id : number
-		let prev = {}; // previous node in best path. Store as id : id
+        //from and to are nodes
+        function travelInfo(from, to){
+            return {
+                from: from,
+                to: to,
+                dist: from.distanceFrom(to)
+            };
+        }
+        let travelLog = new Stack();
+        let travelHeap = new MinHeap((ti1, ti2)=>ti1.dist < ti2.dist);
+        let visited = new Map();
+        let curr = nodeDB.getNode(this.startId);
+        let t = travelInfo(curr, curr);
 
-		// initialize values
-		for (let i = 0; i < allNodes.length; i++) {
-			unvisited[i] = allNodes[i];
-			dists[allNodes[i].id] = Infinity;
-			prev[allNodes[i].id] = undefined;
-		}
-		dists[this.startId] = 0; // distance from start to start is 0
+        travelLog.push(t);
+        visited.set(this.startId, true);
+        while(curr.id !== this.endId){
+            //get everything adjacent to curr
+            curr.adj.forEach((node)=>{
+                if(!visited.has(node.id)){
+                    t = travelInfo(curr, node);
+                    t.dist += travelLog.top.value.dist; //this is accumulated distance
+                    travelHeap.siftUp(t);
+                }
+            });
+            /*
+            console.log(t);
+            console.log("After sifting up");
+            travelHeap.print();
+            travelLog.print();
+            console.log(visited);
+            */
+            do {
+                t = travelHeap.siftDown();
+                //console.log(t);
+            } while(visited.has(t.to.id));
+            travelLog.push(t);
+            curr = t.to;
+            visited.set(curr.id, true);
 
-		function smallestIndex() {
-			/*
-			Returns the index of the node with the shortest distance from start
-			that has yet to be visited
-			*/
-			let index = 0;
-			for (let i = 0; i < unvisited.length; i++) {
-				if (dists[unvisited[i].id] < dists[unvisited[index].id]) {
-					index = i;
-				}
-			}
-			return index;
-		}
+            //travelLog.print();
+        }
+        //backtrack
+        let totalDist = travelLog.top.value.dist;
+        let reversed = new Stack();
+        while(!travelLog.isEmpty() && curr.id !== this.startId){
+            t = travelLog.pop();
+            if(t.to === curr && Math.abs(t.dist - totalDist) < 0.001){
+                reversed.push(t);
+                curr = t.from;
+                totalDist -= t.from.distanceFrom(t.to);
+            }
+        }
 
-		// run while there are still nodes to visit
-		while (unvisited.length > 0) {
-			let index = smallestIndex();
-
-			let nearest = unvisited[index];
-			unvisited.splice(index, 1); // remove nearest from unvisited, as we are visiting it
-
-			// find which of its adjacent nodes are closest to start
-			for (let j = 0; j < nearest.adj.length; j++) {
-				if (unvisited.includes(nearest.adj[j])) {
-					let check = dists[nearest.id] + nearest.distanceFrom(nearest.adj[j]); // distance from start to i
-					//                                                V     is this right?
-					if (dists[nearest.adj[j].id] === Infinity || check < nearest.adj[j].distanceFrom(nodeDB.getNode(this.startId))) {
-						dists[nearest.adj[j].id] = check;
-						prev[nearest.adj[j].id] = nearest.id;
-					}
-				}
-			}
-		}
-
-		// generate the path
-		let path = [];
-		let id = this.endId;
-		while (prev[id] !== undefined) {
-			path.push(id);
-			id = prev[id];
-		}
-		
-		if(nodeDB.getNode(this.startId).adjIds.indexOf(path[path.length - 1]) !== -1){
-			path.push(this.startId);	
-		}
-		path = path.reverse();
-		this.idPath = path;
-		this.pathLength = dists[this.endId];
-		
-		if(this.startId !== this.idPath[0] || this.endId !== this.idPath[this.idPath.length - 1]){
+        //reversed.print();
+        let path = [nodeDB.getNode(this.startId)];
+        while(!reversed.isEmpty()){
+            path.push(reversed.pop().to);
+        }
+        
+        let newDist = 0;
+        for(let i = 0; i < path.length - 1; i++){
+            newDist += path[i].distanceFrom(path[i + 1]);
+        }
+        this.idPath = path.map((node)=>node.id);
+        this.pathLength = newDist;
+        
+        if(this.startId !== this.idPath[0] || this.endId !== this.idPath[this.idPath.length - 1]){
 			this.invalidate();
 		}
 		if((this.startId < 0) || (this.endId < 0)){
 			this.invalidate();
 		}
-        
-        
-        let newPath = djskstrasAlgorithm(this.startId, this.endId, nodeDB);
-        let newDist = 0;
-        for(let i = 0; i < newPath.length - 1; i++){
-            newDist += newPath[i].distanceFrom(newPath[i + 1]);
-        }
-        
-        if(newDist <= this.pathLength){
-            console.log("new path is shorter");
-            return;
-        }
-        if(this.idPath.length !== newPath.length){
-            console.log("Bad path");
-            console.log(this.idPath);
-            console.log(newPath.map((node)=>node.id));
-        } else {
-            for(let i = 0; i < this.idPath.length; i++){
-                if(newPath[i].id !== this.idPath[i]){
-                    console.log("Bad path");
-                    console.log(this.idPath);
-                    console.log(newPath.map((node)=>node.id));
-                }
-            }
-        }
 	}
 	invalidate(){
 		if(this.valid){
@@ -260,7 +237,7 @@ export class Path{
 	}
 };
 
-//use these for new Djdkstra's algorithm
+//these are used for Djdkstra's algorithm
 class StackFrame{
     constructor(value){
         this.value = value;
@@ -398,71 +375,6 @@ class MinHeap{
         }
         console.log(nextRow);
     }
-}
-
-
-
-function djskstrasAlgorithm(startId, endId, nodeDB){
-    //from and to are nodes
-    function travelInfo(from, to){
-        return {
-            from: from,
-            to: to,
-            dist: from.distanceFrom(to)
-        };
-    }
-    let travelLog = new Stack();
-    let travelHeap = new MinHeap((ti1, ti2)=>ti1.dist < ti2.dist);
-    let visited = new Map();
-    let curr = nodeDB.getNode(startId);
-    let t = travelInfo(curr, curr);
-    
-    travelLog.push(t);
-    visited.set(startId, true);
-    while(curr.id !== endId){
-        //get everything adjacent to curr
-        curr.adj.forEach((node)=>{
-            if(!visited.has(node.id)){
-                t = travelInfo(curr, node);
-                t.dist += travelLog.top.value.dist; //this is accumulated distance
-                travelHeap.siftUp(t);
-            }
-        });
-        /*
-        console.log(t);
-        console.log("After sifting up");
-        travelHeap.print();
-        travelLog.print();
-        console.log(visited);
-        */
-        do {
-            t = travelHeap.siftDown();
-            //console.log(t);
-        } while(visited.has(t.to.id));
-        travelLog.push(t);
-        curr = t.to;
-        visited.set(curr.id, true);
-        
-        //travelLog.print();
-    }
-    //backtrack
-    let totalDist = travelLog.top.value.dist;
-    let reversed = new Stack();
-    while(!travelLog.isEmpty() && curr.id !== startId){
-        t = travelLog.pop();
-        if(t.to === curr && Math.abs(t.dist - totalDist) < 0.001){
-            reversed.push(t);
-            curr = t.from;
-            totalDist -= t.from.distanceFrom(t.to);
-        }
-    }
-
-    //reversed.print();
-    let ret = [nodeDB.getNode(startId)];
-    while(!reversed.isEmpty()){
-        ret.push(reversed.pop().to);
-    }
-    return ret;
 }
 
 function testStack(){
