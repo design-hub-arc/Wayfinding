@@ -39,6 +39,8 @@ export class Node{
         of an adjacent node.
         i.e. you can travel from this point to that one
         */
+       
+        this.labels = []; //names for this node
 		
         this.connectionImages = {};
 		/*
@@ -84,6 +86,24 @@ export class Node{
 		this.adjIds.push(id);
 	}
 	
+    addLabel(label){
+        this.labels.push(label);
+        //insertion sort
+        let len = this.labels.length;
+        let i = len - 2;
+        let temp;
+        while(i > 0 && this.labels[i] < this.labels[i - 1]){
+            temp = this.labels[i];
+            this.labels[i] = this.labels[i - 1];
+            this.labels[i - 1] = temp;
+            i--;
+        }
+    }
+    
+    getLabels(){
+        return this.labels.map((i)=>i); // shallow copy
+    }
+    
 	setConnectionImage(id, url) {
 		// invoked by importImages in import data file
 		// sets the image going from this node to node with id equal to the id passed

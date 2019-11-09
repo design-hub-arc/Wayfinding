@@ -13,10 +13,10 @@ each of the functions has their own documentation
 */
 
 import {formatResponse, CsvFile} from "../dataFormatting/csv.js";
-import {getParamsFromURL}        from "../htmlInterface/qrCodes.js";
+import {QrCodeParams}            from "../htmlInterface/qrCodes.js";
 
 
-export const newline = /\r?\n|\r/;
+const NEWLINE = /\r?\n|\r/;
 
 /*
 The version log is used to keep track of data exports from the Node Manager.
@@ -29,159 +29,21 @@ NOTHING.
 With that said, if this gets broken, everything stops working.
 Not good.
 */
-export const VERSION_LOG_URL = "https://drive.google.com/export=download?id=1Q99ku0cMctu3kTN9OerjFsM9Aj-nW6H5";
+const VERSION_LOG_URL = "https://drive.google.com/export=download?id=1Q99ku0cMctu3kTN9OerjFsM9Aj-nW6H5";
 
 //used for debugging
-export const logger = {
+const LOGGER = {
 	contents : [],
 	add(msg){
-		"use strict";
 		this.contents.push(msg);
 	},
 	displayAll(){
-		"use strict";
 		for(let i = 0; i < this.contents.length; i++){
 			console.log(this.contents[i]);
 		}
 	}
 };
 
-
-/*
-Gets a file's data from the google drive.
-fileId - a string, the id of the file in google drive.
-*/
-async function driveGet(fileId){
-	//gapi is defined in https://apis.google.com/js/api.js.
-	//if this doesn't work, make sure that the API has been loaded!
-	return new Promise((resolve, reject)=>{
-        gapi.client.drive.files.get({
-            fileId: fileId
-        }).then((metadata)=>{
-            if(metadata.result.mimeType.includes("image")){
-                resolve("https://drive.google.com/uc?export=download&id=" + metadata.result.id);
-            } else {
-                gapi.client.drive.files.get({
-                    fileId: fileId,
-                    alt: "media" //this means download the file's contents, not its metadata
-                }).then((result)=> {
-                    logger.add("Response from " + fileId + ":");
-                    logger.add(result);
-                    logger.add(result.body);
-                    resolve(result.body);
-                }).catch((error)=>{
-                    throw new Error(error);
-                });
-            }
-        }).catch((error)=>{
-            throw new Error(error);
-        });    
-    });
-    
-    
-    return gapi.client.drive.files.get({
-		fileId: fileId,
-		alt: "media" //this means download the file's contents, not its metadata
-	}).then((result)=> {
-		logger.add("Response from " + fileId + ":");
-		logger.add(result);
-		logger.add(result.body);
-		return result.body;
-	}).catch((error)=>{
-		throw new Error(error);
-	});
-}
-
-
-/*
-@param fileIds : an array of strings, the ids of files to get
-
-calls driveGet on each id, then resolves the promise, 
-passing in all responses to a Map,
-where the key is the id, and the value is the response text,
-then resolves with that Map once each id's response has been obtained.
-*/
-async function driveSeqGets(fileIds){
-	return new Promise((resolve, reject) => {
-		let responses = new Map();
-		let received = 0;
-		
-		for(let i = 0; i < fileIds.length; i++){
-			responses.set(fileIds[i], "No response from file ID " + fileIds[i]);
-			driveGet(fileIds[i]).then((responseText) => {
-				responses.set(fileIds[i], responseText);
-				received++;
-				if(received === fileIds.length){
-					resolve(responses);
-				}
-			});
-		}
-	});
-}
-
-
-/*
- @param fileId : a string, the 
- id of the master url file
- on our google drive
-
- This performs a get request on the master url spreadsheet,
- then performs a get request on each url on the spreadsheet,
- then passes each URL into the callback function
-
- passes a Map, 
- with the keys being the identifier in the first column of the spreadsheet,
- and the value is the response text from performing a get request on the url after that identifier
- returning the Map
- */
-async function importManifest(fileId){
-	let promise = new Promise((resolve, reject) => {
-		driveGet(fileId).then((responseText) => {
-			let data = formatResponse(responseText);
-			let fileIdToKey = new Map();
-			/*
-			since sequentialGets will return fileId-to-response,
-			we need to provide an easier way to identify what each response is giving.
-			since we are looking at key-to-fileId-to-response text,
-			and sequentialGets gives us fileId-to-response,
-			we can use this to get key-to-response text
-			*/
-
-			for(let i = 1; i < data.length; i++){ 
-				if (data[i].length >= 2 && data[i][1] !== ""){
-					/*
-					The data is a table, with the first column being a key,
-					such as "node coordinates", "buildings", etc,
-
-					and the second being the url linking to that resource
-					*/
-					if(data[i][1].indexOf("id=") > -1){
-                        fileIdToKey.set(data[i][1].split("id=")[1], data[i][0]);
-                    } else {
-                        fileIdToKey.set(data[i][1], data[i][0]);
-                    }
-				}
-			}
-            
-            
-			driveSeqGets(Array.from(fileIdToKey.keys())).then((responses) => {
-				/*
-				Convets the url-to-response result of seqGet
-				to an easier to use key-to-response
-				*/
-				
-				let ret = new Map();
-				
-				responses.forEach((responseText, url) => {
-					ret.set(fileIdToKey.get(url), responseText);
-				});
-
-				resolve(ret);
-			});
-		});
-	});
-	return promise;
-}
 
 
 //returns whether or not a file with the given ID exists in the google drive
@@ -195,6 +57,88 @@ async function checkExists(id){
 	});
 }
 
+/*
+Gets a file's data from the google drive.
+fileId - a string, the id of the file in google drive.
+*/
+async function driveGet(fileId){
+	//gapi is defined in https://apis.google.com/js/api.js.
+	//if this doesn't work, make sure that the API has been loaded!
+    let metadata = await gapi.client.drive.files.get({fileId: fileId});
+    let ret;
+    if(metadata.result.mimeType.includes("image")){
+        ret = "https://drive.google.com/uc?export=download&id=" + metadata.result.id;
+    } else {
+        let result = await gapi.client.drive.files.get({
+            fileId: fileId,
+            alt: "media" //this means download the file's contents, not its metadata
+        });
+        LOGGER.add("Response from " + fileId + ":");
+        LOGGER.add(result);
+        LOGGER.add(result.body);
+        ret = result.body;
+    }
+    return ret;
+}
+
+
+
+/*
+ * Downloads the manifest with the given ID.
+ * 
+ * A manifest lists all the different files used by a version of Wayfinding.
+ * this function downloads each file referenced in that manifest, returning a Map:
+ * (*) each key in the Map is the purpose of the file, and can have the following values:
+ *      - "Node coordinates"
+ *      - "Node connections"
+ *      - "labels"
+ *      - "map image"
+ * (*) the value will be the text of the file referenced in the manifest, 
+ *      for example, map.get("Node coordinates") returns the node coordinate file associated with the manifest
+ *      the only exception is the map image, which is stored in the Map as a link to the image
+ */
+async function importManifest(manifestFileId){
+    let manifestText = await driveGet(manifestFileId);
+    let data = formatResponse(manifestText);
+    let keyToFileText = new Map();
+    let promises = [];
+    
+    let key;
+    let fileId;
+    
+    //need this to preserve values of fileId and key despite iteration
+    async function getFile(fileId, key){
+        let file = await driveGet(fileId);
+        keyToFileText.set(key, file);
+        return file;
+    }
+    //          avoid the header
+    for(let i = 1; i < data.length; i++){ 
+        if (data[i].length >= 2 && data[i][1] !== ""){
+            /*
+            The data is a table, with the first column being a key,
+            such as "node coordinates", "buildings", etc,
+
+            and the second being the url linking to that resource
+            */
+            
+            key = data[i][0];
+            //make sure to get just the file id
+            fileId = (data[i][1].indexOf("id=") === -1) ? data[i][1] : data[i][1].split("id=")[1];
+            
+            keyToFileText.set(key, "No response from file ID " + fileId);
+            promises.push(getFile(fileId, key));
+        }
+    }
+    
+    await Promise.all(promises).then((r)=>{
+        LOGGER.add(r);
+    });
+    
+    return keyToFileText;
+}
+
+
 
 /*
 Returns the id of the most recently added manifest that works.
@@ -205,103 +149,117 @@ What it does:
 3. Stores all the URLs in the column headed by that version
 4. Starting at the end of URL list, goes backwards until it finds a version that works
 5. If no valid manifests exist for the current version, check for the most recent wayfinding manifest.
-6. If no valid manifests exist for wayfinding, something went VERY wrong.
+6. If no valid manifests exist for wayfinding, something went VERY wrong, and throws an Error.
 */
 async function getLatestManifest(){
 	//get the file id, not the URL
 	let versionLogId = (VERSION_LOG_URL.indexOf("id=") === -1) ? VERSION_LOG_URL : VERSION_LOG_URL.split("id=")[1];
 	
-	return new Promise((resolve, reject)=>{
-		driveGet(versionLogId).then((responseText)=>{
-			//get the contents of the version log
-			let rows = responseText.split(newline);
-			rows = rows.map((row)=>{
-				return row.split(",");
-			});
+    //get the contents of the version log
+    let response = await driveGet(versionLogId);
+    let rows = response.split(NEWLINE).map((row)=>row.split(","));
+    //since QR code parameters converts to upper case, we need the headers to be uppercase as well
+    rows[0] = rows[0].map((header)=>header.toUpperCase());
 
-			//since getParamsFromURL converts to upper case, we need the headers to be uppercase as well
-			rows[0] = rows[0].map((header)=>header.toUpperCase());
+    //check the wayfinding mode
+    //mode is an int, the index of the column it is contained in the version log
+    let wayfindingMode = new QrCodeParams().wayfindingMode;
+    let mode = rows[0].indexOf(wayfindingMode);
+    if(mode === -1){
+        /*
+        The mode is not present in the version log,
+        so default to wayfinding.
+        */
+        mode = 0;
+    }
 
-			//check the wayfinding mode
-			//mode is an int, the index of the column it is contained in the version log
-			let mode = rows[0].indexOf(getParamsFromURL().get("mode"));
-			if(mode === -1){
-				/*
-				The mode is not present in the version log,
-				so default to wayfinding.
-				*/
-				mode = 0;
-			}
-
-			//keep goind until you hit a version that works
-			let url;
-			let id;
-
-			function recursiveCheck(row, col){
-				/*
-				Remember suffering through recursuion back in CISP 300?
-				Yes, it does have valid uses.
-
-				We need to check if an id in the version log works.
-				This needs to be done using drive.files.get, which is asynchronus.
-				Async + iteration = BAD.
-				Instead, make each check call the next check as needed.
-				*/
-				if(row === 0 && col === 0){
-					console.log("No valid manifests exist. Something went very wrong.");
-				} else if(row === 0){
-					//couldn't find a valid URL in the current column
-					console.log("No valid manifests were found for " + rows[row][col] + ". Switching to default wayfinding.");
-					recursiveCheck(rows.length - 1, 0);
-				} else if(rows[row][col] === ""){
-					//skip blank
-					recursiveCheck(row - 1, col);
-				} else {
-					//not blank, not header: we're ready to check.
-					url = rows[row][col];
-					id = (url.indexOf("id=") === -1) ? url : url.split("id=")[1];
-					console.log("Checking " + id);
-					checkExists(id).then((doesExist)=>{
-						if(doesExist){
-							console.log("Yup, that works!");
-							resolve(id);
-						} else {
-							console.log("Nope.");
-							recursiveCheck(row - 1, col);
-						}
-					});
-				}
-			}
-
-			recursiveCheck(rows.length - 1, mode);
-		}).catch((error)=>{
-			console.log(error);
-		});
-	});
+    let url;
+    let id;
+    
+    console.log("Finding the latest manifest...");
+    //rows.forEach((row)=>console.log(row.join(", ")));
+    
+    /*
+    Since the most recent manifest for each version
+    is appended to the bottom of its column, the CSV
+    file works like an upside-down stack, starting from
+    the top, and growing downward. We want the latest manifest,
+    so we have to start at the bottom, and work our way up until
+    we hit the header.
+     */
+    let currRow = rows.length - 1;
+    let currCol = mode;
+    let ret = null;
+    while(ret === null){
+        if(rows[currRow][currCol] === ""){
+            //skip blank cells
+            currRow--;
+        } else {
+            url = rows[currRow][currCol];
+            id = (url.indexOf("id=") === -1) ? url : url.split("id=")[1];
+            console.log("Checking if " + id + " exists");
+            if(await checkExists(id)){
+                console.log("yes, the file " + id + " exists.");
+                ret = id;
+            } else {
+                console.log("no, the file " + id + " does not exist");
+                currRow--;
+            }
+        }
+        /*
+        If we make it to the header, that means
+        there are no valid exports for the given mode.
+        If we aren't checking for Wayfinding exports,
+        switch to checking that column, and start back 
+        at the bottom.
+        */
+        if(currRow === 0 && currCol !== 0){
+            console.log("No valid manifests exist for the given mode. Defaulting to Wayfinding");
+            currCol = 0; //check for Wayfinding exports...
+            currRow = rows.length - 1; //...go back to the bottom.
+        }else if(currRow === 0 && currCol === 0){
+            throw new Error("Something is wrong with the manifest: no valid exports exist.");
+        }
+    }
+    return ret;
 }
 
 /*
 Imports all the data needed by the program into master
-@param master : the Main object used by the program.
+@param master : the App object used by the program.
 */
-export async function importDataInto(master){
-	master.mode = getParamsFromURL().get("mode");
-	return new Promise((resolve, reject)=>{
-		getLatestManifest().then((id)=>{
-			console.log("id is " + id);
-			importManifest(id).then((responses)=>{
-				let nodeDB = master.getNodeDB();
-				let canvas = master.getCanvas();
-
-				nodeDB.parseNodeData(responses.get("Node coordinates"));
-				nodeDB.parseConnData(responses.get("Node connections"));
-				nodeDB.parseNameToId(responses.get("labels"));
-                
-                master.getCanvas().setImage(responses.get("map image")).then(()=>{
-					master.notifyImportDone();
-					resolve(responses);
-				});
-			});
-		});
-	});
+async function importDataInto(master){
+    console.time("begin importing data");
+    
+    console.time("get latest manifest");
+    let id = await getLatestManifest();
+    console.timeEnd("get latest manifest");
+    console.log("id is " + id);
+    
+    console.time("import manifest");
+    let responses = await importManifest(id);
+    console.timeEnd("import manifest");
+    
+    await master.notifyImportDone(responses);
+    console.timeEnd("begin importing data");
+    
+    return responses;
 }
+
+//maybe use this to replace all of the ugly importing?
+/*
+class DataSet{
+    constructor(){
+        this.nodeCoordFile = null;
+        this.nodeConnFile = null;
+        this.labelFile = null;
+        this.imageUrl = null;
+    }
+}
+*/
+export {
+    NEWLINE,
+    VERSION_LOG_URL,
+    LOGGER,
+    importDataInto
+};

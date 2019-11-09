@@ -1,5 +1,6 @@
 import {Node} from '../nodes/arcNode.js';
 import {formatResponse} from '../dataFormatting/csv.js';
+import {closestMatch} from "../htmlInterface/elementInterfaces.js";
 
 /*
 NodeDB is used by the Main class to store the data used by the program.
@@ -33,6 +34,8 @@ export class NodeDB{
 		-Object
 		-Array
 		*/
+       
+       this.allLabels = []; //need this for closest match
     }
     
 	parseNodeData(responseText){
@@ -92,23 +95,29 @@ export class NodeDB{
 		let name;
 		let id;
 		let data = formatResponse(responseText);
-		
+		let firstRow = true;
+        
 		data.forEach(row => {
-			try{
-				name = row[0].toString().toUpperCase();
-				id = parseInt(row[1]);
+			if(firstRow){
+                firstRow = false;
+                //skip first row
+            } else {
+                try{
+                    name = row[0].toString().toUpperCase();
+                    id = parseInt(row[1]);
+        			if(isNaN(id)){
+        				throw new Error(`Oops! Node ID of "${row[1]}": ID must be a number`);
+        			} else {
+            			db.stuffToNodeId.set(name, id);
+                        this.getNode(id).addLabel(name);
+                        this.allLabels.push(name);
+                	}
 				
-				if(isNaN(id)){
-					// the first row will fail, because of the header, so don't throw an error
-					console.log("Oops! Node ID of " + row[1]);
-				} else {
-					db.stuffToNodeId.set(name, id);
-				}
-				
-			} catch(err){
-				console.log("Invalid row: " + row);
-				console.log(err.message);
-			}
+            	} catch(err){
+                	console.error("Invalid row: " + row);
+                    console.error(err.message);
+                }
+            }
 		});
 	}
 	
@@ -224,8 +233,13 @@ export class NodeDB{
 		may move this to getNode, just making it check if parameter is integer or string. Could cause problems with class numbers
 		*/
 		
+        //first, try the easy solution
 		let ret = this.stuffToNodeId.get(string.toString().toUpperCase());
 		
+        //nope. Need to find the closest match
+        if(ret === undefined){
+            ret = this.stuffToNodeId.get(closestMatch(string.toString().toUpperCase(), this.allLabels, true));
+        }
 		if(ret === undefined){
 			console.log("Couldn't find node identified by " + string);
 		}
@@ -254,7 +268,7 @@ export class NodeDB{
 		the names of all named nodes
 		(buildings, rooms, etc)
 		*/
-		return Array.from(this.stuffToNodeId.keys())
+		return Array.from(this.stuffToNodeId.keys());
 	}
 	
 	getAll(){

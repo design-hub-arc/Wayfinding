@@ -1,14 +1,13 @@
 The program begins in index.html
 
-loads the index.js module, which sets the onload function of a div to initialize the program.
-downloads the google api, after which it calls the aforementioned div's onload function.
+downloads the google api, 
+after which it inserts the index.js module into the head of the document,
+and initializes the program.
 
 initializing the program:
-	Creates a Main object, which is used to store otherwise global variables
-	a Canvas (not HTML canvas) interface to draw on the SVG element,
-	and two TextBoxes interfaces to make working with the input boxes easier.
-	
-	the Canvas is then linked to the SVG element, so any calls to the Canvas' drawing methods will draw on the SVG.
+	Creates a App object, which is used to store otherwise global variables,
+    the App links the various HTML components to itself,
+    so as to connect the data and GUI together.
 	
 	Next, the program downloads the data used by the program, then:
 		Draws the map image downloaded from the data on the SVG element
@@ -19,7 +18,7 @@ initializing the program:
 		With that in mind, each Node's coordinates are a set percentage of the way between Nodes -1 and -2's coordinates, and thus are the same percentage of the way between them on the SVG image.
 		
 		Next, the NodeDB constructs a string to node ID table of buildings, rooms, and other labels.
-		the Main object populates the two input boxes with all the strings from this table, meaning that when the user starts typing, the string that most closely matches what they are typing will appear below the input box.
+		the App object populates the two input boxes with all the strings from this table, meaning that when the user starts typing, the string that most closely matches what they are typing will appear below the input box.
 		the program then reads the parameters passed to the URL, and if any of the parameters are "startID=" or "endID=", it will set the default path's start and end points based on the node IDs passed in.
 		draw the current path.
 
@@ -34,20 +33,14 @@ What each file does:
 	/getRequests
 		-importData.js imports data from the google drive into the program.
 	/htmlInterface
-		-infoElement.js: used to display URLs contained in the last node in the current path.
-		-input.js: provides the TextBox interface that works with those two boxes that the user types into.
+		-htmlInterfaces.js:
+            Contains the various classes used to connect the program data with the HTML elements on the webpage.
+            See the htmlInterfaces.js file for more extensive documentation.
 		-qrCodes.js: qrCodes.js allows us to extract parameters from the URL, so we can make QR codes which allows us to set a default path.
-		-scaledCanvas.js: is used as an interface to draw nodes on the SVG element.
-			the first version of wayfinding used latitude and longitude for node coordinates,
-			then later versions used real-world measurement (feet, miles, whatever),
-			and now they use some arbitrary coordinates.
-			Given that we can't guarantee that the nodes will occupy the exact size needed by the program, we need to scale them.
-			scaledCanvas converts these arbitrary coordinates to points on the SVG,
-			given the assumption that the point (0, 0) on the SVG is node -1, and the lower right corner is node -2.
-	/nodes
+    /nodes
 		-arcNode.js: contains the Node class.
 		-path.js: provides the Path class, used to find paths between nodes.
 	/webpages
 		-index.js: contains all the code to run once google api is loaded
 	
-	main.js provides the Main class, which is used to store otherwise global variables. One is created by index.js, then stuff gets passed into it. We can then pass the Main object to whatever function we want so it can access the "global" variables.
+	app.js provides the App class, which is used to store otherwise global variables. One is created by index.js, then stuff gets passed into it. We can then pass the App object to whatever function we want so it can access the "global" variables.
