@@ -1,4 +1,4 @@
-# Project Title
+# Wayfinding
 
 Wayfinding is a website designed to help students navigate the American River College Campus.
 
