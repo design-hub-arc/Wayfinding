@@ -2,6 +2,10 @@
 
 Wayfinding is a website designed to help students navigate the American River College Campus.
 
+## Google Slides presentation
+
+A detailed guide to the Wayfinding project can be found [here](https://docs.google.com/presentation/d/14uy2DAPB68twqYutxfy9it2A-veyfG2TyEI0Ig03Pk8/edit?usp=sharing).
+
 ## Getting Started
 
 To get started, you'll need to download and unzip the project to the directory of your choice.
