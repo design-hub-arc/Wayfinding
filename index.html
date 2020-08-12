@@ -4,19 +4,25 @@
 		<meta charset="utf-8">
 		<title> Wayfinding </title>
 		<base target="_top">
-		
+
 		<link rel="stylesheet" href="stylesheet.css">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 		<script src="./src/svg.js"></script>
 		<script src="./src/svg.panzoom.js"></script>
-		
+
 		<script>
 			function initDrive(){
+				/*
+				Put your info here!
+				*/
+				const API_KEY = "AIzaSyCk-i3lAc_k5ngfJ-FDw37swWvPMYaEWZs";
+				const CLIENT_ID = "123335625420-4t9oodh2j04umpau2m98dd2uvkn6s659.apps.googleusercontent.com";
+
 				gapi.load("client:auth2", ()=>{
 					gapi.client.init({
-						apiKey: "AIzaSyCk-i3lAc_k5ngfJ-FDw37swWvPMYaEWZs",
-						client_id: "123335625420-4t9oodh2j04umpau2m98dd2uvkn6s659.apps.googleusercontent.com",
+						apiKey: API_KEY,
+						client_id: CLIENT_ID,
 						discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
 						scope: "https://www.googleapis.com/auth/drive"
 					}).then(()=> {
@@ -24,7 +30,7 @@
                         Since gapi loads asynchronously,
                         whereas index.js is loaded synchronously,
                         and index.js requires gapi to work, gapi must load first.
-                        To solve this problem, gapi, upon loading, 
+                        To solve this problem, gapi, upon loading,
                         inserts the script tag for index.js once it loads.
                         This allows both gapi and modules to coexist with minimal polution of the global namespace.
                          */
@@ -39,14 +45,14 @@
 				});
 			}
 		</script>
-		
+
 	</head>
     <body>
         <div id="body" class="container-fluid d-flex flex-column justify-content-center">
             <div id="tools" class="row w-100 border border-info">
                 <div class="col border border-info">
                     <p class="border border-info">Current Path URL</p>
-                    <p class="border border-info" id="currUrl"></p>   
+                    <p class="border border-info" id="currUrl"></p>
                     <button class="border border-info" id="copyUrl">Copy link</button>
                 </div>
                 <div class="col justify-content-center border border-info">
@@ -55,7 +61,7 @@
             </div>
 
             <div id="wrapper" class="row w-75 h-75"></div>
-            
+
             <div class="row w-100">
                 <div class="col">
                     <table id="search">
@@ -88,7 +94,7 @@
                 </div>
             </div>
         </div>
-        
+
 		<script async defer src="https://apis.google.com/js/api.js"onload="initDrive()"></script>
 		<!--See head for why this is commented out-->
         <!--<script src="./src/webpages/index.js" type="module"></script>-->

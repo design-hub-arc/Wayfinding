@@ -2,6 +2,12 @@
 
 Wayfinding is a website designed to help students navigate the American River College Campus.
 
+## Note
+The API key is currently configured to only work when requests are sent from the ARC power server,
+so the project doesn't work anywhere else. If you are developing this application, you will have to
+create your own API key. Quite frankly, I would be very surprised if this works at all outside of the
+power server, so this is really not meant to be used anywhere else.
+
 ## Google Slides presentation
 
 A detailed guide to the Wayfinding project can be found [here](https://docs.google.com/presentation/d/14uy2DAPB68twqYutxfy9it2A-veyfG2TyEI0Ig03Pk8/edit?usp=sharing).
@@ -68,4 +74,3 @@ See also the list of [contributors](https://github.com/IronHeart7334/Wayfinding/
 ## Acknowledgments
 
 * Thank you [PurpleBooth](https://github.com/PurpleBooth) for this awesome readme template! [link to template](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2)
-
